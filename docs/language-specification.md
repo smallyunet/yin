@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.6 language. Behavior not described
+This document defines the normative Yin 0.7 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -133,8 +133,8 @@ internally, but no anonymous record literal syntax is currently supported.
 Local and inherited fields are readable. Accessing a missing field or applying
 `field` to a non-record value is an error.
 
-Records are immutable after construction. Field mutation and generic
-subscripting are not in the grammar.
+Records are immutable after construction. Field mutation and generic subscript
+syntax are not in the grammar.
 
 ## Static types
 
@@ -149,6 +149,16 @@ Type rules:
 - A vector has a fixed structural type containing one type per element.
 - Two vector types are equivalent when they have the same length and equivalent
   element types.
+- `length` accepts a vector and returns its length as `Int`.
+- `at` accepts a vector and an `Int` index. A literal index has the exact type
+  of the selected element. A dynamic index has the normalized union of every
+  element type. Negative and out-of-bounds literal indices, and dynamic access
+  to an empty vector, are static errors; runtime bounds checks always apply.
+- `append` accepts two vectors and returns a new vector whose fixed structural
+  type concatenates the input element types. Neither input is mutated.
+- Vector operations distribute across unions only when every member is valid.
+  An `Any` operand remains runtime-checked; `at` and `append` then produce
+  `Any`, while `length` still produces `Int`.
 - `(U T1 ... Tn)` is a non-empty, flattened union. Repeated equivalent members
   collapse. A value is a subtype of a union when it is a subtype of any member;
   a union is a subtype of another type when every member is.

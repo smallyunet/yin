@@ -63,6 +63,15 @@ The project is being stabilized before new language features are designed.
 - structured syntax, missing-field, and non-record diagnostics
 - maintained CLI, REPL, browser, formatter, and specification coverage
 
+## 0.7 — vector usability
+
+- immutable vector length, indexed access, and concatenation primitives
+- exact element types for literal indices and normalized unions for dynamic
+  indices
+- safe distribution across vector unions and explicit runtime checks for `Any`
+- structured operand, index, empty-vector, and bounds diagnostics
+- maintained CLI, REPL, browser, formatter, and specification coverage
+
 ## Later
 
 - modules

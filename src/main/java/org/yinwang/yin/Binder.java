@@ -42,7 +42,7 @@ public class Binder {
         } else if (pattern instanceof VectorLiteral) {
             if (value instanceof Vector) {
                 List<Node> elms1 = ((VectorLiteral) pattern).elements;
-                List<Value> elms2 = ((Vector) value).values;
+                List<Value> elms2 = ((Vector) value).values();
                 if (elms1.size() == elms2.size()) {
                     for (int i = 0; i < elms1.size(); i++) {
                         define(elms1.get(i), elms2.get(i), env);
@@ -121,7 +121,7 @@ public class Binder {
         } else if (pattern instanceof VectorLiteral) {
             if (value instanceof Vector) {
                 List<Node> elms1 = ((VectorLiteral) pattern).elements;
-                List<Value> elms2 = ((Vector) value).values;
+                List<Value> elms2 = ((Vector) value).values();
                 if (elms1.size() == elms2.size()) {
                     for (int i = 0; i < elms1.size(); i++) {
                         assign(elms1.get(i), elms2.get(i), env);

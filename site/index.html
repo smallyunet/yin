@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.6</strong><span>Current version</span></div>
-          <div><strong>91</strong><span>Automated tests</span></div>
+          <div><strong>0.7</strong><span>Current version</span></div>
+          <div><strong>100</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -63,6 +63,7 @@
           <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">Recursion</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
         </div>
@@ -175,6 +176,14 @@
             <pre><code>(record Point [x Int] [y Int])
 (define point (Point :x 10 :y 20))
 (field point :x)</code></pre>
+          </article>
+          <article class="feature-card feature-wide">
+            <span class="feature-index">05</span>
+            <h3>Immutable vectors</h3>
+            <p>Read, measure, and combine fixed vectors with precise element types and checked bounds.</p>
+            <pre><code>(define values (append [10 20] [30 40]))
+(length values)
+(at values 3)</code></pre>
           </article>
         </div>
       </section>

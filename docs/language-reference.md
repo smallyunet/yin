@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.6 language specification](language-specification.md). Files in
+[Yin 0.7 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -119,14 +119,27 @@ access through `Any` remains `Any` and is checked at runtime.
 - arithmetic: `+`, `-`, `*`, `/`
 - numeric comparison: `<`, `<=`, `>`, `>=`, `=`
 - boolean operations: `and`, `or`, `not`
+- immutable vectors: `length`, `at`, `append`
 - output: `print`
 - union type constructor used by the type checker: `U`
 
 `print` accepts zero or more positional arguments and returns `void`.
 
+Vector operations retain fixed structural types:
+
+```yin
+(define values (append [1 "two"] [true]))
+(length values) -- 3 : Int
+(at values 1)   -- "two" : String
+```
+
+A dynamic `at` index produces the union of all possible element types. Vector
+indices are zero-based and checked both statically when possible and at
+runtime. `append` constructs a new vector and does not modify either input.
+
 ## Known language gaps
 
-- record mutation and generic collection subscripting are unsupported
+- record mutation and generic subscript syntax are unsupported
 - the type system is experimental and is not a formal soundness guarantee
 - there is no module system, package manager, bytecode/native compiler, or LSP
 - several files under `experiments/` represent abandoned syntax designs

@@ -1,8 +1,11 @@
 package org.yinwang.yin.type;
 
 import org.yinwang.yin.ast.Node;
+import org.yinwang.yin.ast.Call;
+import org.yinwang.yin.ast.IntNum;
 import org.yinwang.yin.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class PrimitiveFunctionType extends YinType {
@@ -63,6 +66,106 @@ public final class PrimitiveFunctionType extends YinType {
             }
             return Types.BOOL;
         });
+    }
+
+    public static PrimitiveFunctionType vectorLength() {
+        return new PrimitiveFunctionType("length", 1, (arguments, location) -> {
+            requireVectorLike(arguments.get(0), location, "length");
+            return Types.INT;
+        });
+    }
+
+    public static PrimitiveFunctionType vectorAt() {
+        return new PrimitiveFunctionType("at", 2, (arguments, location) -> {
+            YinType target = arguments.get(0);
+            YinType index = arguments.get(1);
+            if (!(index instanceof IntType) && !(index instanceof AnyType)) {
+                Util.abort(location, "at index must be Int, got: " + index);
+            }
+            if (target instanceof AnyType || index instanceof AnyType) {
+                return Types.ANY;
+            }
+
+            List<VectorType> vectors = vectorAlternatives(target, location, "at");
+            Integer literalIndex = literalIndex(location);
+            List<YinType> possible = new ArrayList<>();
+            for (VectorType vector : vectors) {
+                if (literalIndex != null) {
+                    if (literalIndex < 0 || literalIndex >= vector.elements().size()) {
+                        Util.abort(location, "vector index out of bounds: " + literalIndex +
+                                " for length " + vector.elements().size());
+                    }
+                    possible.add(vector.elements().get(literalIndex));
+                } else {
+                    if (vector.elements().isEmpty()) {
+                        Util.abort(location, "at cannot index an empty vector");
+                    }
+                    possible.addAll(vector.elements());
+                }
+            }
+            return UnionType.union(possible);
+        });
+    }
+
+    public static PrimitiveFunctionType vectorAppend() {
+        return new PrimitiveFunctionType("append", 2, (arguments, location) -> {
+            YinType left = arguments.get(0);
+            YinType right = arguments.get(1);
+            if (left instanceof AnyType || right instanceof AnyType) {
+                return Types.ANY;
+            }
+            List<VectorType> leftVectors = vectorAlternatives(left, location, "append");
+            List<VectorType> rightVectors = vectorAlternatives(right, location, "append");
+            List<YinType> results = new ArrayList<>();
+            for (VectorType leftVector : leftVectors) {
+                for (VectorType rightVector : rightVectors) {
+                    List<YinType> elements = new ArrayList<>(leftVector.elements());
+                    elements.addAll(rightVector.elements());
+                    results.add(new VectorType(elements));
+                }
+            }
+            return UnionType.union(results);
+        });
+    }
+
+    private static void requireVectorLike(YinType type, Node location, String operation) {
+        if (type instanceof AnyType || type instanceof VectorType) {
+            return;
+        }
+        if (type instanceof UnionType union) {
+            for (YinType member : union.members()) {
+                requireVectorLike(member, location, operation);
+            }
+            return;
+        }
+        Util.abort(location, operation + " requires a vector, got: " + type);
+    }
+
+    private static List<VectorType> vectorAlternatives(YinType type, Node location, String operation) {
+        List<VectorType> vectors = new ArrayList<>();
+        collectVectorAlternatives(type, vectors, location, operation);
+        return vectors;
+    }
+
+    private static void collectVectorAlternatives(
+            YinType type, List<VectorType> vectors, Node location, String operation) {
+        if (type instanceof VectorType vector) {
+            vectors.add(vector);
+        } else if (type instanceof UnionType union) {
+            for (YinType member : union.members()) {
+                collectVectorAlternatives(member, vectors, location, operation);
+            }
+        } else {
+            Util.abort(location, operation + " requires a vector, got: " + type);
+        }
+    }
+
+    private static Integer literalIndex(Node location) {
+        if (location instanceof Call call && call.args.positional.size() == 2
+                && call.args.positional.get(1) instanceof IntNum index) {
+            return index.value;
+        }
+        return null;
     }
 
     public static PrimitiveFunctionType print() {

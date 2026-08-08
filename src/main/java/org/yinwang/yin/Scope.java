@@ -180,6 +180,9 @@ public class Scope<T> {
         init.putValue("or", new Or());
         init.putValue("not", new Not());
 
+        init.putValue("length", new Length());
+        init.putValue("at", new At());
+        init.putValue("append", new Append());
         init.putValue("print", new Print(output));
     }
 
@@ -197,6 +200,9 @@ public class Scope<T> {
         init.putValue("and", PrimitiveFunctionType.booleanBinary("and"));
         init.putValue("or", PrimitiveFunctionType.booleanBinary("or"));
         init.putValue("not", PrimitiveFunctionType.booleanUnary("not"));
+        init.putValue("length", PrimitiveFunctionType.vectorLength());
+        init.putValue("at", PrimitiveFunctionType.vectorAt());
+        init.putValue("append", PrimitiveFunctionType.vectorAppend());
         init.putValue("print", PrimitiveFunctionType.print());
         init.putValue("U", PrimitiveFunctionType.union());
     }

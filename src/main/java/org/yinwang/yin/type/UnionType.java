@@ -26,8 +26,13 @@ public final class UnionType extends YinType {
 
     private void add(YinType type) {
         if (type instanceof UnionType union) {
-            members.addAll(union.members);
-        } else {
+            union.members.forEach(this::add);
+        } else if (type instanceof AnyType) {
+            members.clear();
+            members.add(type);
+        } else if (members.stream().anyMatch(AnyType.class::isInstance)) {
+            return;
+        } else if (members.stream().noneMatch(member -> Types.equivalent(member, type))) {
             members.add(type);
         }
     }

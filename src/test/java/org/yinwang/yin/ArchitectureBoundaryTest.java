@@ -4,11 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.yinwang.yin.type.Types;
 import org.yinwang.yin.type.YinType;
+import org.yinwang.yin.value.IntValue;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.value.Vector;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -93,6 +97,18 @@ class ArchitectureBoundaryTest {
 
         assertEquals(Diagnostic.Code.SYNTAX, error.diagnostic.code());
         assertTrue(error.getMessage().contains("unrecognized syntax: ."));
+    }
+
+    @Test
+    void vectorValuesOwnAnImmutableSnapshotOfTheirElements() {
+        List<Value> source = new ArrayList<>(List.of(new IntValue(1)));
+        Vector vector = new Vector(source);
+
+        source.add(new IntValue(2));
+
+        assertEquals(1, vector.size());
+        assertThrows(UnsupportedOperationException.class,
+                () -> vector.values().add(new IntValue(3)));
     }
 
     private Path program(String source) throws Exception {

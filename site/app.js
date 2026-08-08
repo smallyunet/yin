@@ -15,6 +15,11 @@ const examples = {
 
 (define origin (NamedPoint :name "origin" :x 42))
 (field origin :x)`,
+  vectors: `(define base [10 20])
+(define extended (append base [30 40]))
+
+(print (length extended))
+(at extended 3)`,
   unions: `(define numeric-label
   (fun ([value (U Int Float)] [-> String])
     (if (= value 0) "zero" "non-zero")))
@@ -182,7 +187,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.6";
+    resultType.textContent = "Yin 0.7";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

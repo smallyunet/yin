@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.0-SNAPSHOT
+
+- add `length`, `at`, and `append` for immutable vector use
+- infer exact `at` types for literal indices and normalized element unions for
+  dynamic indices
+- distribute safe vector operations across union members and preserve `Any` as
+  an explicit runtime-checked boundary
+- reject invalid operands, non-integer indices, empty dynamic access, and
+  out-of-bounds access with structured diagnostics
+- make runtime vectors own immutable element snapshots
+- add vector operations to the maintained corpus and browser Playground
+- expand the automated suite from 91 to 100 tests
+
 ## 0.6.0-SNAPSHOT
 
 - add `(field value :name)` for immutable record field access

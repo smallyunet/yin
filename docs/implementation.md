@@ -28,6 +28,8 @@ source file
   concrete syntax tree so comments and original string tokens remain intact.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
+- `value/Vector.java` stores an immutable element snapshot; `length`, `at`, and
+  `append` expose checked vector operations without subscript syntax.
 - `type/` contains static types, record and function types, unions, and
   primitive signatures. No class in this package extends `Value`.
 
@@ -80,7 +82,7 @@ Run all checks with:
 
 ## Current architectural boundary
 
-- record mutation and generic subscripting are intentionally absent from the
+- record mutation and generic subscript syntax are intentionally absent from the
   supported grammar and AST
 - descriptor forms remain stored in a generic property table before evaluation
 - the type system remains experimental and is not a soundness proof

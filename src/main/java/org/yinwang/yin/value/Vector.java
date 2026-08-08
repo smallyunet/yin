@@ -3,20 +3,38 @@ package org.yinwang.yin.value;
 
 import org.yinwang.yin.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Vector extends Value {
 
-    public List<Value> values;
+    private final List<Value> values;
 
 
     public Vector(List<Value> values) {
-        this.values = values;
+        this.values = List.copyOf(values);
     }
 
 
     public int size() {
         return values.size();
+    }
+
+
+    public Value get(int index) {
+        return values.get(index);
+    }
+
+
+    public List<Value> values() {
+        return values;
+    }
+
+
+    public Vector append(Vector other) {
+        List<Value> combined = new ArrayList<>(values);
+        combined.addAll(other.values);
+        return new Vector(combined);
     }
 
 

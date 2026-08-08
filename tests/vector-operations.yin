@@ -1,0 +1,3 @@
+(define base [10 20])
+(define extended (append base [30 40]))
+(+ (length extended) (at extended 3))

@@ -51,4 +51,12 @@ class BrowserBridgeTest {
         assertTrue(result.contains("\"value\":\"42\""));
         assertTrue(result.contains("\"type\":\"Int\""));
     }
+
+    @Test
+    void evaluatesTypedVectorOperationsInTheBrowserSession() {
+        String result = BrowserBridge.yinEvaluate("(at (append [1] [42]) 1)");
+
+        assertTrue(result.contains("\"value\":\"42\""));
+        assertTrue(result.contains("\"type\":\"Int\""));
+    }
 }

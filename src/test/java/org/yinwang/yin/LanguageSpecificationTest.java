@@ -179,6 +179,125 @@ class LanguageSpecificationTest {
     }
 
     @Test
+    void vectorLengthAndAppendPreserveImmutableStructuralTypes() throws Exception {
+        Path source = program("""
+                (define left [1 2])
+                (define combined (append left ["three" true]))
+                combined
+                """);
+
+        assertEquals("[1 2 \"three\" true]", interpret(source));
+        assertEquals("[Int Int String Bool]", typecheck(source));
+    }
+
+    @Test
+    void literalVectorIndicesHavePreciseTypes() throws Exception {
+        Path source = program("(at [1 \"two\" true] 1)");
+
+        assertEquals("\"two\"", interpret(source));
+        assertEquals("String", typecheck(source));
+    }
+
+    @Test
+    void dynamicVectorIndicesProduceNormalizedElementUnions() throws Exception {
+        Path source = program("""
+                (define select
+                  (fun ([items Any] [index Int])
+                    (at [1 \"two\" 3] index)))
+                (select [false] 1)
+                """);
+
+        YinType type = new TypeChecker(source.toString()).typecheck(source.toString());
+        assertEquals("\"two\"", interpret(source));
+        assertTrue(type instanceof UnionType);
+        assertTrue(type.toString().contains("Int"));
+        assertTrue(type.toString().contains("String"));
+        assertEquals(2, ((UnionType) type).members().size());
+    }
+
+    @Test
+    void vectorOperationsDistributeAcrossSafeUnionMembers() throws Exception {
+        Path access = program("""
+                (define choose
+                  (fun ([flag Bool])
+                    (if flag [1] [\"one\" true])))
+                (at (choose true) 0)
+                """);
+        Path append = program("""
+                (define choose
+                  (fun ([flag Bool])
+                    (if flag [1] [\"one\"])))
+                (append (choose true) [false])
+                """);
+
+        assertEquals("1", interpret(access));
+        assertTrue(typecheck(access).contains("Int"));
+        assertTrue(typecheck(access).contains("String"));
+        assertEquals("[1 false]", interpret(append));
+        assertTrue(typecheck(append).contains("[Int Bool]"));
+        assertTrue(typecheck(append).contains("[String Bool]"));
+    }
+
+    @Test
+    void vectorOperationsUseAnyAsAnExplicitRuntimeCheckedBoundary() throws Exception {
+        Path valid = program("""
+                (define read
+                  (fun ([items Any] [index Any] [-> Any])
+                    (at items index)))
+                (read [40 42] 1)
+                """);
+        Path invalidTarget = program("""
+                (define read
+                  (fun ([items Any] [index Any] [-> Any])
+                    (at items index)))
+                (read 42 0)
+                """);
+        Path invalidIndex = program("""
+                (define read
+                  (fun ([items Any] [index Any] [-> Any])
+                    (at items index)))
+                (read [42] \"zero\")
+                """);
+
+        assertEquals("42", interpret(valid));
+        assertEquals("Any", typecheck(valid));
+        assertEquals("Any", typecheck(invalidTarget));
+        assertEquals("Any", typecheck(invalidIndex));
+        assertLanguageError(() -> interpret(invalidTarget), "at requires a vector");
+        assertLanguageError(() -> interpret(invalidIndex), "at index must be Int");
+    }
+
+    @Test
+    void invalidVectorIndicesAreRejectedStaticallyAndAtRuntime() throws Exception {
+        Path outOfBounds = program("(at [1 2] 2)");
+        Path negative = program("(at [1 2] -1)");
+        Path emptyDynamic = program("""
+                (define read (fun ([index Int]) (at [] index)))
+                (read 0)
+                """);
+
+        assertLanguageError(() -> interpret(outOfBounds), "vector index out of bounds: 2 for length 2");
+        assertLanguageError(() -> typecheck(outOfBounds), "vector index out of bounds: 2 for length 2");
+        assertLanguageError(() -> interpret(negative), "vector index out of bounds: -1 for length 2");
+        assertLanguageError(() -> typecheck(negative), "vector index out of bounds: -1 for length 2");
+        assertLanguageError(() -> typecheck(emptyDynamic), "at cannot index an empty vector");
+    }
+
+    @Test
+    void vectorOperationsRejectInvalidOperandTypes() throws Exception {
+        Path invalidLength = program("(length 42)");
+        Path invalidIndex = program("(at [1] \"zero\")");
+        Path invalidAppend = program("(append [1] 2)");
+
+        assertLanguageError(() -> interpret(invalidLength), "length requires a vector");
+        assertLanguageError(() -> typecheck(invalidLength), "length requires a vector");
+        assertLanguageError(() -> interpret(invalidIndex), "at index must be Int");
+        assertLanguageError(() -> typecheck(invalidIndex), "at index must be Int");
+        assertLanguageError(() -> interpret(invalidAppend), "append requires vectors");
+        assertLanguageError(() -> typecheck(invalidAppend), "append requires a vector");
+    }
+
+    @Test
     void recordInheritanceDefinesNominalSubtyping() throws Exception {
         Path source = program("""
                 (record Parent [value Int])
@@ -310,6 +429,7 @@ class LanguageSpecificationTest {
         assertTrue(Types.equivalent(firstVector, secondVector));
         assertFalse(Types.equivalent(firstVector, differentVector));
         assertTrue(Types.equivalent(firstUnion, reversedUnion));
+        assertEquals("Any", UnionType.union(Types.INT, Types.ANY).toString());
         assertFalse(Types.equivalent(addition, subtraction));
     }
 
