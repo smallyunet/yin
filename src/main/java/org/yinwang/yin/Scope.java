@@ -14,6 +14,7 @@ public class Scope {
 
     public Map<String, Map<String, Object>> table = new LinkedHashMap<>();
     public Scope parent;
+    public TypeChecker typeChecker;
 
 
     public Scope() {
@@ -23,6 +24,7 @@ public class Scope {
 
     public Scope(Scope parent) {
         this.parent = parent;
+        this.typeChecker = parent == null ? null : parent.typeChecker;
     }
 
 
@@ -140,6 +142,36 @@ public class Scope {
     public static Scope buildInitScope() {
         Scope init = new Scope();
 
+        addPrimitiveFunctions(init);
+
+        init.putValue("true", new BoolValue(true));
+        init.putValue("false", new BoolValue(false));
+
+        addTypes(init);
+
+        return init;
+    }
+
+
+    public static Scope buildInitTypeScope(TypeChecker typeChecker) {
+        Scope init = new Scope();
+        init.typeChecker = typeChecker;
+
+        addPrimitiveFunctions(init);
+        init.putValue("U", new U());
+
+        init.putValue("true", Type.BOOL);
+        init.putValue("false", Type.BOOL);
+
+        addTypes(init);
+        init.putValue("Any", Value.ANY);
+
+        return init;
+    }
+
+
+    private static void addPrimitiveFunctions(Scope init) {
+
         init.putValue("+", new Add());
         init.putValue("-", new Sub());
         init.putValue("*", new Mult());
@@ -155,45 +187,14 @@ public class Scope {
         init.putValue("not", new Not());
 
         init.putValue("print", new Print());
-
-        init.putValue("true", new BoolValue(true));
-        init.putValue("false", new BoolValue(false));
-
-        init.putValue("Int", Type.INT);
-        init.putValue("Bool", Type.BOOL);
-        init.putValue("String", Type.STRING);
-
-        return init;
     }
 
 
-    public static Scope buildInitTypeScope() {
-        Scope init = new Scope();
-
-        init.putValue("+", new Add());
-        init.putValue("-", new Sub());
-        init.putValue("*", new Mult());
-        init.putValue("/", new Div());
-
-        init.putValue("<", new Lt());
-        init.putValue("<=", new LtE());
-        init.putValue(">", new Gt());
-        init.putValue(">=", new GtE());
-        init.putValue("=", new Eq());
-        init.putValue("and", new And());
-        init.putValue("or", new Or());
-        init.putValue("not", new Not());
-        init.putValue("U", new U());
-
-        init.putValue("true", Type.BOOL);
-        init.putValue("false", Type.BOOL);
-
+    private static void addTypes(Scope init) {
         init.putValue("Int", Type.INT);
+        init.putValue("Float", Type.FLOAT);
         init.putValue("Bool", Type.BOOL);
         init.putValue("String", Type.STRING);
-        init.putValue("Any", Value.ANY);
-
-        return init;
     }
 
 

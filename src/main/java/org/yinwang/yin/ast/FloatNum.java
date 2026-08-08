@@ -3,6 +3,7 @@ package org.yinwang.yin.ast;
 
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.value.FloatValue;
+import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
 
 public class FloatNum extends Node {
@@ -35,7 +36,7 @@ public class FloatNum extends Node {
 
     @Override
     public Value typecheck(Scope s) {
-        return null;
+        return Type.FLOAT;
     }
 
 

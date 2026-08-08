@@ -19,6 +19,9 @@ public class Div extends PrimFun {
         Value v1 = args.get(0);
         Value v2 = args.get(1);
         if (v1 instanceof IntValue && v2 instanceof IntValue) {
+            if (((IntValue) v2).value == 0) {
+                Util.abort(location, "division by zero");
+            }
             return new IntValue(((IntValue) v1).value / ((IntValue) v2).value);
         }
         if (v1 instanceof FloatValue && v2 instanceof FloatValue) {
@@ -40,11 +43,9 @@ public class Div extends PrimFun {
         Value v1 = args.get(0);
         Value v2 = args.get(1);
 
-        if (v1 instanceof FloatType || v2 instanceof FloatType) {
-            return new FloatType();
-        }
-        if (v1 instanceof IntType && v2 instanceof IntType) {
-            return Type.INT;
+        Value result = Type.arithmetic(v1, v2);
+        if (result != null) {
+            return result;
         }
         Util.abort(location, "incorrect argument types for /: " + v1 + ", " + v2);
         return null;

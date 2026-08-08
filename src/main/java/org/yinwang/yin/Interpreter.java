@@ -21,16 +21,25 @@ public class Interpreter {
         try {
             program = Parser.parse(file);
         } catch (ParserException e) {
-            Util.abort("parsing error: " + e);
-            return null;
+            throw new GeneralError("parsing error: " + e);
         }
         return program.interp(Scope.buildInitScope());
     }
 
 
     public static void main(String[] args) {
-        Interpreter i = new Interpreter(args[0]);
-        Util.msg(i.interp(args[0]).toString());
+        if (args.length != 1) {
+            System.err.println("usage: java -jar yin.jar <program.yin>");
+            System.exit(2);
+        }
+
+        try {
+            Interpreter i = new Interpreter(args[0]);
+            Util.msg(i.interp(args[0]).toString());
+        } catch (GeneralError error) {
+            System.err.println(error);
+            System.exit(1);
+        }
     }
 
 }

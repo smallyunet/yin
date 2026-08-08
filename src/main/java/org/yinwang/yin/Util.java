@@ -1,7 +1,5 @@
 package org.yinwang.yin;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.yinwang.yin.ast.Node;
 
 import java.io.File;
@@ -14,8 +12,7 @@ import java.util.Collection;
 
 public class Util {
 
-    @Nullable
-    public static String readFile(@NotNull String path) {
+    public static String readFile(String path) {
         try {
             byte[] encoded = Files.readAllBytes(Paths.get(path));
             return Charset.forName("UTF-8").decode(ByteBuffer.wrap(encoded)).toString();
@@ -31,23 +28,16 @@ public class Util {
 
 
     public static void abort(String m) {
-        System.err.println(m);
-        System.err.flush();
-        Thread.dumpStack();
-        System.exit(1);
+        throw new GeneralError(m);
     }
 
 
     public static void abort(Node loc, String msg) {
-        System.err.println(loc.getFileLineCol() + " " + msg);
-        System.err.flush();
-        Thread.dumpStack();
-        System.exit(1);
+        throw new GeneralError(loc, msg);
     }
 
 
-    @NotNull
-    public static String joinWithSep(@NotNull Collection<? extends Object> ls, String sep) {
+    public static String joinWithSep(Collection<?> ls, String sep) {
         StringBuilder sb = new StringBuilder();
         int i = 0;
         for (Object s : ls) {

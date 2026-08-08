@@ -1,7 +1,6 @@
 package org.yinwang.yin.parser;
 
 
-import org.jetbrains.annotations.Nullable;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.ast.*;
@@ -196,7 +195,6 @@ public class Lexer {
      *
      * @return a token or null if file ends
      */
-    @Nullable
     public Node nextToken() throws ParserException {
 
         skipSpacesAndComments();

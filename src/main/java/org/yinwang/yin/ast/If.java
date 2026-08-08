@@ -24,6 +24,9 @@ public class If extends Node {
 
     public Value interp(Scope s) {
         Value tv = interp(test, s);
+        if (!(tv instanceof BoolValue)) {
+            Util.abort(test, "test is not boolean: " + tv);
+        }
         if (((BoolValue) tv).value) {
             return interp(then, s);
         } else {

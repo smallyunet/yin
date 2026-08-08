@@ -19,7 +19,7 @@ public class FunType extends Value {
 
 
     public String toString() {
-        return properties.toString();
+        return properties == null ? "(fun)" : properties.toString();
     }
 
 }

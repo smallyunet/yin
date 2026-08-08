@@ -18,6 +18,9 @@ public class Block extends Node {
 
 
     public Value interp(Scope s) {
+        if (statements.isEmpty()) {
+            return Value.VOID;
+        }
         s = new Scope(s);
         for (int i = 0; i < statements.size() - 1; i++) {
             statements.get(i).interp(s);
@@ -28,6 +31,9 @@ public class Block extends Node {
 
     @Override
     public Value typecheck(Scope s) {
+        if (statements.isEmpty()) {
+            return Value.VOID;
+        }
         s = new Scope(s);
         for (int i = 0; i < statements.size() - 1; i++) {
             statements.get(i).typecheck(s);

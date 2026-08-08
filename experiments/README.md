@@ -1,6 +1,5 @@
 # Experiments
 
-This directory contains experimental programs which are used for trying out new
-features. Some of them may have already gone out of date of current design.
-Please don't use if you are not interested in doing archeology on language
-features.
+This directory preserves experimental programs used while the language was
+being designed. Many use syntax that is no longer accepted by the maintained
+parser. They are historical material, not supported examples or CI fixtures.

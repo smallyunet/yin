@@ -1,73 +1,73 @@
 # The Yin Programming Language
 
+Yin is an experimental programming language originally developed by Yin Wang
+in 2013–2014. It uses an S-expression-like syntax and explores a small set of
+language-design ideas through a hand-written parser, tree-walking interpreter,
+and an incomplete static type checker.
 
-### Introduction
+The project is suitable for studying language implementation. It is not yet a
+production-ready language. The untouched historical state is preserved by the
+`legacy-2015` Git tag.
 
-I started to design a new programming language, which tries to solve the
-following problems:
+## Implemented and tested
 
-- Most languages fail to learn from some historical mistakes
-- Most languages have a religious following and an over-enthusiastic community, which prevents them from correcting their mistakes
-- Some languages do too little for programmers, some languages do too much
-- Some languages provide too little abstraction, some languages provide too much
-- Some languages focus too little on usability, some languages focus too much on usability and not much on everything else
-- Some languages learned too little from mathematics and logics, some languages learned too much
-- Some languages infer too little about types, some languages infer too much
+- integers, floats, booleans, strings, and vectors
+- arithmetic, comparison, and boolean primitives
+- lexical scopes and first-class closures
+- positional and keyword function arguments
+- direct and mutual recursion
+- records with typed fields and default values
+- an experimental type checker
 
+The JUnit integration suite runs every maintained program under `tests/` through
+both the interpreter and type checker. Additional regression tests cover parser
+boundaries, Float handling, records, keyword argument scope, and diagnostics.
 
-Solving these problems will need lots of inputs from programmers' experiences.
-You are welcome to follow my development and let me know your experiences and
-perspectives, so that I can make the best decision.
+## Requirements
 
+- JDK 17 or newer
+- no system Maven installation is required
 
+## Build and test
 
-### Current state
+```bash
+./mvnw verify
+```
 
-The language is in a design stage, so please don't expect it to be usable right
-now. Many design decisions are already made, but many still remain. If you want
-to learn how to design and implement a language, this might be a good place to
-look.
+This produces the executable JAR at `target/yin-0.1-SNAPSHOT.jar`.
 
+## Run a program
 
+```bash
+java -jar target/yin-0.1-SNAPSHOT.jar tests/recursion-direct.yin
+```
 
-### Implemented features
+Run the type checker separately:
 
-- basic types (integers, floats, arrays, records)
-- primitive operators (arithmetic)
-- first-class functions (closures)
-- type system (incomplete)
+```bash
+java -cp target/yin-0.1-SNAPSHOT.jar \
+  org.yinwang.yin.TypeChecker tests/recursion-direct.yin
+```
 
+## Repository layout
 
+```text
+src/main/java/   language implementation
+src/test/java/   automated integration and regression tests
+tests/           maintained runnable Yin programs
+experiments/     historical, potentially outdated language experiments
+prototype1/      original Racket prototype
+emacs/           historical Emacs modes
+archive/         inactive implementation fragments
+docs/            language, architecture, and roadmap notes
+```
 
-### Implemented facilities
+See [Language reference](docs/language-reference.md),
+[Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for
+the maintained project boundaries.
 
-- parser
-- interpreter
-- type checker
+## License
 
+GNU Affero General Public License v3.0. See [LICENSE](LICENSE).
 
-
-### Still missing
-
-- testing framework
-- compiler
-- runtime system
-
-
-
-### License (GNU AGPLv3)
-
-Copyright (c) 2013-2014 Yin Wang
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Copyright © 2013–2014 Yin Wang and contributors.

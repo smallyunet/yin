@@ -200,7 +200,7 @@ public class Parser {
         }
 
         Node name = elements.get(1);
-        Node maybeParents = elements.get(2);
+        Node maybeParents = elements.size() > 2 ? elements.get(2) : null;
 
         List<Name> parents;
         List<Node> fields;

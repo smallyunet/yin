@@ -33,6 +33,9 @@ public class RecordDef extends Node {
         if (parents != null) {
             for (Node p : parents) {
                 Value pv = p.interp(s);
+                if (!(pv instanceof RecordType)) {
+                    Util.abort(p, "parent is not a record: " + pv);
+                }
                 properties.putAll(((RecordType) pv).properties);
             }
         }

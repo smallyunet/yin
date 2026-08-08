@@ -3,27 +3,27 @@ package org.yinwang.yin;
 
 import org.yinwang.yin.ast.Node;
 
-public class GeneralError extends Exception {
-    public String msg;
-    public Node location;
+public class GeneralError extends RuntimeException {
+    public final Node location;
 
 
     public GeneralError(Node location, String msg) {
-        this.msg = msg;
+        super(msg);
         this.location = location;
     }
 
 
     public GeneralError(String msg) {
-        this.msg = msg;
+        super(msg);
+        this.location = null;
     }
 
 
     public String toString() {
         if (location != null) {
-            return location.getFileLineCol() + ": " + msg;
+            return location.getFileLineCol() + " " + getMessage();
         } else {
-            return msg;
+            return getMessage();
         }
     }
 

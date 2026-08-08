@@ -16,7 +16,6 @@ import java.util.Set;
 
 public class TypeChecker {
 
-    public static TypeChecker self;
     public String file;
     public Set<FunType> uncalled = new HashSet<>();
     public Set<FunType> callStack = new HashSet<>();
@@ -28,14 +27,15 @@ public class TypeChecker {
 
 
     public Value typecheck(String file) {
+        uncalled.clear();
+        callStack.clear();
         Node program;
         try {
             program = Parser.parse(file);
         } catch (ParserException e) {
-            Util.abort("parsing error: " + e);
-            return null;
+            throw new GeneralError("parsing error: " + e);
         }
-        Scope s = Scope.buildInitTypeScope();
+        Scope s = Scope.buildInitTypeScope(this);
         Value ret = program.typecheck(s);
 
         while (!uncalled.isEmpty()) {
@@ -56,15 +56,19 @@ public class TypeChecker {
             Declare.mergeType(fun.properties, funScope);
         }
 
-        TypeChecker.self.callStack.add(fun);
+        callStack.add(fun);
         Value actual = fun.fun.body.typecheck(funScope);
-        TypeChecker.self.callStack.remove(fun);
+        callStack.remove(fun);
 
-        Object retNode = fun.properties.lookupPropertyLocal(Constants.RETURN_ARROW, "type");
+        Object retNode = fun.properties == null
+                ? null
+                : fun.properties.lookupPropertyLocal(Constants.RETURN_ARROW, "type");
 
-        if (retNode == null || !(retNode instanceof Node)) {
-            Util.abort("illegal return type: " + retNode);
+        if (retNode == null) {
             return;
+        }
+        if (!(retNode instanceof Node)) {
+            Util.abort("illegal return type: " + retNode);
         }
 
         Value expected = ((Node) retNode).typecheck(funScope);
@@ -75,10 +79,19 @@ public class TypeChecker {
 
 
     public static void main(String[] args) {
-        TypeChecker tc = new TypeChecker(args[0]);
-        TypeChecker.self = tc;
-        Value result = tc.typecheck(args[0]);
-        Util.msg(result.toString());
+        if (args.length != 1) {
+            System.err.println("usage: java -cp yin.jar org.yinwang.yin.TypeChecker <program.yin>");
+            System.exit(2);
+        }
+
+        try {
+            TypeChecker tc = new TypeChecker(args[0]);
+            Value result = tc.typecheck(args[0]);
+            Util.msg(result.toString());
+        } catch (GeneralError error) {
+            System.err.println(error);
+            System.exit(1);
+        }
     }
 
 }

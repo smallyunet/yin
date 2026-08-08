@@ -10,7 +10,7 @@ import java.util.List;
 public class Print extends PrimFun {
 
     public Print() {
-        super("print", 1);
+        super("print", -1);
     }
 
 
