@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0-SNAPSHOT
+
+- publish a normative grammar and deterministic evaluation-order specification
+- define `Any`, union, vector, and nominal record subtype/equivalence rules
+- make record inheritance transitive in static checks while keeping records
+  immutable
+- reject unsupported declarations, computed annotation types, empty unions,
+  unknown descriptor properties, and misplaced return descriptors
+- evaluate keyword and record arguments in source order
+- classify every historical program and migrate two maintained examples
+- expand the automated suite from 44 to 63 tests
+
 ## 0.2.0-SNAPSHOT
 
 - separate runtime `Value` objects from static `YinType` representations

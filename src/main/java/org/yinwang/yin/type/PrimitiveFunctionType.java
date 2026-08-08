@@ -70,7 +70,12 @@ public final class PrimitiveFunctionType extends YinType {
     }
 
     public static PrimitiveFunctionType union() {
-        return new PrimitiveFunctionType("U", -1, (arguments, location) -> UnionType.union(arguments));
+        return new PrimitiveFunctionType("U", -1, (arguments, location) -> {
+            if (arguments.isEmpty()) {
+                Util.abort(location, "U expects at least one type");
+            }
+            return UnionType.union(arguments);
+        });
     }
 
     @Override

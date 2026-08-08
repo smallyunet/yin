@@ -1,7 +1,10 @@
 # Yin language reference
 
-This document describes behavior covered by the current automated test suite.
-Files in `experiments/` may use older syntax and are not normative.
+This is a concise guide to the behavior covered by the current automated test
+suite. The normative definition is the
+[Yin 0.3 language specification](language-specification.md). Files in
+`experiments/` may use older syntax and are not normative; see the
+[historical-program classification](historical-programs.md).
 
 ## Programs and comments
 
@@ -68,6 +71,12 @@ Calls use either positional or keyword arguments, never a mixture:
 Every required parameter must be supplied exactly once. Unknown and duplicated
 keywords are errors. A parameter may declare `:default`; its expression is
 evaluated once, in lexical scope, when the function definition is evaluated.
+The call operator and positional arguments evaluate from left to right. Keyword
+values also evaluate in source order, independently of parameter order.
+
+Annotations may name a built-in or record type, or use a non-empty union such
+as `(U Int Float)`. `Any` is the top type. A return descriptor, when present,
+must be the final descriptor in the parameter list.
 
 ## Records
 
@@ -91,9 +100,9 @@ Records may inherit fields from one or more previously defined records:
 ```
 
 Inherited fields are appended after locally declared fields. Conflicts between
-local fields or multiple parents are rejected. Attribute access, subscripting,
-and record mutation are not part of the grammar, so inheritance should still be
-considered experimental.
+local fields or multiple parents are rejected. Inheritance establishes nominal,
+transitive subtyping. Attribute access, subscripting, and record mutation are
+not part of the grammar.
 
 ## Primitive operations
 

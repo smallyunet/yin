@@ -73,7 +73,7 @@ public class TypeChecker {
         }
 
         YinType expected = ((Node) retNode).typecheck(funScope);
-        if (!Types.subtype(actual, expected, true)) {
+        if (!Types.subtype(actual, expected)) {
             Util.abort(fun.function, "type error in return value, expected: " + expected + ", actual: " + actual);
         }
     }

@@ -4,17 +4,26 @@ import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.ast.Node;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class RecordType extends YinType {
     public final String name;
     public final Node definition;
     public final Scope<YinType> properties;
+    private final Set<String> nominalTypes;
 
-    public RecordType(String name, Node definition, Scope<YinType> properties) {
+    public RecordType(String name, Node definition, Scope<YinType> properties,
+                      Set<String> nominalTypes) {
         this.name = name;
         this.definition = definition;
         this.properties = properties.copy();
+        this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
+    }
+
+    public Set<String> nominalTypes() {
+        return nominalTypes;
     }
 
     @Override

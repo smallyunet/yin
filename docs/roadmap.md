@@ -34,10 +34,12 @@ The project is being stabilized before new language features are designed.
 
 ## 0.3 — language definition
 
-- specify grammar and evaluation order
-- specify record inheritance and mutation semantics
-- specify type equivalence, unions, subtyping, and inference boundaries
-- classify historical programs as supported, migrated, or archived
+- normative grammar and deterministic evaluation order
+- immutable records and nominal, transitive inheritance subtyping
+- structural vector equivalence, union normalization, subtyping, and explicit
+  inference boundaries
+- complete classification of historical programs as migrated or archived
+- executable specification and corpus-classification regression tests
 
 ## Later, only after semantics stabilize
 

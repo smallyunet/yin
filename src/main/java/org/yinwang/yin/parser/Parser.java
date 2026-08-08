@@ -58,7 +58,7 @@ public class Parser {
                             case Constants.ASSIGN_KEYWORD:
                                 return parseAssign(tuple);
                             case Constants.DECLARE_KEYWORD:
-                                return parseDeclare(tuple);
+                                throw new ParserException("standalone declare forms are unsupported", tuple);
                             case Constants.FUN_KEYWORD:
                                 return parseFun(tuple);
                             case Constants.RECORD_KEYWORD:
@@ -148,7 +148,9 @@ public class Parser {
         List<Name> paramNames = new ArrayList<>();
         List<Node> paramTuples = new ArrayList<>();
 
-        for (Node p : ((Tuple) preParams).elements) {
+        List<Node> preParamElements = ((Tuple) preParams).elements;
+        for (int parameterIndex = 0; parameterIndex < preParamElements.size(); parameterIndex++) {
+            Node p = preParamElements.get(parameterIndex);
             if (p instanceof Name) {
                 hasName = true;
                 paramNames.add((Name) p);
@@ -163,7 +165,11 @@ public class Parser {
                 }
 
                 Name name = (Name) argElements.get(0);
-                if (!name.id.equals(Constants.RETURN_ARROW)) {
+                if (name.id.equals(Constants.RETURN_ARROW)) {
+                    if (parameterIndex != preParamElements.size() - 1) {
+                        throw new ParserException("return descriptor must be last", p);
+                    }
+                } else {
                     paramNames.add(name);
                 }
                 paramTuples.add(p);
@@ -295,12 +301,27 @@ public class Parser {
                 }
 
                 Node typeNode = elements.get(1);
-                if (!(typeNode instanceof Name)) {
-                    throw new ParserException("type must be a name, but got: " + typeNode.toString(), typeNode);
+                if (typeNode instanceof Call call
+                        && call.op instanceof Name operator
+                        && operator.id.equals(Constants.UNION_KEYWORD)
+                        && call.args.positional.isEmpty()) {
+                    throw new ParserException("union type requires at least one member", typeNode);
+                }
+                if (!isTypeExpression(typeNode)) {
+                    throw new ParserException("unsupported type expression: " + typeNode, typeNode);
                 }
                 properties.put(id, "type", typeNode);
 
                 Map<String, Node> props = parseMap(elements.subList(2, elements.size()));
+                for (String property : props.keySet()) {
+                    if (!property.equals("default")) {
+                        throw new ParserException("unsupported descriptor property: :" + property,
+                                props.get(property));
+                    }
+                }
+                if (id.equals(Constants.RETURN_ARROW) && !props.isEmpty()) {
+                    throw new ParserException("return type descriptor cannot have properties", field);
+                }
                 Map<String, Object> propsObj = new LinkedHashMap<>();
                 for (Map.Entry<String, Node> e : props.entrySet()) {
                     propsObj.put(e.getKey(), e.getValue());
@@ -309,6 +330,26 @@ public class Parser {
             }
         }
         return properties;
+    }
+
+
+    private static boolean isTypeExpression(Node node) {
+        if (node instanceof Name) {
+            return true;
+        }
+        if (!(node instanceof Call call)
+                || !(call.op instanceof Name operator)
+                || !operator.id.equals(Constants.UNION_KEYWORD)
+                || !call.args.keywords.isEmpty()
+                || call.args.positional.isEmpty()) {
+            return false;
+        }
+        for (Node member : call.args.positional) {
+            if (!isTypeExpression(member)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 

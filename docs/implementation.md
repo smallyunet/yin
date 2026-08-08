@@ -58,6 +58,9 @@ boundary.
 The integration tests deliberately exercise complete source files rather than
 isolated AST construction. They cover the public interpreter and type-checker
 entry points and protect the behavior of the maintained examples.
+`LanguageSpecificationTest` makes the normative evaluation and type rules
+executable, while `HistoricalCorpusTest` ensures every historical source stays
+explicitly classified and every migrated replacement remains runnable.
 
 Run all checks with:
 

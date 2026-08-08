@@ -44,26 +44,29 @@ public class Call extends Node {
                     funScope.putValue(params.get(i).id, value);
                 }
             } else {
-                Set<String> seen = new HashSet<>();
+                Set<String> parameterNames = new LinkedHashSet<>();
                 for (Name param : params) {
-                    Node actual = args.keywords.get(param.id);
-                    if (actual != null) {
-                        seen.add(param.id);
-                        Value value = actual.interp(s);
-                        funScope.putValue(param.id, value);
-                    } else if (funScope.lookupLocal(param.id) == null) {
+                    parameterNames.add(param.id);
+                    boolean hasDefault = closure.properties != null
+                            && closure.properties.lookupPropertyLocal(param.id, "default") instanceof Value;
+                    if (!args.keywords.containsKey(param.id) && !hasDefault) {
                         Util.abort(this, "argument not supplied for: " + param);
                     }
                 }
 
                 List<String> extra = new ArrayList<>();
                 for (String id : args.keywords.keySet()) {
-                    if (!seen.contains(id)) {
+                    if (!parameterNames.contains(id)) {
                         extra.add(id);
                     }
                 }
                 if (!extra.isEmpty()) {
                     Util.abort(this, "extra keyword arguments: " + extra);
+                }
+
+                // Keyword values are evaluated in their source order.
+                for (Map.Entry<String, Node> argument : args.keywords.entrySet()) {
+                    funScope.putValue(argument.getKey(), argument.getValue().interp(s));
                 }
             }
             return closure.fun.body.interp(funScope);
@@ -81,11 +84,15 @@ public class Call extends Node {
                 }
             }
 
+            Map<String, Value> actualValues = new LinkedHashMap<>();
+            for (Map.Entry<String, Node> argument : args.keywords.entrySet()) {
+                actualValues.put(argument.getKey(), argument.getValue().interp(s));
+            }
+
             for (String field : template.properties.keySet()) {
-                Node actual = args.keywords.get(field);
                 Object defaultValue = template.properties.lookupPropertyLocal(field, "default");
-                if (actual != null) {
-                    values.putValue(field, actual.interp(s));
+                if (actualValues.containsKey(field)) {
+                    values.putValue(field, actualValues.get(field));
                 } else if (defaultValue instanceof Value) {
                     values.putValue(field, (Value) defaultValue);
                 } else {
@@ -136,36 +143,27 @@ public class Call extends Node {
                 for (int i = 0; i < args.positional.size(); i++) {
                     YinType value = args.positional.get(i).typecheck(s);
                     YinType expected = funScope.lookup(params.get(i).id);
-                    if (expected != null && !Types.subtype(value, expected, false)) {
+                    if (expected != null && !Types.subtype(value, expected)) {
                         Util.abort(args.positional.get(i), "type error. expected: " + expected + ", actual: " + value);
                     }
                     funScope.putValue(params.get(i).id, value);
                 }
             } else {
                 // keywords
-                Set<String> seen = new HashSet<>();
-
-                // try to bind all arguments
+                Set<String> parameterNames = new LinkedHashSet<>();
                 for (Name param : params) {
-                    Node actual = args.keywords.get(param.id);
-                    if (actual != null) {
-                        seen.add(param.id);
-                        YinType value = actual.typecheck(s);
-                        YinType expected = funScope.lookup(param.id);
-                        if (expected != null && !Types.subtype(value, expected, false)) {
-                            Util.abort(actual, "type error. expected: " + expected + ", actual: " + value);
-                        }
-                        funScope.putValue(param.id, value);
-                    } else if (funScope.lookupLocal(param.id) == null) {
+                    parameterNames.add(param.id);
+                    boolean hasDefault = funtype.properties != null
+                            && funtype.properties.lookupPropertyLocal(param.id, "default") instanceof YinType;
+                    if (!args.keywords.containsKey(param.id) && !hasDefault) {
                         Util.abort(this, "argument not supplied for: " + param);
                         return Types.VOID;
                     }
                 }
 
-                // detect extra arguments
                 List<String> extra = new ArrayList<>();
                 for (String id : args.keywords.keySet()) {
-                    if (!seen.contains(id)) {
+                    if (!parameterNames.contains(id)) {
                         extra.add(id);
                     }
                 }
@@ -173,6 +171,19 @@ public class Call extends Node {
                 if (!extra.isEmpty()) {
                     Util.abort(this, "extra keyword arguments: " + extra);
                     return Types.VOID;
+                }
+
+                // Mirror runtime evaluation by checking keyword values in source order.
+                for (Map.Entry<String, Node> argument : args.keywords.entrySet()) {
+                    YinType value = argument.getValue().typecheck(s);
+                    YinType expected = funtype.properties == null
+                            ? null
+                            : funtype.properties.lookupLocalType(argument.getKey());
+                    if (expected != null && !Types.subtype(value, expected)) {
+                        Util.abort(argument.getValue(),
+                                "type error. expected: " + expected + ", actual: " + value);
+                    }
+                    funScope.putValue(argument.getKey(), value);
                 }
             }
 
@@ -212,13 +223,17 @@ public class Call extends Node {
                 }
             }
 
+            Map<String, YinType> actualTypes = new LinkedHashMap<>();
+            for (Map.Entry<String, Node> argument : args.keywords.entrySet()) {
+                actualTypes.put(argument.getKey(), argument.getValue().typecheck(s));
+            }
+
             for (String field : template.properties.keySet()) {
-                Node actualNode = args.keywords.get(field);
                 YinType expected = template.properties.lookupLocalType(field);
                 Object defaultValue = template.properties.lookupPropertyLocal(field, "default");
-                if (actualNode != null) {
-                    YinType actual = actualNode.typecheck(s);
-                    if (!Types.subtype(actual, expected, false)) {
+                if (actualTypes.containsKey(field)) {
+                    YinType actual = actualTypes.get(field);
+                    if (!Types.subtype(actual, expected)) {
                         Util.abort(this, "type error. expected: " + expected + ", actual: " + actual);
                     }
                     values.putValue(field, actual);
@@ -230,7 +245,7 @@ public class Call extends Node {
             }
 
             // instantiate
-            return new RecordValueType(template.name, values);
+            return new RecordValueType(template.name, values, template.nominalTypes());
         } else if (fun instanceof PrimitiveFunctionType primitiveType) {
             if (!args.keywords.isEmpty()) {
                 Util.abort(this, "primitive arguments must be positional: " + primitiveType.name);

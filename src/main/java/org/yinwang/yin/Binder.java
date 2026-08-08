@@ -152,7 +152,7 @@ public class Binder {
             }
 
             YinType expected = definingScope.lookupLocal(id);
-            if (!Types.subtype(value, expected, false)) {
+            if (!Types.subtype(value, expected)) {
                 Util.abort(pattern, "assignment type error. expected: " + expected + ", actual: " + value);
             }
         } else if (pattern instanceof RecordLiteral && value instanceof RecordValueType recordType) {

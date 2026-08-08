@@ -8,8 +8,10 @@ import org.yinwang.yin.value.Value;
 import org.yinwang.yin.type.RecordType;
 import org.yinwang.yin.type.YinType;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class RecordDef extends Node {
@@ -51,6 +53,8 @@ public class RecordDef extends Node {
     @Override
     public YinType typecheck(Scope<YinType> s) {
         Scope<YinType> properties = Declare.typecheckProperties(propertyForm, s);
+        Set<String> nominalTypes = new LinkedHashSet<>();
+        nominalTypes.add(name.id);
 
         if (parents != null) {
             for (Node p : parents) {
@@ -60,6 +64,7 @@ public class RecordDef extends Node {
                     return org.yinwang.yin.type.Types.VOID;
                 }
                 Scope<YinType> parentProps = ((RecordType) pv).properties;
+                nominalTypes.addAll(((RecordType) pv).nominalTypes());
 
                 rejectConflictingFields(properties, parentProps, p, pv);
 
@@ -68,7 +73,7 @@ public class RecordDef extends Node {
             }
         }
 
-        YinType r = new RecordType(name.id, this, properties);
+        YinType r = new RecordType(name.id, this, properties, nominalTypes);
         s.putValue(name.id, r);
         return r;
     }

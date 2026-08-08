@@ -11,6 +11,7 @@ import org.yinwang.yin.type.YinType;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class RecordLiteral extends Node {
@@ -56,7 +57,7 @@ public class RecordLiteral extends Node {
         for (Map.Entry<String, Node> e : map.entrySet()) {
             properties.putValue(e.getKey(), e.getValue().typecheck(s));
         }
-        return new RecordValueType(null, properties);
+        return new RecordValueType(null, properties, Set.of());
     }
 
 

@@ -4,6 +4,7 @@ import org.yinwang.yin.Constants;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public final class UnionType extends YinType {
     }
 
     public Set<YinType> members() {
-        return Set.copyOf(members);
+        return Collections.unmodifiableSet(new LinkedHashSet<>(members));
     }
 
     @Override

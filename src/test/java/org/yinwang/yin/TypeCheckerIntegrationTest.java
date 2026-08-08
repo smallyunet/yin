@@ -20,6 +20,8 @@ class TypeCheckerIntegrationTest {
     @Test
     void checksTheMaintainedExamplePrograms() {
         assertEquals("[Int Int Int Int Int]", typecheck("tests/array.yin").toString());
+        assertEquals("[]", typecheck("tests/empty-vector.yin").toString());
+        assertEquals("Int", typecheck("tests/arithmetic.yin").toString());
         assertEquals("void", typecheck("tests/expr.yin").toString());
         assertEquals("Int", typecheck("tests/function1.yin").toString());
         assertEquals("Int", typecheck("tests/recursion-direct.yin").toString());

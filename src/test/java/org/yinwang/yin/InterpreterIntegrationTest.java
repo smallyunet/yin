@@ -22,6 +22,8 @@ class InterpreterIntegrationTest {
     @Test
     void runsTheMaintainedExamplePrograms() {
         assertEquals("[1 2 3 4 5]", interpret("tests/array.yin").toString());
+        assertEquals("[]", interpret("tests/empty-vector.yin").toString());
+        assertEquals("5", interpret("tests/arithmetic.yin").toString());
         assertEquals("-1", interpret("tests/function1.yin").toString());
         assertEquals("120", interpret("tests/recursion-direct.yin").toString());
         assertEquals("void", interpret("tests/recursion-mutual.yin").toString());
