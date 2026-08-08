@@ -11,6 +11,7 @@ import org.yinwang.yin.type.YinType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class Scope<T> {
 
@@ -132,9 +133,14 @@ public class Scope<T> {
 
 
     public static Scope<Value> buildInitScope() {
+        return buildInitScope(System.out::println);
+    }
+
+
+    public static Scope<Value> buildInitScope(Consumer<String> output) {
         Scope<Value> init = new Scope<>();
 
-        addPrimitiveFunctions(init);
+        addPrimitiveFunctions(init, output);
 
         init.putValue("true", new BoolValue(true));
         init.putValue("false", new BoolValue(false));
@@ -158,7 +164,7 @@ public class Scope<T> {
     }
 
 
-    private static void addPrimitiveFunctions(Scope<Value> init) {
+    private static void addPrimitiveFunctions(Scope<Value> init, Consumer<String> output) {
 
         init.putValue("+", new Add());
         init.putValue("-", new Sub());
@@ -174,7 +180,7 @@ public class Scope<T> {
         init.putValue("or", new Or());
         init.putValue("not", new Not());
 
-        init.putValue("print", new Print());
+        init.putValue("print", new Print(output));
     }
 
 

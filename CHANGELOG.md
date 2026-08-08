@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0-SNAPSHOT
+
+- compile the interpreter, type checker, and formatter to browser JavaScript
+  with TeaVM
+- expose a stateful browser bridge with values, types, output, and structured
+  diagnostics
+- add a responsive, accessible Yin Playground with runnable language examples
+- isolate execution in a Web Worker with a 1.5-second time limit
+- deploy the entirely static demo to GitHub Pages from `main`
+- expand the automated suite from 77 to 83 tests
+
 ## 0.4.0-SNAPSHOT
 
 - add an interactive REPL with persistent definitions and multiline forms

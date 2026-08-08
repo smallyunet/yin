@@ -47,6 +47,14 @@ The project is being stabilized before new language features are designed.
 - in-memory parsing and a stateful embedding session
 - deterministic, comment-preserving formatter with print, check, and write modes
 
+## 0.5 — browser playground
+
+- TeaVM JavaScript build of the language core
+- stateful browser bridge and captured standard output
+- responsive playground with examples, diagnostics, and online formatting
+- Web Worker isolation and execution timeout
+- automated GitHub Pages deployment
+
 ## Later
 
 - modules

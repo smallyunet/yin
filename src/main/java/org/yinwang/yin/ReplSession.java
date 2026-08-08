@@ -7,13 +7,25 @@ import org.yinwang.yin.parser.ParserException;
 import org.yinwang.yin.type.YinType;
 import org.yinwang.yin.value.Value;
 
+import java.util.function.Consumer;
+
 /** Persistent interpreter and type-checker state for interactive evaluation. */
 public final class ReplSession {
     private static final String SOURCE_NAME = "<repl>";
 
-    private final TypeChecker typeChecker = new TypeChecker(SOURCE_NAME);
-    private Scope<Value> runtimeScope = Scope.buildInitScope();
-    private Scope<YinType> typeScope = Scope.buildInitTypeScope(typeChecker);
+    private final TypeChecker typeChecker;
+    private Scope<Value> runtimeScope;
+    private Scope<YinType> typeScope;
+
+    public ReplSession() {
+        this(System.out::println);
+    }
+
+    public ReplSession(Consumer<String> output) {
+        typeChecker = new TypeChecker(SOURCE_NAME);
+        runtimeScope = Scope.buildInitScope(output);
+        typeScope = Scope.buildInitTypeScope(typeChecker);
+    }
 
     public Evaluation evaluate(String source) {
         Block program = parse(source);
