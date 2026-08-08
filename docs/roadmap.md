@@ -41,9 +41,14 @@ The project is being stabilized before new language features are designed.
 - complete classification of historical programs as migrated or archived
 - executable specification and corpus-classification regression tests
 
-## Later, only after semantics stabilize
+## 0.4 — interactive tooling
 
-- REPL and formatter
+- persistent, multiline REPL with diagnostic recovery
+- in-memory parsing and a stateful embedding session
+- formatter (next)
+
+## Later
+
 - modules
 - bytecode or native compilation
 - editor/LSP integration

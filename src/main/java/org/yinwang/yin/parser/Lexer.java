@@ -30,9 +30,7 @@ public class Lexer {
     public Lexer(String file) {
         this.file = Util.unifyPath(file);
         this.text = Util.readFile(file);
-        this.offset = 0;
-        this.line = 0;
-        this.col = 0;
+        initialize();
 
         if (text == null) {
             throw new GeneralError(new Diagnostic(
@@ -40,10 +38,31 @@ public class Lexer {
                     "failed to read file: " + file,
                     new SourceSpan(this.file, 0, 0, 0, 0)));
         }
+    }
+
+
+    private Lexer(String sourceName, String source) {
+        this.file = sourceName;
+        this.text = source;
+        initialize();
+    }
+
+
+    public static Lexer fromSource(String sourceName, String source) {
+        if (sourceName == null || source == null) {
+            throw new IllegalArgumentException("source name and text are required");
+        }
+        return new Lexer(sourceName, source);
+    }
+
+
+    private void initialize() {
+        this.offset = 0;
+        this.line = 0;
+        this.col = 0;
 
         Delimeter.addDelimiterPair(Constants.PAREN_BEGIN, Constants.PAREN_END);
         Delimeter.addDelimiterPair(Constants.SQUARE_BEGIN, Constants.SQUARE_END);
-
     }
 
 

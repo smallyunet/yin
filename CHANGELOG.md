@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0-SNAPSHOT
+
+- add an interactive REPL with persistent definitions and multiline forms
+- recover from syntax, type, and runtime diagnostics without ending the session
+- type-check each submission before executing its runtime effects
+- support parsing in-memory source strings with virtual diagnostic locations
+- expose `ReplSession` as a small stateful embedding API
+- expand the automated suite from 63 to 70 tests
+
 ## 0.3.0-SNAPSHOT
 
 - publish a normative grammar and deterministic evaluation-order specification

@@ -20,7 +20,7 @@ production-ready language. The untouched historical state is preserved by the
 - an experimental type checker
 
 The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The 63-test suite also covers parser
+both the interpreter and type checker. The 70-test suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
 boundaries between runtime values and static types. Yin 0.3 defines these
@@ -37,20 +37,32 @@ behaviors normatively rather than relying on historical implementation details.
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.3.0-SNAPSHOT.jar`.
+This produces the executable JAR at `target/yin-0.4.0-SNAPSHOT.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.3.0-SNAPSHOT.jar tests/recursion-direct.yin
+java -jar target/yin-0.4.0-SNAPSHOT.jar tests/recursion-direct.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.3.0-SNAPSHOT.jar \
+java -cp target/yin-0.4.0-SNAPSHOT.jar \
   org.yinwang.yin.TypeChecker tests/recursion-direct.yin
 ```
+
+## Interactive REPL
+
+Launch the REPL by running the JAR without a program path:
+
+```bash
+java -jar target/yin-0.4.0-SNAPSHOT.jar
+```
+
+Definitions persist across inputs, balanced multiline forms are supported, and
+language errors do not terminate the session. Use `:quit` or `:q` to exit. See
+the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 
 ## Repository layout
 
@@ -70,8 +82,8 @@ docs/            language, architecture, and roadmap notes
 See the normative [Language specification](docs/language-specification.md), the
 short [Language reference](docs/language-reference.md), the
 [historical-program classification](docs/historical-programs.md),
-[Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for
-the maintained project boundaries.
+[REPL guide](docs/repl.md), [Implementation](docs/implementation.md), and
+[Roadmap](docs/roadmap.md) for the maintained project boundaries.
 
 ## License
 

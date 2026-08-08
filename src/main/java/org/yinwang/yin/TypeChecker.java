@@ -1,6 +1,7 @@
 package org.yinwang.yin;
 
 
+import org.yinwang.yin.ast.Block;
 import org.yinwang.yin.ast.Declare;
 import org.yinwang.yin.ast.Node;
 import org.yinwang.yin.parser.Parser;
@@ -39,15 +40,33 @@ public class TypeChecker {
         Scope<YinType> s = Scope.buildInitTypeScope(this);
         YinType ret = program.typecheck(s);
 
+        finishChecks(s);
+
+        return ret;
+    }
+
+
+    public YinType typecheckTopLevel(Block program, Scope<YinType> scope) {
+        uncalled.clear();
+        callStack.clear();
+        YinType result = Types.VOID;
+        for (Node statement : program.statements) {
+            result = statement.typecheck(scope);
+        }
+        finishChecks(scope);
+        return result;
+    }
+
+
+    private void finishChecks(Scope<YinType> scope) {
+
         while (!uncalled.isEmpty()) {
             List<FunctionType> toRemove = new ArrayList<>(uncalled);
             for (FunctionType ft : toRemove) {
-                invokeUncalled(ft, s);
+                invokeUncalled(ft, scope);
             }
             uncalled.removeAll(toRemove);
         }
-
-        return ret;
     }
 
 

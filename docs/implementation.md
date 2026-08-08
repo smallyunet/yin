@@ -20,6 +20,8 @@ source file
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
 - `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
+- `ReplSession.java` keeps paired runtime and type scopes across interactive
+  submissions; `Repl.java` owns terminal input, multiline recovery, and output.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
 - `type/` contains static types, record and function types, unions, and
@@ -61,6 +63,8 @@ entry points and protect the behavior of the maintained examples.
 `LanguageSpecificationTest` makes the normative evaluation and type rules
 executable, while `HistoricalCorpusTest` ensures every historical source stays
 explicitly classified and every migrated replacement remains runnable.
+`ReplTest` covers in-memory parsing, persistent state, pre-execution type
+checking, multiline input, error recovery, and incomplete input at EOF.
 
 Run all checks with:
 

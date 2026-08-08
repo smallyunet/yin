@@ -28,6 +28,12 @@ public class PreParser {
     }
 
 
+    public PreParser(String sourceName, String source) {
+        this.file = sourceName;
+        this.lexer = Lexer.fromSource(sourceName, source);
+    }
+
+
     /**
      * Get next node from token stream
      */

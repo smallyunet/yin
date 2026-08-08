@@ -6,6 +6,11 @@ import org.yinwang.yin.parser.Parser;
 import org.yinwang.yin.parser.ParserException;
 import org.yinwang.yin.value.Value;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+
 public class Interpreter {
 
     String file;
@@ -30,8 +35,20 @@ public class Interpreter {
 
 
     public static void main(String[] args) {
+        if (args.length == 0 || (args.length == 1 && args[0].equals("--repl"))) {
+            try {
+                new Repl(
+                        new InputStreamReader(System.in, StandardCharsets.UTF_8),
+                        new OutputStreamWriter(System.out, StandardCharsets.UTF_8),
+                        System.console() != null).run();
+            } catch (IOException error) {
+                System.err.println("failed to read REPL input: " + error.getMessage());
+                System.exit(1);
+            }
+            return;
+        }
         if (args.length != 1) {
-            System.err.println("usage: java -jar yin.jar <program.yin>");
+            System.err.println("usage: java -jar yin.jar [--repl | <program.yin>]");
             System.exit(2);
         }
 

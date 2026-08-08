@@ -25,6 +25,13 @@ public class Parser {
     }
 
 
+    public static Node parseSource(String sourceName, String source) throws ParserException {
+        PreParser preparser = new PreParser(sourceName, source);
+        Node prenode = preparser.parse();
+        return parseNode(prenode);
+    }
+
+
     public static Node parseNode(Node prenode) throws ParserException {
 
         if (!(prenode instanceof Tuple)) {
