@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class Interpreter {
 
@@ -35,6 +36,16 @@ public class Interpreter {
 
 
     public static void main(String[] args) {
+        if (args.length > 0 && args[0].equals("--format")) {
+            int status = Formatter.run(
+                    Arrays.copyOfRange(args, 1, args.length),
+                    new java.io.PrintWriter(System.out, true),
+                    new java.io.PrintWriter(System.err, true));
+            if (status != 0) {
+                System.exit(status);
+            }
+            return;
+        }
         if (args.length == 0 || (args.length == 1 && args[0].equals("--repl"))) {
             try {
                 new Repl(
@@ -48,7 +59,7 @@ public class Interpreter {
             return;
         }
         if (args.length != 1) {
-            System.err.println("usage: java -jar yin.jar [--repl | <program.yin>]");
+            System.err.println("usage: java -jar yin.jar [--repl | --format [mode] <file>... | <program.yin>]");
             System.exit(2);
         }
 

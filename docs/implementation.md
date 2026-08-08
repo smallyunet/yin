@@ -22,6 +22,8 @@ source file
 - `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
 - `ReplSession.java` keeps paired runtime and type scopes across interactive
   submissions; `Repl.java` owns terminal input, multiline recovery, and output.
+- `Formatter.java` validates with the semantic parser, then renders a small
+  concrete syntax tree so comments and original string tokens remain intact.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
 - `type/` contains static types, record and function types, unions, and
@@ -65,6 +67,8 @@ executable, while `HistoricalCorpusTest` ensures every historical source stays
 explicitly classified and every migrated replacement remains runnable.
 `ReplTest` covers in-memory parsing, persistent state, pre-execution type
 checking, multiline input, error recovery, and incomplete input at EOF.
+`FormatterTest` covers comment safety, idempotence, semantic preservation, CLI
+modes, invalid input, and canonical formatting of every maintained program.
 
 Run all checks with:
 

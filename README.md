@@ -20,7 +20,7 @@ production-ready language. The untouched historical state is preserved by the
 - an experimental type checker
 
 The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The 70-test suite also covers parser
+both the interpreter and type checker. The 77-test suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
 boundaries between runtime values and static types. Yin 0.3 defines these
@@ -64,6 +64,18 @@ Definitions persist across inputs, balanced multiline forms are supported, and
 language errors do not terminate the session. Use `:quit` or `:q` to exit. See
 the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 
+## Format source
+
+Print canonical formatting without changing the file:
+
+```bash
+java -jar target/yin-0.4.0-SNAPSHOT.jar --format tests/function1.yin
+```
+
+Use `--format --check` in CI or `--format --write` to update one or more files.
+The formatter validates supported Yin syntax before changing output and retains
+all line comments. See the [Formatter guide](docs/formatter.md).
+
 ## Repository layout
 
 ```text
@@ -82,8 +94,9 @@ docs/            language, architecture, and roadmap notes
 See the normative [Language specification](docs/language-specification.md), the
 short [Language reference](docs/language-reference.md), the
 [historical-program classification](docs/historical-programs.md),
-[REPL guide](docs/repl.md), [Implementation](docs/implementation.md), and
-[Roadmap](docs/roadmap.md) for the maintained project boundaries.
+[REPL guide](docs/repl.md), [Formatter guide](docs/formatter.md),
+[Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
+maintained project boundaries.
 
 ## License
 

@@ -45,7 +45,7 @@ The project is being stabilized before new language features are designed.
 
 - persistent, multiline REPL with diagnostic recovery
 - in-memory parsing and a stateful embedding session
-- formatter (next)
+- deterministic, comment-preserving formatter with print, check, and write modes
 
 ## Later
 

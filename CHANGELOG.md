@@ -7,7 +7,10 @@
 - type-check each submission before executing its runtime effects
 - support parsing in-memory source strings with virtual diagnostic locations
 - expose `ReplSession` as a small stateful embedding API
-- expand the automated suite from 63 to 70 tests
+- add a syntax-validating, comment-preserving, idempotent source formatter
+- provide formatter print, CI check, and in-place write modes
+- enforce canonical formatting across the maintained program corpus
+- expand the automated suite from 63 to 77 tests
 
 ## 0.3.0-SNAPSHOT
 
