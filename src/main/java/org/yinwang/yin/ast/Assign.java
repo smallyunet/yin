@@ -4,6 +4,8 @@ import org.yinwang.yin.Binder;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 public class Assign extends Node {
     public Node pattern;
@@ -17,7 +19,7 @@ public class Assign extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         Value valueValue = value.interp(s);
         Binder.checkDup(pattern);
         Binder.assign(pattern, valueValue, s);
@@ -26,11 +28,11 @@ public class Assign extends Node {
 
 
     @Override
-    public Value typecheck(Scope s) {
-        Value valueValue = value.typecheck(s);
+    public YinType typecheck(Scope<YinType> s) {
+        YinType valueValue = value.typecheck(s);
         Binder.checkDup(pattern);
         Binder.assignType(pattern, valueValue, s);
-        return Value.VOID;
+        return Types.VOID;
     }
 
 

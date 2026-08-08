@@ -3,8 +3,9 @@ package org.yinwang.yin.ast;
 
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.value.FloatValue;
-import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 public class FloatNum extends Node {
 
@@ -29,14 +30,14 @@ public class FloatNum extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         return new FloatValue(value);
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return Type.FLOAT;
+    public YinType typecheck(Scope<YinType> s) {
+        return Types.FLOAT;
     }
 
 

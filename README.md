@@ -20,9 +20,10 @@ production-ready language. The untouched historical state is preserved by the
 - an experimental type checker
 
 The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The 38-test suite also covers parser
+both the interpreter and type checker. The 44-test suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
-inheritance, destructuring, unions, and diagnostics.
+inheritance, destructuring, unions, structured diagnostics, and architecture
+boundaries between runtime values and static types.
 
 ## Requirements
 
@@ -35,18 +36,18 @@ inheritance, destructuring, unions, and diagnostics.
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.1.1-SNAPSHOT.jar`.
+This produces the executable JAR at `target/yin-0.2.0-SNAPSHOT.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.1.1-SNAPSHOT.jar tests/recursion-direct.yin
+java -jar target/yin-0.2.0-SNAPSHOT.jar tests/recursion-direct.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.1.1-SNAPSHOT.jar \
+java -cp target/yin-0.2.0-SNAPSHOT.jar \
   org.yinwang.yin.TypeChecker tests/recursion-direct.yin
 ```
 
@@ -54,6 +55,8 @@ java -cp target/yin-0.1.1-SNAPSHOT.jar \
 
 ```text
 src/main/java/   language implementation
+  .../type/      static type representations and primitive signatures
+  .../value/     runtime values, closures, constructors, and primitives
 src/test/java/   automated integration and regression tests
 tests/           maintained runnable Yin programs
 experiments/     historical, potentially outdated language experiments

@@ -37,16 +37,4 @@ public class GtE extends PrimFun {
     }
 
 
-    public Value typecheck(List<Value> args, Node location) {
-        Value v1 = args.get(0);
-        Value v2 = args.get(1);
-
-        if (!Type.numeric(v1) || !Type.numeric(v2))
-        {
-            Util.abort(location, "incorrect argument types for >=: " + v1 + ", " + v2);
-        }
-
-        return Type.BOOL;
-    }
-
 }

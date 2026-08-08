@@ -24,9 +24,13 @@ The project is being stabilized before new language features are designed.
 
 ## 0.2 — semantic cleanup
 
-- separate runtime values from static type representations
-- define structured diagnostics with source spans
-- either complete or remove unreachable attribute/subscript syntax
+- runtime `Value` and static `YinType` hierarchies are separate
+- runtime and type-checking environments are statically parameterized
+- record constructors, record values, record types, and record value types have
+  distinct representations
+- primitive runtime implementations and static signatures are separate
+- diagnostics expose stable codes and source spans
+- unreachable attribute and subscript AST implementations are removed
 
 ## 0.3 — language definition
 

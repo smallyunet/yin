@@ -124,7 +124,7 @@ public class Parser {
         if (elements.size() < 2) {
             throw new ParserException("syntax error in record type definition", tuple);
         }
-        Scope properties = parseProperties(elements.subList(1, elements.size()));
+        Scope<Object> properties = parseProperties(elements.subList(1, elements.size()));
         return new Declare(properties, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
     }
 
@@ -175,7 +175,7 @@ public class Parser {
                     preParams.toString(), preParams);
         }
 
-        Scope properties;
+        Scope<Object> properties;
         if (hasTuple) {
             properties = parseProperties(paramTuples);
         } else {
@@ -227,7 +227,7 @@ public class Parser {
             fields = elements.subList(2, elements.size());
         }
 
-        Scope properties = parseProperties(fields);
+        Scope<Object> properties = parseProperties(fields);
         return new RecordDef((Name) name, parents, properties, tuple.file,
                 tuple.start, tuple.end, tuple.line, tuple.col);
     }
@@ -275,8 +275,8 @@ public class Parser {
     }
 
 
-    public static Scope parseProperties(List<Node> fields) throws ParserException {
-        Scope properties = new Scope();
+    public static Scope<Object> parseProperties(List<Node> fields) throws ParserException {
+        Scope<Object> properties = new Scope<>();
         for (Node field : fields) {
             if (!(field instanceof Tuple &&
                     delimType(((Tuple) field).open, Constants.SQUARE_BEGIN) &&

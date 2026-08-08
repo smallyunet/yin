@@ -3,6 +3,8 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.Vector;
+import org.yinwang.yin.type.VectorType;
+import org.yinwang.yin.type.YinType;
 
 import java.util.List;
 
@@ -18,14 +20,14 @@ public class VectorLiteral extends Node {
 
 
     @Override
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         return new Vector(interpList(elements, s));
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return new Vector(typecheckList(elements, s));
+    public YinType typecheck(Scope<YinType> s) {
+        return new VectorType(typecheckList(elements, s));
     }
 
 }

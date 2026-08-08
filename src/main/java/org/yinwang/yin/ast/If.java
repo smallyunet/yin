@@ -3,10 +3,11 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
-import org.yinwang.yin.value.BoolType;
 import org.yinwang.yin.value.BoolValue;
-import org.yinwang.yin.value.UnionType;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.BoolType;
+import org.yinwang.yin.type.UnionType;
+import org.yinwang.yin.type.YinType;
 
 public class If extends Node {
     public Node test;
@@ -22,7 +23,7 @@ public class If extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         Value tv = interp(test, s);
         if (!(tv instanceof BoolValue)) {
             Util.abort(test, "test is not boolean: " + tv);
@@ -36,14 +37,14 @@ public class If extends Node {
 
 
     @Override
-    public Value typecheck(Scope s) {
-        Value tv = typecheck(test, s);
+    public YinType typecheck(Scope<YinType> s) {
+        YinType tv = typecheck(test, s);
         if (!(tv instanceof BoolType)) {
             Util.abort(test, "test is not boolean: " + tv);
-            return null;
+            return org.yinwang.yin.type.Types.VOID;
         }
-        Value type1 = typecheck(then, s);
-        Value type2 = typecheck(orelse, s);
+        YinType type1 = typecheck(then, s);
+        YinType type2 = typecheck(orelse, s);
         return UnionType.union(type1, type2);
     }
 

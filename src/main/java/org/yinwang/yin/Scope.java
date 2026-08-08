@@ -2,18 +2,20 @@ package org.yinwang.yin;
 
 
 import org.yinwang.yin.value.BoolValue;
-import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.primitives.*;
+import org.yinwang.yin.type.PrimitiveFunctionType;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Scope {
+public class Scope<T> {
 
     public Map<String, Map<String, Object>> table = new LinkedHashMap<>();
-    public Scope parent;
+    public Scope<T> parent;
     public TypeChecker typeChecker;
 
 
@@ -22,14 +24,14 @@ public class Scope {
     }
 
 
-    public Scope(Scope parent) {
+    public Scope(Scope<T> parent) {
         this.parent = parent;
         this.typeChecker = parent == null ? null : parent.typeChecker;
     }
 
 
-    public Scope copy() {
-        Scope ret = new Scope();
+    public Scope<T> copy() {
+        Scope<T> ret = new Scope<>();
         for (String name : table.keySet()) {
             Map<String, Object> props = new LinkedHashMap<>();
             props.putAll(table.get(name));
@@ -39,7 +41,7 @@ public class Scope {
     }
 
 
-    public void putAll(Scope other) {
+    public void putAll(Scope<T> other) {
         for (String name : other.table.keySet()) {
             Map<String, Object> props = new LinkedHashMap<>();
             props.putAll(other.table.get(name));
@@ -48,55 +50,45 @@ public class Scope {
     }
 
 
-    public Value lookup(String name) {
+    public T lookup(String name) {
         Object v = lookupProperty(name, "value");
         if (v == null) {
             return null;
-        } else if (v instanceof Value) {
-            return (Value) v;
-        } else {
-            Util.abort("value is not a Value, shouldn't happen: " + v);
-            return null;
         }
+        return castBinding(v);
     }
 
 
-    public Value lookupLocal(String name) {
+    public T lookupLocal(String name) {
         Object v = lookupPropertyLocal(name, "value");
         if (v == null) {
             return null;
-        } else if (v instanceof Value) {
-            return (Value) v;
-        } else {
-            Util.abort("value is not a Value, shouldn't happen: " + v);
-            return null;
         }
+        return castBinding(v);
     }
 
 
-    public Value lookupType(String name) {
+    public T lookupType(String name) {
         Object v = lookupProperty(name, "type");
         if (v == null) {
             return null;
-        } else if (v instanceof Value) {
-            return (Value) v;
-        } else {
-            Util.abort("value is not a Value, shouldn't happen: " + v);
-            return null;
         }
+        return castBinding(v);
     }
 
 
-    public Value lookupLocalType(String name) {
+    public T lookupLocalType(String name) {
         Object v = lookupPropertyLocal(name, "type");
         if (v == null) {
             return null;
-        } else if (v instanceof Value) {
-            return (Value) v;
-        } else {
-            Util.abort("value is not a Value, shouldn't happen: " + v);
-            return null;
         }
+        return castBinding(v);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private T castBinding(Object value) {
+        return (T) value;
     }
 
 
@@ -127,7 +119,7 @@ public class Scope {
     }
 
 
-    public Scope findDefiningScope(String name) {
+    public Scope<T> findDefiningScope(String name) {
         Object v = table.get(name);
         if (v != null) {
             return this;
@@ -139,38 +131,34 @@ public class Scope {
     }
 
 
-    public static Scope buildInitScope() {
-        Scope init = new Scope();
+    public static Scope<Value> buildInitScope() {
+        Scope<Value> init = new Scope<>();
 
         addPrimitiveFunctions(init);
 
         init.putValue("true", new BoolValue(true));
         init.putValue("false", new BoolValue(false));
 
-        addTypes(init);
-
         return init;
     }
 
 
-    public static Scope buildInitTypeScope(TypeChecker typeChecker) {
-        Scope init = new Scope();
+    public static Scope<YinType> buildInitTypeScope(TypeChecker typeChecker) {
+        Scope<YinType> init = new Scope<>();
         init.typeChecker = typeChecker;
 
-        addPrimitiveFunctions(init);
-        init.putValue("U", new U());
+        addPrimitiveTypes(init);
 
-        init.putValue("true", Type.BOOL);
-        init.putValue("false", Type.BOOL);
+        init.putValue("true", Types.BOOL);
+        init.putValue("false", Types.BOOL);
 
         addTypes(init);
-        init.putValue("Any", Value.ANY);
 
         return init;
     }
 
 
-    private static void addPrimitiveFunctions(Scope init) {
+    private static void addPrimitiveFunctions(Scope<Value> init) {
 
         init.putValue("+", new Add());
         init.putValue("-", new Sub());
@@ -190,11 +178,30 @@ public class Scope {
     }
 
 
-    private static void addTypes(Scope init) {
-        init.putValue("Int", Type.INT);
-        init.putValue("Float", Type.FLOAT);
-        init.putValue("Bool", Type.BOOL);
-        init.putValue("String", Type.STRING);
+    private static void addPrimitiveTypes(Scope<YinType> init) {
+        init.putValue("+", PrimitiveFunctionType.arithmetic("+"));
+        init.putValue("-", PrimitiveFunctionType.arithmetic("-"));
+        init.putValue("*", PrimitiveFunctionType.arithmetic("*"));
+        init.putValue("/", PrimitiveFunctionType.arithmetic("/"));
+        init.putValue("<", PrimitiveFunctionType.numericComparison("<"));
+        init.putValue("<=", PrimitiveFunctionType.numericComparison("<="));
+        init.putValue(">", PrimitiveFunctionType.numericComparison(">"));
+        init.putValue(">=", PrimitiveFunctionType.numericComparison(">="));
+        init.putValue("=", PrimitiveFunctionType.numericComparison("="));
+        init.putValue("and", PrimitiveFunctionType.booleanBinary("and"));
+        init.putValue("or", PrimitiveFunctionType.booleanBinary("or"));
+        init.putValue("not", PrimitiveFunctionType.booleanUnary("not"));
+        init.putValue("print", PrimitiveFunctionType.print());
+        init.putValue("U", PrimitiveFunctionType.union());
+    }
+
+
+    private static void addTypes(Scope<YinType> init) {
+        init.putValue("Int", Types.INT);
+        init.putValue("Float", Types.FLOAT);
+        init.putValue("Bool", Types.BOOL);
+        init.putValue("String", Types.STRING);
+        init.putValue("Any", Types.ANY);
     }
 
 
@@ -218,12 +225,12 @@ public class Scope {
     }
 
 
-    public void putValue(String name, Value value) {
+    public void putValue(String name, T value) {
         put(name, "value", value);
     }
 
 
-    public void putType(String name, Value value) {
+    public void putType(String name, T value) {
         put(name, "type", value);
     }
 

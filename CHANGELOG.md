@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0-SNAPSHOT
+
+- separate runtime `Value` objects from static `YinType` representations
+- parameterize lexical scopes so runtime and type environments cannot mix
+- split runtime record constructors and values from static record types
+- move primitive signatures out of runtime primitive implementations
+- add structured diagnostics with stable codes and exact source spans
+- classify missing source files as I/O diagnostics
+- remove unreachable attribute and subscript AST implementations
+- expand the automated suite from 38 to 44 tests
+
 ## 0.1.1-SNAPSHOT
 
 - expand the automated suite from 16 to 38 tests

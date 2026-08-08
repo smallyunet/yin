@@ -8,13 +8,11 @@ import org.yinwang.yin.Scope;
 public class RecordValue extends Value {
 
     public String name;
-    public RecordType type;
-    public Scope properties;
+    public Scope<Value> properties;
 
 
-    public RecordValue(String name, RecordType type, Scope properties) {
+    public RecordValue(String name, Scope<Value> properties) {
         this.name = name;
-        this.type = type;
         this.properties = properties;
     }
 

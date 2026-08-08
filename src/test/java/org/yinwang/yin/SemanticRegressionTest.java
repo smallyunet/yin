@@ -3,6 +3,7 @@ package org.yinwang.yin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.YinType;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -259,7 +260,10 @@ class SemanticRegressionTest {
         Path program = program("\n(+ 1 2");
 
         GeneralError error = assertThrows(GeneralError.class, () -> interpret(program));
-        assertTrue(error.getMessage().contains("2:1"));
+        assertEquals(Diagnostic.Code.SYNTAX, error.diagnostic.code());
+        assertTrue(error.diagnostic.sourceSpan().isPresent());
+        assertEquals(1, error.diagnostic.sourceSpan().orElseThrow().line());
+        assertEquals(0, error.diagnostic.sourceSpan().orElseThrow().column());
         assertTrue(error.getMessage().contains("unclosed delimeter"));
     }
 
@@ -278,7 +282,7 @@ class SemanticRegressionTest {
         return new Interpreter(file.toString()).interp(file.toString());
     }
 
-    private Value typecheck(Path file) {
+    private YinType typecheck(Path file) {
         return new TypeChecker(file.toString()).typecheck(file.toString());
     }
 

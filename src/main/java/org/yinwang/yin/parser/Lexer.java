@@ -2,6 +2,9 @@ package org.yinwang.yin.parser;
 
 
 import org.yinwang.yin.Constants;
+import org.yinwang.yin.Diagnostic;
+import org.yinwang.yin.GeneralError;
+import org.yinwang.yin.SourceSpan;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.ast.*;
 
@@ -32,13 +35,15 @@ public class Lexer {
         this.col = 0;
 
         if (text == null) {
-            Util.abort("failed to read file: " + file);
+            throw new GeneralError(new Diagnostic(
+                    Diagnostic.Code.IO,
+                    "failed to read file: " + file,
+                    new SourceSpan(this.file, 0, 0, 0, 0)));
         }
 
         Delimeter.addDelimiterPair(Constants.PAREN_BEGIN, Constants.PAREN_END);
         Delimeter.addDelimiterPair(Constants.SQUARE_BEGIN, Constants.SQUARE_END);
 
-        Delimeter.addDelimiter(Constants.ATTRIBUTE_ACCESS);
     }
 
 
@@ -108,7 +113,7 @@ public class Lexer {
         while (true) {
             // detect runaway strings at end of file or at newline
             if (offset >= text.length() || text.charAt(offset) == '\n') {
-                throw new ParserException("runaway string", startLine, startCol, offset);
+                throw new ParserException("runaway string", file, startLine, startCol, start, offset);
             }
 
             // end of string
@@ -161,7 +166,8 @@ public class Lexer {
             if (floatNum != null) {
                 return floatNum;
             } else {
-                throw new ParserException("incorrect number format: " + content, startLine, startCol, start);
+                throw new ParserException("incorrect number format: " + content,
+                        file, startLine, startCol, start, offset);
             }
         }
     }
@@ -234,7 +240,7 @@ public class Lexer {
 
         // case 5. syntax error
         throw new ParserException("unrecognized syntax: " + text.substring(offset, offset + 1),
-                line, col, offset);
+                file, line, col, offset, offset + 1);
     }
 
 

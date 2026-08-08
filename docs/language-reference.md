@@ -91,9 +91,9 @@ Records may inherit fields from one or more previously defined records:
 ```
 
 Inherited fields are appended after locally declared fields. Conflicts between
-local fields or multiple parents are rejected. Attribute access and record
-mutation remain unsupported, so inheritance should still be considered
-experimental.
+local fields or multiple parents are rejected. Attribute access, subscripting,
+and record mutation are not part of the grammar, so inheritance should still be
+considered experimental.
 
 ## Primitive operations
 
@@ -107,8 +107,7 @@ experimental.
 
 ## Known language gaps
 
-- attribute access and subscripting have AST implementations but incomplete
-  parser integration
+- attribute access, subscripting, and collection mutation are unsupported
 - the type system is experimental and is not a formal soundness guarantee
 - there is no module system, package manager, REPL, compiler, or runtime system
 - several files under `experiments/` represent abandoned syntax designs

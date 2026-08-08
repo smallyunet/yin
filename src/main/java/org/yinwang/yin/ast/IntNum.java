@@ -2,10 +2,10 @@ package org.yinwang.yin.ast;
 
 
 import org.yinwang.yin.Scope;
-import org.yinwang.yin.value.IntType;
 import org.yinwang.yin.value.IntValue;
-import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 public class IntNum extends Node {
 
@@ -55,14 +55,14 @@ public class IntNum extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         return new IntValue(value);
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return Type.INT;
+    public YinType typecheck(Scope<YinType> s) {
+        return Types.INT;
     }
 
 

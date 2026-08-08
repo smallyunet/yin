@@ -4,6 +4,8 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 public class Name extends Node {
     public String id;
@@ -23,7 +25,7 @@ public class Name extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         Value value = s.lookup(id);
         if (value != null) {
             return value;
@@ -34,13 +36,13 @@ public class Name extends Node {
 
 
     @Override
-    public Value typecheck(Scope s) {
-        Value v = s.lookup(id);
+    public YinType typecheck(Scope<YinType> s) {
+        YinType v = s.lookup(id);
         if (v != null) {
             return v;
         } else {
             Util.abort(this, "unbound variable: " + id);
-            return Value.VOID;
+            return Types.VOID;
         }
     }
 

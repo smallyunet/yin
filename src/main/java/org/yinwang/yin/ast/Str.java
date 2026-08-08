@@ -2,10 +2,10 @@ package org.yinwang.yin.ast;
 
 
 import org.yinwang.yin.Scope;
-import org.yinwang.yin.value.StringType;
 import org.yinwang.yin.value.StringValue;
-import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 public class Str extends Node {
     public String value;
@@ -17,14 +17,14 @@ public class Str extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         return new StringValue(value);
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return Type.STRING;
+    public YinType typecheck(Scope<YinType> s) {
+        return Types.STRING;
     }
 
 

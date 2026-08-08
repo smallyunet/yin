@@ -5,9 +5,9 @@ import org.yinwang.yin.ast.Declare;
 import org.yinwang.yin.ast.Node;
 import org.yinwang.yin.parser.Parser;
 import org.yinwang.yin.parser.ParserException;
-import org.yinwang.yin.value.FunType;
-import org.yinwang.yin.value.Type;
-import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.FunctionType;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,8 +17,8 @@ import java.util.Set;
 public class TypeChecker {
 
     public String file;
-    public Set<FunType> uncalled = new HashSet<>();
-    public Set<FunType> callStack = new HashSet<>();
+    public Set<FunctionType> uncalled = new HashSet<>();
+    public Set<FunctionType> callStack = new HashSet<>();
 
 
     public TypeChecker(String file) {
@@ -26,21 +26,22 @@ public class TypeChecker {
     }
 
 
-    public Value typecheck(String file) {
+    public YinType typecheck(String file) {
         uncalled.clear();
         callStack.clear();
         Node program;
         try {
             program = Parser.parse(file);
         } catch (ParserException e) {
-            throw new GeneralError("parsing error: " + e);
+            throw new GeneralError(new Diagnostic(
+                    Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
         }
-        Scope s = Scope.buildInitTypeScope(this);
-        Value ret = program.typecheck(s);
+        Scope<YinType> s = Scope.buildInitTypeScope(this);
+        YinType ret = program.typecheck(s);
 
         while (!uncalled.isEmpty()) {
-            List<FunType> toRemove = new ArrayList<>(uncalled);
-            for (FunType ft : toRemove) {
+            List<FunctionType> toRemove = new ArrayList<>(uncalled);
+            for (FunctionType ft : toRemove) {
                 invokeUncalled(ft, s);
             }
             uncalled.removeAll(toRemove);
@@ -50,14 +51,14 @@ public class TypeChecker {
     }
 
 
-    public void invokeUncalled(FunType fun, Scope s) {
-        Scope funScope = new Scope(fun.env);
+    public void invokeUncalled(FunctionType fun, Scope<YinType> s) {
+        Scope<YinType> funScope = new Scope<>(fun.environment);
         if (fun.properties != null) {
             Declare.mergeType(fun.properties, funScope);
         }
 
         callStack.add(fun);
-        Value actual = fun.fun.body.typecheck(funScope);
+        YinType actual = fun.function.body.typecheck(funScope);
         callStack.remove(fun);
 
         Object retNode = fun.properties == null
@@ -71,9 +72,9 @@ public class TypeChecker {
             Util.abort("illegal return type: " + retNode);
         }
 
-        Value expected = ((Node) retNode).typecheck(funScope);
-        if (!Type.subtype(actual, expected, true)) {
-            Util.abort(fun.fun, "type error in return value, expected: " + expected + ", actual: " + actual);
+        YinType expected = ((Node) retNode).typecheck(funScope);
+        if (!Types.subtype(actual, expected, true)) {
+            Util.abort(fun.function, "type error in return value, expected: " + expected + ", actual: " + actual);
         }
     }
 
@@ -86,7 +87,7 @@ public class TypeChecker {
 
         try {
             TypeChecker tc = new TypeChecker(args[0]);
-            Value result = tc.typecheck(args[0]);
+            YinType result = tc.typecheck(args[0]);
             Util.msg(result.toString());
         } catch (GeneralError error) {
             System.err.println(error);

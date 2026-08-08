@@ -4,6 +4,8 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.YinType;
+import org.yinwang.yin.type.Types;
 
 public class Keyword extends Node {
     public String id;
@@ -20,16 +22,16 @@ public class Keyword extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         Util.abort(this, "keyword used as value");
-        return null;
+        return Value.VOID;
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
+    public YinType typecheck(Scope<YinType> s) {
         Util.abort(this, "keyword used as value");
-        return null;
+        return Types.VOID;
     }
 
 

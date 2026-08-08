@@ -2,7 +2,10 @@ package org.yinwang.yin.ast;
 
 
 import org.yinwang.yin.Scope;
+import org.yinwang.yin.Util;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.YinType;
+import org.yinwang.yin.type.Types;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,14 +22,16 @@ public class Delimeter extends Node {
     }
 
 
-    public Value interp(Scope s) {
-        return null;
+    public Value interp(Scope<Value> s) {
+        Util.abort(this, "internal delimiter reached interpreter");
+        return Value.VOID;
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return null;
+    public YinType typecheck(Scope<YinType> s) {
+        Util.abort(this, "internal delimiter reached type checker");
+        return Types.VOID;
     }
 
 

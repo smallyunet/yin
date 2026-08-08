@@ -2,7 +2,7 @@ package org.yinwang.yin;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.YinType;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -64,7 +64,7 @@ class TypeCheckerIntegrationTest {
         assertEquals("(record Point [x Int] [y Int])", typecheck(program.toString()).toString());
     }
 
-    private Value typecheck(String file) {
+    private YinType typecheck(String file) {
         return new TypeChecker(file).typecheck(file);
     }
 

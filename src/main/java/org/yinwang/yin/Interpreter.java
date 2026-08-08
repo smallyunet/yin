@@ -21,9 +21,11 @@ public class Interpreter {
         try {
             program = Parser.parse(file);
         } catch (ParserException e) {
-            throw new GeneralError("parsing error: " + e);
+            throw new GeneralError(new Diagnostic(
+                    Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
         }
-        return program.interp(Scope.buildInitScope());
+        Scope<Value> scope = Scope.buildInitScope();
+        return program.interp(scope);
     }
 
 

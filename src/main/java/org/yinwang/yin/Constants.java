@@ -18,7 +18,6 @@ public class Constants {
     public static final String SQUARE_BEGIN = "[";
     public static final String SQUARE_END = "]";
 
-    public static final String ATTRIBUTE_ACCESS = ".";
     public static final String RETURN_ARROW = "->";
 
     public static final String STRING_START = "\"";

@@ -2,6 +2,8 @@ package org.yinwang.yin.ast;
 
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +19,11 @@ public class Block extends Node {
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
         if (statements.isEmpty()) {
             return Value.VOID;
         }
-        s = new Scope(s);
+        s = new Scope<>(s);
         for (int i = 0; i < statements.size() - 1; i++) {
             statements.get(i).interp(s);
         }
@@ -30,11 +32,11 @@ public class Block extends Node {
 
 
     @Override
-    public Value typecheck(Scope s) {
+    public YinType typecheck(Scope<YinType> s) {
         if (statements.isEmpty()) {
-            return Value.VOID;
+            return Types.VOID;
         }
-        s = new Scope(s);
+        s = new Scope<>(s);
         for (int i = 0; i < statements.size() - 1; i++) {
             statements.get(i).typecheck(s);
         }

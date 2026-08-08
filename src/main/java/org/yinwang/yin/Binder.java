@@ -2,10 +2,11 @@ package org.yinwang.yin;
 
 
 import org.yinwang.yin.ast.*;
-import org.yinwang.yin.value.RecordType;
-import org.yinwang.yin.value.Type;
-import org.yinwang.yin.value.Value;
-import org.yinwang.yin.value.Vector;
+import org.yinwang.yin.type.RecordValueType;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.VectorType;
+import org.yinwang.yin.type.YinType;
+import org.yinwang.yin.value.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Set;
 
 public class Binder {
 
-    public static void define(Node pattern, Value value, Scope env) {
+    public static void define(Node pattern, Value value, Scope<Value> env) {
         if (pattern instanceof Name) {
             String id = ((Name) pattern).id;
             Value v = env.lookupLocal(id);
@@ -24,9 +25,9 @@ public class Binder {
                 env.putValue(id, value);
             }
         } else if (pattern instanceof RecordLiteral) {
-            if (value instanceof RecordType) {
+            if (value instanceof RecordValue) {
                 Map<String, Node> elms1 = ((RecordLiteral) pattern).map;
-                Scope elms2 = ((RecordType) value).properties;
+                Scope<Value> elms2 = ((RecordValue) value).properties;
                 if (elms1.keySet().equals(elms2.keySet())) {
                     for (String k1 : elms1.keySet()) {
                         define(elms1.get(k1), elms2.lookupLocal(k1), env);
@@ -59,24 +60,53 @@ public class Binder {
     }
 
 
-    public static void assign(Node pattern, Value value, Scope env) {
+    public static void defineType(Node pattern, YinType type, Scope<YinType> env) {
         if (pattern instanceof Name) {
             String id = ((Name) pattern).id;
-            Scope d = env.findDefiningScope(id);
+            if (env.lookupLocal(id) != null) {
+                Util.abort(pattern, "trying to redefine name: " + id);
+            }
+            env.putValue(id, type);
+        } else if (pattern instanceof RecordLiteral && type instanceof RecordValueType recordType) {
+            Map<String, Node> fields = ((RecordLiteral) pattern).map;
+            Scope<YinType> types = recordType.fields;
+            if (!fields.keySet().equals(types.keySet())) {
+                Util.abort(pattern, "define with records of different attributes: " +
+                        fields.keySet() + " v.s. " + types.keySet());
+            }
+            for (String field : fields.keySet()) {
+                defineType(fields.get(field), types.lookupLocal(field), env);
+            }
+        } else if (pattern instanceof VectorLiteral && type instanceof VectorType vectorType) {
+            List<Node> elements = ((VectorLiteral) pattern).elements;
+            List<YinType> types = vectorType.elements();
+            if (elements.size() != types.size()) {
+                Util.abort(pattern, "define with vectors of different sizes: " +
+                        elements.size() + " v.s. " + types.size());
+            }
+            for (int i = 0; i < elements.size(); i++) {
+                defineType(elements.get(i), types.get(i), env);
+            }
+        } else {
+            Util.abort(pattern, "unsupported pattern of typed definition: " + pattern);
+        }
+    }
+
+
+    public static void assign(Node pattern, Value value, Scope<Value> env) {
+        if (pattern instanceof Name) {
+            String id = ((Name) pattern).id;
+            Scope<Value> d = env.findDefiningScope(id);
 
             if (d == null) {
                 Util.abort(pattern, "assigned name was not defined: " + id);
             } else {
                 d.putValue(id, value);
             }
-        } else if (pattern instanceof Subscript) {
-            ((Subscript) pattern).set(value, env);
-        } else if (pattern instanceof Attr) {
-            ((Attr) pattern).set(value, env);
         } else if (pattern instanceof RecordLiteral) {
-            if (value instanceof RecordType) {
+            if (value instanceof RecordValue) {
                 Map<String, Node> elms1 = ((RecordLiteral) pattern).map;
-                Scope elms2 = ((RecordType) value).properties;
+                Scope<Value> elms2 = ((RecordValue) value).properties;
                 if (elms1.keySet().equals(elms2.keySet())) {
                     for (String k1 : elms1.keySet()) {
                         assign(elms1.get(k1), elms2.lookupLocal(k1), env);
@@ -113,21 +143,21 @@ public class Binder {
      * binding. Runtime assignment and static assignment deliberately use
      * separate paths so type checking cannot accidentally evaluate an lvalue.
      */
-    public static void assignType(Node pattern, Value value, Scope env) {
+    public static void assignType(Node pattern, YinType value, Scope<YinType> env) {
         if (pattern instanceof Name) {
             String id = ((Name) pattern).id;
-            Scope definingScope = env.findDefiningScope(id);
+            Scope<YinType> definingScope = env.findDefiningScope(id);
             if (definingScope == null) {
                 Util.abort(pattern, "assigned name was not defined: " + id);
             }
 
-            Value expected = definingScope.lookupLocal(id);
-            if (!Type.subtype(value, expected, false)) {
+            YinType expected = definingScope.lookupLocal(id);
+            if (!Types.subtype(value, expected, false)) {
                 Util.abort(pattern, "assignment type error. expected: " + expected + ", actual: " + value);
             }
-        } else if (pattern instanceof RecordLiteral && value instanceof RecordType) {
+        } else if (pattern instanceof RecordLiteral && value instanceof RecordValueType recordType) {
             Map<String, Node> fields = ((RecordLiteral) pattern).map;
-            Scope types = ((RecordType) value).properties;
+            Scope<YinType> types = recordType.fields;
             if (!fields.keySet().equals(types.keySet())) {
                 Util.abort(pattern, "assign with records of different attributes: " +
                         fields.keySet() + " v.s. " + types.keySet());
@@ -135,9 +165,9 @@ public class Binder {
             for (String field : fields.keySet()) {
                 assignType(fields.get(field), types.lookupLocal(field), env);
             }
-        } else if (pattern instanceof VectorLiteral && value instanceof Vector) {
+        } else if (pattern instanceof VectorLiteral && value instanceof VectorType vectorType) {
             List<Node> elements = ((VectorLiteral) pattern).elements;
-            List<Value> types = ((Vector) value).values;
+            List<YinType> types = vectorType.elements();
             if (elements.size() != types.size()) {
                 Util.abort(pattern, "assign vectors of different sizes: " +
                         elements.size() + " v.s. " + types.size());

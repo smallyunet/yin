@@ -39,15 +39,4 @@ public class Div extends PrimFun {
     }
 
 
-    public Value typecheck(List<Value> args, Node location) {
-        Value v1 = args.get(0);
-        Value v2 = args.get(1);
-
-        Value result = Type.arithmetic(v1, v2);
-        if (result != null) {
-            return result;
-        }
-        Util.abort(location, "incorrect argument types for /: " + v1 + ", " + v2);
-        return null;
-    }
 }

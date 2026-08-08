@@ -4,33 +4,35 @@ import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 
 import java.util.Map;
 
 
 public class Declare extends Node {
-    public Scope propertyForm;
+    public Scope<Object> propertyForm;
 
 
-    public Declare(Scope propertyForm, String file, int start, int end, int line, int col) {
+    public Declare(Scope<Object> propertyForm, String file, int start, int end, int line, int col) {
         super(file, start, end, line, col);
         this.propertyForm = propertyForm;
     }
 
 
-    public Value interp(Scope s) {
+    public Value interp(Scope<Value> s) {
 //        mergeProperties(propsNode, s);
         return Value.VOID;
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        return null;
+    public YinType typecheck(Scope<YinType> s) {
+        return Types.VOID;
     }
 
 
-    public static void mergeDefault(Scope properties, Scope s) {
+    public static void mergeDefault(Scope<Value> properties, Scope<Value> s) {
         for (String key : properties.keySet()) {
             Object defaultValue = properties.lookupPropertyLocal(key, "default");
             if (defaultValue == null) {
@@ -47,7 +49,7 @@ public class Declare extends Node {
     }
 
 
-    public static void mergeType(Scope properties, Scope s) {
+    public static void mergeType(Scope<YinType> properties, Scope<YinType> s) {
         for (String key : properties.keySet()) {
             if (key.equals(Constants.RETURN_ARROW)) {
                 continue;
@@ -55,10 +57,10 @@ public class Declare extends Node {
             Object type = properties.lookupPropertyLocal(key, "type");
             if (type == null) {
                 continue;
-            } else if (type instanceof Value) {
-                Value existing = s.lookup(key);
+            } else if (type instanceof YinType) {
+                YinType existing = s.lookup(key);
                 if (existing == null) {
-                    s.putValue(key, (Value) type);
+                    s.putValue(key, (YinType) type);
                 }
             } else {
                 Util.abort("illegal type, shouldn't happen" + type);
@@ -67,12 +69,16 @@ public class Declare extends Node {
     }
 
 
-    public static Scope evalProperties(Scope unevaled, Scope s) {
-        Scope evaled = new Scope();
+    public static Scope<Value> evalProperties(Scope<Object> unevaled, Scope<Value> s) {
+        Scope<Value> evaled = new Scope<>();
 
         for (String field : unevaled.keySet()) {
+            evaled.putProperties(field, Map.of());
             Map<String, Object> props = unevaled.lookupAllProps(field);
             for (Map.Entry<String, Object> e : props.entrySet()) {
+                if (e.getKey().equals("type")) {
+                    continue;
+                }
                 Object v = e.getValue();
                 if (v instanceof Node) {
                     Value vValue = ((Node) v).interp(s);
@@ -86,8 +92,8 @@ public class Declare extends Node {
     }
 
 
-    public static Scope typecheckProperties(Scope unevaled, Scope s) {
-        Scope evaled = new Scope();
+    public static Scope<YinType> typecheckProperties(Scope<Object> unevaled, Scope<YinType> s) {
+        Scope<YinType> evaled = new Scope<>();
 
         for (String field : unevaled.keySet()) {
             if (field.equals(Constants.RETURN_ARROW)) {
@@ -97,7 +103,7 @@ public class Declare extends Node {
                 for (Map.Entry<String, Object> e : props.entrySet()) {
                     Object v = e.getValue();
                     if (v instanceof Node) {
-                        Value vValue = ((Node) v).typecheck(s);
+                        YinType vValue = ((Node) v).typecheck(s);
                         evaled.put(field, e.getKey(), vValue);
                     } else {
                         Util.abort("property is not a node, parser bug: " + v);

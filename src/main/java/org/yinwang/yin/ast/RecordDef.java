@@ -3,8 +3,10 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
-import org.yinwang.yin.value.RecordType;
+import org.yinwang.yin.value.RecordConstructor;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.RecordType;
+import org.yinwang.yin.type.YinType;
 
 import java.util.List;
 import java.util.Map;
@@ -13,11 +15,10 @@ import java.util.Map;
 public class RecordDef extends Node {
     public Name name;
     public List<Name> parents;
-    public Scope propertyForm;
-    public Scope properties;
+    public Scope<Object> propertyForm;
 
 
-    public RecordDef(Name name, List<Name> parents, Scope propertyForm,
+    public RecordDef(Name name, List<Name> parents, Scope<Object> propertyForm,
                      String file, int start, int end, int line, int col)
     {
         super(file, start, end, line, col);
@@ -27,38 +28,38 @@ public class RecordDef extends Node {
     }
 
 
-    public Value interp(Scope s) {
-        Scope properties = Declare.evalProperties(propertyForm, s);
+    public Value interp(Scope<Value> s) {
+        Scope<Value> properties = Declare.evalProperties(propertyForm, s);
 
         if (parents != null) {
             for (Node p : parents) {
                 Value pv = p.interp(s);
-                if (!(pv instanceof RecordType)) {
+                if (!(pv instanceof RecordConstructor)) {
                     Util.abort(p, "parent is not a record: " + pv);
                 }
-                Scope parentProperties = ((RecordType) pv).properties;
+                Scope<Value> parentProperties = ((RecordConstructor) pv).properties;
                 rejectConflictingFields(properties, parentProperties, p, pv);
                 properties.putAll(parentProperties);
             }
         }
-        Value r = new RecordType(name.id, this, properties);
+        Value r = new RecordConstructor(name.id, this, properties);
         s.putValue(name.id, r);
         return r;
     }
 
 
     @Override
-    public Value typecheck(Scope s) {
-        Scope properties = Declare.typecheckProperties(propertyForm, s);
+    public YinType typecheck(Scope<YinType> s) {
+        Scope<YinType> properties = Declare.typecheckProperties(propertyForm, s);
 
         if (parents != null) {
             for (Node p : parents) {
-                Value pv = p.typecheck(s);
+                YinType pv = p.typecheck(s);
                 if (!(pv instanceof RecordType)) {
                     Util.abort(p, "parent is not a record: " + pv);
-                    return null;
+                    return org.yinwang.yin.type.Types.VOID;
                 }
-                Scope parentProps = ((RecordType) pv).properties;
+                Scope<YinType> parentProps = ((RecordType) pv).properties;
 
                 rejectConflictingFields(properties, parentProps, p, pv);
 
@@ -67,14 +68,14 @@ public class RecordDef extends Node {
             }
         }
 
-        Value r = new RecordType(name.id, this, properties);
+        YinType r = new RecordType(name.id, this, properties);
         s.putValue(name.id, r);
         return r;
     }
 
 
-    private static void rejectConflictingFields(Scope properties, Scope parentProperties,
-                                                Node parent, Value parentValue) {
+    private static void rejectConflictingFields(Scope<?> properties, Scope<?> parentProperties,
+                                                Node parent, Object parentValue) {
         for (String field : parentProperties.keySet()) {
             if (properties.containsKey(field)) {
                 Util.abort(parent, "conflicting field " + field +

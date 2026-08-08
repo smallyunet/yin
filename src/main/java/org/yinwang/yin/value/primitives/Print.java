@@ -29,7 +29,4 @@ public class Print extends PrimFun {
     }
 
 
-    public Value typecheck(List<Value> args, Node location) {
-        return Value.VOID;
-    }
 }

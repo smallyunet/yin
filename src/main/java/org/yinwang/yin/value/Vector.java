@@ -15,11 +15,6 @@ public class Vector extends Value {
     }
 
 
-    public void set(int idx, Value value) {
-        values.set(idx, value);
-    }
-
-
     public int size() {
         return values.size();
     }

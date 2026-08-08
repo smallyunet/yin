@@ -1,7 +1,9 @@
 package org.yinwang.yin.ast;
 
 import org.yinwang.yin.Scope;
+import org.yinwang.yin.SourceSpan;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.type.YinType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,23 +25,23 @@ public abstract class Node {
     }
 
 
-    public abstract Value interp(Scope s);
+    public abstract Value interp(Scope<Value> s);
 
 
-    public static Value interp(Node node, Scope s) {
+    public static Value interp(Node node, Scope<Value> s) {
         return node.interp(s);
     }
 
 
-    public abstract Value typecheck(Scope s);
+    public abstract YinType typecheck(Scope<YinType> s);
 
 
-    public static Value typecheck(Node node, Scope s) {
+    public static YinType typecheck(Node node, Scope<YinType> s) {
         return node.typecheck(s);
     }
 
 
-    public static List<Value> interpList(List<Node> nodes, Scope s) {
+    public static List<Value> interpList(List<Node> nodes, Scope<Value> s) {
         List<Value> values = new ArrayList<>();
         for (Node n : nodes) {
             values.add(n.interp(s));
@@ -48,8 +50,8 @@ public abstract class Node {
     }
 
 
-    public static List<Value> typecheckList(List<Node> nodes, Scope s) {
-        List<Value> types = new ArrayList<>();
+    public static List<YinType> typecheckList(List<Node> nodes, Scope<YinType> s) {
+        List<YinType> types = new ArrayList<>();
         for (Node n : nodes) {
             types.add(n.typecheck(s));
         }
@@ -59,6 +61,11 @@ public abstract class Node {
 
     public String getFileLineCol() {
         return file + ":" + (line + 1) + ":" + (col + 1);
+    }
+
+
+    public SourceSpan sourceSpan() {
+        return SourceSpan.from(this);
     }
 
 

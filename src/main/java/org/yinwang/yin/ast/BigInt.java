@@ -1,17 +1,18 @@
 package org.yinwang.yin.ast;
 
-
 import org.yinwang.yin.Scope;
+import org.yinwang.yin.Util;
+import org.yinwang.yin.type.Types;
+import org.yinwang.yin.type.YinType;
 import org.yinwang.yin.value.Value;
 
 import java.math.BigInteger;
 
+/** Historical arbitrary-precision literal node; not produced by the parser. */
 public class BigInt extends Node {
-
     public String content;
     public BigInteger value;
     public int base;
-
 
     public BigInt(String content, String file, int start, int end, int line, int col) {
         super(file, start, end, line, col);
@@ -41,36 +42,32 @@ public class BigInt extends Node {
             base = 10;
         }
 
-        BigInteger value1 = new BigInteger(content, base);
-        if (sign == -1) {
-            value1 = value1.negate();
-        }
-        this.value = value1;
+        BigInteger parsed = new BigInteger(content, base);
+        this.value = sign == -1 ? parsed.negate() : parsed;
     }
-
 
     public static BigInt parse(String content, String file, int start, int end, int line, int col) {
         try {
             return new BigInt(content, file, start, end, line, col);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException error) {
             return null;
         }
     }
 
-
-    public Value interp(Scope s) {
-        return null;
+    @Override
+    public Value interp(Scope<Value> scope) {
+        Util.abort(this, "arbitrary-precision integers are unsupported");
+        return Value.VOID;
     }
-
 
     @Override
-    public Value typecheck(Scope s) {
-        return null;
+    public YinType typecheck(Scope<YinType> scope) {
+        Util.abort(this, "arbitrary-precision integers are unsupported");
+        return Types.VOID;
     }
 
-
+    @Override
     public String toString() {
         return content;
     }
-
 }
