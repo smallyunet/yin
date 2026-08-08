@@ -29,6 +29,7 @@ class DemoSiteTest {
     void pageExposesThePlaygroundAndLanguageTour() throws Exception {
         String html = Files.readString(Path.of("site/index.html"), StandardCharsets.UTF_8);
 
+        assertTrue(html.contains("<html lang=\"en\">"));
         assertTrue(html.contains("id=\"playground\""));
         assertTrue(html.contains("id=\"code-editor\""));
         assertTrue(html.contains("id=\"features\""));
@@ -36,6 +37,14 @@ class DemoSiteTest {
         assertTrue(html.contains("aria-live=\"polite\""));
         assertFalse(html.contains("href=\"/"), "project-page assets must remain path-relative");
         assertFalse(html.contains("src=\"/"), "project-page assets must remain path-relative");
+    }
+
+    @Test
+    void demoInterfaceContainsNoChineseCopy() throws Exception {
+        for (String asset : List.of("site/index.html", "site/app.js")) {
+            String content = Files.readString(Path.of(asset), StandardCharsets.UTF_8);
+            assertFalse(content.matches("(?s).*\\p{IsHan}.*"), asset + " must remain English-only");
+        }
     }
 
     @Test

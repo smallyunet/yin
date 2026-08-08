@@ -67,7 +67,7 @@ function createWorker() {
   worker = new Worker("worker.js");
   worker.addEventListener("message", handleWorkerMessage);
   worker.addEventListener("error", () => {
-    showRuntimeFailure("无法加载浏览器运行时，请刷新页面重试。");
+    showRuntimeFailure("The browser runtime could not be loaded. Refresh the page to try again.");
   });
 }
 
@@ -162,7 +162,7 @@ function showTimeout() {
   showResult({
     ok: false,
     output: [],
-    diagnostic: { code: "YIN9002", message: "程序超过 1.5 秒限制，运行环境已安全重置。" }
+    diagnostic: { code: "YIN9002", message: "The program exceeded the 1.5-second limit. The runtime was safely reset." }
   }, 1500);
 }
 
@@ -181,7 +181,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.4";
+    resultType.textContent = "Yin 0.5";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);
@@ -236,8 +236,8 @@ resetButton.addEventListener("click", () => {
 });
 copyButton.addEventListener("click", async () => {
   await navigator.clipboard.writeText(editor.value);
-  copyButton.setAttribute("title", "已复制");
-  setTimeout(() => copyButton.setAttribute("title", "复制代码"), 1200);
+  copyButton.setAttribute("title", "Copied");
+  setTimeout(() => copyButton.setAttribute("title", "Copy code"), 1200);
 });
 diagnostic.addEventListener("click", () => {
   if (!lastDiagnostic) return;

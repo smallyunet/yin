@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Yin 是一个拥有解释器、静态类型检查器和在线运行环境的小型实验语言。">
+    <meta name="description" content="Yin is a small experimental language with an interpreter, a static type checker, and an online playground.">
     <meta name="theme-color" content="#0f172a">
-    <title>Yin Playground — 在浏览器中探索一门小型语言</title>
+    <title>Yin Playground — Explore a Small Language in Your Browser</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,14 +14,14 @@
     <script src="app.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#playground">跳到运行环境</a>
+    <a class="skip-link" href="#playground">Skip to playground</a>
     <header class="site-header">
-      <a class="brand" href="#top" aria-label="Yin Playground 首页">
+      <a class="brand" href="#top" aria-label="Yin Playground home">
         <span class="brand-mark" aria-hidden="true">Y</span>
         <span>Yin <strong>Playground</strong></span>
       </a>
-      <nav class="header-nav" aria-label="主要导航">
-        <a href="#features">语言特性</a>
+      <nav class="header-nav" aria-label="Primary navigation">
+        <a href="#features">Language features</a>
         <a class="github-link" href="https://github.com/smallyunet/yin" target="_blank" rel="noreferrer">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.57-.29-5.27-1.28-5.27-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.38-5.29 5.67.42.36.79 1.06.79 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
           GitHub
@@ -32,21 +32,21 @@
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <div class="eyebrow"><span></span> Java 写成，浏览器中运行</div>
-          <h1 id="hero-title">一门足够小，<br><em>又足够完整</em>的语言。</h1>
-          <p>探索 S 表达式、词法闭包、静态类型、记录继承与联合类型。代码在你的浏览器中执行，不会发送到服务器。</p>
+          <div class="eyebrow"><span></span> Written in Java. Running in your browser.</div>
+          <h1 id="hero-title">Small enough to learn.<br><em>Complete enough</em> to explore.</h1>
+          <p>Explore S-expressions, lexical closures, static types, record inheritance, and union types. Your code runs entirely in the browser and is never sent to a server.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#playground">
-              立即运行
+              Try it now
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
             </a>
             <span class="runtime-note"><span class="pulse" aria-hidden="true"></span> TeaVM client runtime</span>
           </div>
         </div>
-        <div class="hero-stats" aria-label="项目状态">
-          <div><strong>0.5</strong><span>当前版本</span></div>
-          <div><strong>83</strong><span>自动化测试</span></div>
-          <div><strong>0</strong><span>服务端依赖</span></div>
+        <div class="hero-stats" aria-label="Project status">
+          <div><strong>0.5</strong><span>Current version</span></div>
+          <div><strong>83</strong><span>Automated tests</span></div>
+          <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
 
@@ -54,17 +54,17 @@
         <div class="section-heading">
           <div>
             <span class="section-kicker">Interactive runtime</span>
-            <h2 id="playground-title">在这里运行 Yin</h2>
+            <h2 id="playground-title">Run Yin right here</h2>
           </div>
-          <p>选择一个示例，修改代码，然后按 <kbd>⌘</kbd><span>+</span><kbd>Enter</kbd> 运行。</p>
+          <p>Choose an example, edit the code, then press <kbd>⌘</kbd><span>+</span><kbd>Enter</kbd> to run it.</p>
         </div>
 
-        <div class="example-tabs" role="tablist" aria-label="Yin 示例">
-          <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">递归</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">闭包</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">记录</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">联合类型</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">关键字参数</button>
+        <div class="example-tabs" role="tablist" aria-label="Yin examples">
+          <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">Recursion</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
         </div>
 
         <div class="workbench">
@@ -75,7 +75,7 @@
                 <span id="editor-title">main.yin</span>
               </div>
               <div class="panel-actions">
-                <button class="icon-button" id="copy-button" type="button" aria-label="复制代码" title="复制代码">
+                <button class="icon-button" id="copy-button" type="button" aria-label="Copy code" title="Copy code">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
                 </button>
                 <button class="text-button" id="format-button" type="button">Format</button>
@@ -87,7 +87,7 @@
             </div>
             <div class="editor-wrap">
               <pre class="line-numbers" id="line-numbers" aria-hidden="true">1</pre>
-              <label class="sr-only" for="code-editor">Yin 源代码</label>
+              <label class="sr-only" for="code-editor">Yin source code</label>
               <textarea id="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="editor-help"></textarea>
             </div>
             <div class="editor-footer" id="editor-help">
@@ -105,7 +105,7 @@
             <div class="output-content" id="output-content">
               <div class="runtime-loading" id="runtime-loading">
                 <span class="spinner" aria-hidden="true"></span>
-                <div><strong>正在加载 Yin runtime</strong><span>首次加载约 150 KB</span></div>
+                <div><strong>Loading the Yin runtime</strong><span>About 150 KB on first load</span></div>
               </div>
               <div class="result-view is-hidden" id="result-view">
                 <div class="result-meta">
@@ -143,35 +143,35 @@
         <div class="section-heading features-heading">
           <div>
             <span class="section-kicker">Language tour</span>
-            <h2 id="features-title">小而清晰的语义边界</h2>
+            <h2 id="features-title">Small language. Clear semantics.</h2>
           </div>
-          <p>Yin 不是语法玩具：解释器和类型检查器共享一份经过测试的语言规范。</p>
+          <p>Yin is more than a syntax toy: its interpreter and type checker share one thoroughly tested language specification.</p>
         </div>
         <div class="feature-grid">
           <article class="feature-card feature-wide">
             <span class="feature-index">01</span>
-            <h3>词法闭包</h3>
-            <p>函数捕获定义位置的环境；交互式重定义不会改写已有闭包。</p>
+            <h3>Lexical closures</h3>
+            <p>Functions capture the environment where they are defined. Interactive redefinitions do not rewrite existing closures.</p>
             <pre><code>(define make-adder
   (fun (base)
     (fun (value) (+ base value))))</code></pre>
           </article>
           <article class="feature-card">
             <span class="feature-index">02</span>
-            <h3>静态类型</h3>
-            <p>执行前检查参数、返回值和赋值，错误带有精确源码位置。</p>
+            <h3>Static types</h3>
+            <p>Arguments, return values, and assignments are checked before execution, with precise source locations for errors.</p>
             <div class="type-pills"><code>Int</code><code>Float</code><code>Bool</code><code>String</code><code>Any</code></div>
           </article>
           <article class="feature-card">
             <span class="feature-index">03</span>
-            <h3>联合类型</h3>
-            <p><code>(U Int Float)</code> 表达多种可能，并遵循明确的子类型规则。</p>
+            <h3>Union types</h3>
+            <p><code>(U Int Float)</code> expresses multiple possibilities under explicit subtype rules.</p>
             <div class="union-visual" aria-hidden="true"><span>Int</span><i>∪</i><span>Float</span></div>
           </article>
           <article class="feature-card feature-wide">
             <span class="feature-index">04</span>
-            <h3>名义记录继承</h3>
-            <p>记录构造器拥有类型化字段、默认值与传递式名义子类型。</p>
+            <h3>Nominal record inheritance</h3>
+            <p>Record constructors support typed fields, default values, and transitive nominal subtyping.</p>
             <pre><code>(record Point [x Int] [y Int])
 (record NamedPoint (Point) [name String])</code></pre>
           </article>
@@ -181,7 +181,7 @@
 
     <footer class="site-footer">
       <div><span class="brand-mark small" aria-hidden="true">Y</span><span>Yin Programming Language</span></div>
-      <p>解释、检查与格式化全部发生在浏览器本地。</p>
+      <p>Evaluation, type checking, and formatting all happen locally in your browser.</p>
       <a href="https://github.com/smallyunet/yin" target="_blank" rel="noreferrer">
         View source
         <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none">
