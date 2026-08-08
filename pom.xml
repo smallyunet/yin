@@ -6,7 +6,7 @@
 
   <groupId>org.yinwang</groupId>
   <artifactId>yin</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
+  <version>0.7.0</version>
   <packaging>jar</packaging>
   <name>yin</name>
 

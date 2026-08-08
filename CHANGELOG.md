@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0-SNAPSHOT
+## 0.7.0 — 2026-08-09
 
 - add `length`, `at`, and `append` for immutable vector use
 - infer exact `at` types for literal indices and normalized element unions for
@@ -11,7 +11,8 @@
   out-of-bounds access with structured diagnostics
 - make runtime vectors own immutable element snapshots
 - add vector operations to the maintained corpus and browser Playground
-- expand the automated suite from 91 to 100 tests
+- add a versioned executable JAR and `--version` CLI contract
+- expand the automated suite from 91 to 101 tests
 
 ## 0.6.0-SNAPSHOT
 

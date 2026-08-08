@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Validate tag version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          pom_version="$(./mvnw --batch-mode help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          test "$version" = "$pom_version"
+      - name: Verify JVM release
+        run: ./mvnw --batch-mode verify
+      - name: Verify browser release
+        run: |
+          ./mvnw --batch-mode -Pbrowser -DskipTests package
+          test -s site/runtime/yin.js
+          node --check site/app.js
+          node --check site/worker.js
+          node .github/scripts/browser-runtime-smoke.cjs
+      - name: Package release assets
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          jar="yin-${version}.jar"
+          test "$(java -jar target/${jar} --version)" = "Yin ${version}"
+          mkdir release
+          cp "target/${jar}" "release/${jar}"
+          cd release
+          sha256sum "${jar}" > "${jar}.sha256"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" release/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Yin ${version}" \
+            --generate-notes \
+            --verify-tag

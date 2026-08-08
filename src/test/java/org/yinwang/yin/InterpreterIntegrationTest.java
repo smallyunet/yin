@@ -48,6 +48,20 @@ class InterpreterIntegrationTest {
     }
 
     @Test
+    void reportsTheReleaseVersion() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream original = System.out;
+        try {
+            System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+            Interpreter.main(new String[]{"--version"});
+        } finally {
+            System.setOut(original);
+        }
+
+        assertEquals("Yin 0.7.0\n", output.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
     void evaluatesKeywordArgumentsInTheCallerScope() throws Exception {
         Path program = program("""
                 (define identity (fun ([x Int] [-> Int]) x))
