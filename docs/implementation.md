@@ -16,6 +16,8 @@ source file
 - `parser/PreParser.java` constructs balanced tuple and vector forms.
 - `parser/Parser.java` converts those forms into semantic AST nodes.
 - `ast/` contains evaluation and type-checking behavior for each construct.
+- `ast/FieldAccess.java` implements immutable record field reads and their
+  record, union, and `Any` type rules.
 - `Scope.java` implements generic lexical environment chains. Runtime scopes
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
@@ -78,7 +80,7 @@ Run all checks with:
 
 ## Current architectural boundary
 
-- attribute access and subscripting are intentionally absent from the supported
-  grammar and AST
+- record mutation and generic subscripting are intentionally absent from the
+  supported grammar and AST
 - descriptor forms remain stored in a generic property table before evaluation
 - the type system remains experimental and is not a soundness proof

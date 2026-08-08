@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.3 language specification](language-specification.md). Files in
+[Yin 0.6 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -101,8 +101,18 @@ Records may inherit fields from one or more previously defined records:
 
 Inherited fields are appended after locally declared fields. Conflicts between
 local fields or multiple parents are rejected. Inheritance establishes nominal,
-transitive subtyping. Attribute access, subscripting, and record mutation are
-not part of the grammar.
+transitive subtyping.
+
+Read immutable local or inherited fields with `field`:
+
+```yin
+(define point (Point :x 10))
+(field point :x)
+```
+
+The target is evaluated once. The type checker returns the field's precise
+type. A union target is accepted only when every member exposes the field;
+access through `Any` remains `Any` and is checked at runtime.
 
 ## Primitive operations
 
@@ -116,7 +126,7 @@ not part of the grammar.
 
 ## Known language gaps
 
-- attribute access, subscripting, and collection mutation are unsupported
+- record mutation and generic collection subscripting are unsupported
 - the type system is experimental and is not a formal soundness guarantee
-- there is no module system, package manager, REPL, compiler, or runtime system
+- there is no module system, package manager, bytecode/native compiler, or LSP
 - several files under `experiments/` represent abandoned syntax designs

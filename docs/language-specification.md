@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.3 language. Behavior not described
+This document defines the normative Yin 0.6 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -36,6 +36,7 @@ expression     = atom
                | assignment
                | function
                | record-definition
+               | field-access
                | call ;
 
 atom           = integer | float | string | name ;
@@ -61,6 +62,8 @@ record-definition
 parent-list    = "(" { name } ")" ;
 field-descriptor
                = "[" name type-expression [ ":default" expression ] "]" ;
+
+field-access   = "(" "field" expression keyword ")" ;
 
 type-expression
                = name | "(" "U" type-expression { type-expression } ")" ;
@@ -126,8 +129,12 @@ a subtype of every transitive parent record. Records with identical fields but
 unrelated names are not subtypes. Anonymous record patterns are structural
 internally, but no anonymous record literal syntax is currently supported.
 
-Records are immutable after construction. Attribute access, field mutation,
-and subscripting are not in the grammar.
+`(field value :name)` evaluates `value` exactly once and reads the named field.
+Local and inherited fields are readable. Accessing a missing field or applying
+`field` to a non-record value is an error.
+
+Records are immutable after construction. Field mutation and generic
+subscripting are not in the grammar.
 
 ## Static types
 
@@ -146,6 +153,10 @@ Type rules:
   collapse. A value is a subtype of a union when it is a subtype of any member;
   a union is a subtype of another type when every member is.
 - Record types are nominal and follow declared inheritance.
+- Field access on a record value has the declared type of that field, including
+  inherited fields. Access across a union is valid only when every union member
+  is a record with the field; the result is the normalized union of the member
+  field types. Access through `Any` has type `Any` and remains runtime-checked.
 - Primitive arithmetic accepts `Int` and `Float`; a mixed arithmetic result is
   `Float`.
 - An `if` expression has the union of its branch types.

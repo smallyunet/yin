@@ -39,5 +39,6 @@ error code and, when available, one-based line and column plus source offsets.
 ## Deployment
 
 `.github/workflows/pages.yml` compiles the JavaScript runtime, validates the
-static JavaScript files, uploads `site/` as a Pages artifact, and deploys it to
-the `github-pages` environment after every push to `main`.
+static JavaScript files, executes an evaluate/diagnostic/format smoke test
+against the generated TeaVM artifact, uploads `site/` as a Pages artifact, and
+deploys it to the `github-pages` environment after every push to `main`.

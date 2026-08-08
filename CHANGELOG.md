@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0-SNAPSHOT
+
+- add `(field value :name)` for immutable record field access
+- infer precise local and inherited field types
+- distribute safe field access across union members and preserve `Any`
+- reject missing fields, non-record targets, and malformed field syntax with
+  structured diagnostics
+- add field access to the maintained corpus, browser bridge, and Playground
+- execute the generated TeaVM runtime in the Pages validation job
+- expand the automated suite from 84 to 91 tests
+
 ## 0.5.0-SNAPSHOT
 
 - compile the interpreter, type checker, and formatter to browser JavaScript

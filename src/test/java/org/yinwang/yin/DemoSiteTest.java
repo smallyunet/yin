@@ -55,6 +55,7 @@ class DemoSiteTest {
         assertTrue(worker.contains("importScripts(\"runtime/yin.js\")"));
         assertTrue(worker.contains("yinEvaluate(source)"));
         assertTrue(app.contains("new Worker(\"worker.js\")"));
+        assertTrue(app.contains("(field origin :x)"));
         assertTrue(app.contains("}, 1500)"));
         assertTrue(app.contains("worker.terminate()"));
     }

@@ -66,6 +66,18 @@ class ReplTest {
     }
 
     @Test
+    void sessionReadsFieldsFromPersistentRecordDefinitions() {
+        ReplSession session = new ReplSession();
+        session.evaluate("(record Box [value Int])");
+        session.evaluate("(define box (Box :value 42))");
+
+        ReplSession.Evaluation result = session.evaluate("(field box :value)");
+
+        assertEquals("42", result.value().toString());
+        assertEquals("Int", result.type().toString());
+    }
+
+    @Test
     void replSupportsMultilineInputAndRecoversAfterErrors() throws Exception {
         String input = """
                 (define add-two

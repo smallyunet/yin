@@ -55,6 +55,14 @@ The project is being stabilized before new language features are designed.
 - Web Worker isolation and execution timeout
 - automated GitHub Pages deployment
 
+## 0.6 — record usability
+
+- immutable `(field value :name)` field access
+- precise local and inherited field types
+- safe union distribution and an explicit `Any` rule
+- structured syntax, missing-field, and non-record diagnostics
+- maintained CLI, REPL, browser, formatter, and specification coverage
+
 ## Later
 
 - modules

@@ -40,4 +40,15 @@ class BrowserBridgeTest {
 
         assertTrue(result.contains("\"formatted\":\"(+ 1 2)\\n\""));
     }
+
+    @Test
+    void evaluatesRecordFieldAccessInTheBrowserSession() {
+        String result = BrowserBridge.yinEvaluate("""
+                (record Box [value Int])
+                (field (Box :value 42) :value)
+                """);
+
+        assertTrue(result.contains("\"value\":\"42\""));
+        assertTrue(result.contains("\"type\":\"Int\""));
+    }
 }

@@ -3,7 +3,7 @@
 Yin is an experimental programming language originally developed by Yin Wang
 in 2013–2014. It uses an S-expression-like syntax and explores a small set of
 language-design ideas through a hand-written parser, tree-walking interpreter,
-and an incomplete static type checker.
+and an experimental static type checker.
 
 The project is suitable for studying language implementation. It is not yet a
 production-ready language. The untouched historical state is preserved by the
@@ -21,13 +21,14 @@ and formatting run locally in a Web Worker; no source code is sent to a server.
 - positional and keyword function arguments
 - direct and mutual recursion
 - records with typed fields and default values
+- immutable record field access, including inherited fields
 - an experimental type checker
 
 The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The 83-test suite also covers parser
+both the interpreter and type checker. The 91-test suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.3 defines these
+boundaries between runtime values and static types. Yin 0.6 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -41,18 +42,18 @@ behaviors normatively rather than relying on historical implementation details.
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.5.0-SNAPSHOT.jar`.
+This produces the executable JAR at `target/yin-0.6.0-SNAPSHOT.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.5.0-SNAPSHOT.jar tests/recursion-direct.yin
+java -jar target/yin-0.6.0-SNAPSHOT.jar tests/recursion-direct.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.5.0-SNAPSHOT.jar \
+java -cp target/yin-0.6.0-SNAPSHOT.jar \
   org.yinwang.yin.TypeChecker tests/recursion-direct.yin
 ```
 
@@ -61,7 +62,7 @@ java -cp target/yin-0.5.0-SNAPSHOT.jar \
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.5.0-SNAPSHOT.jar
+java -jar target/yin-0.6.0-SNAPSHOT.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -73,7 +74,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.5.0-SNAPSHOT.jar --format tests/function1.yin
+java -jar target/yin-0.6.0-SNAPSHOT.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.

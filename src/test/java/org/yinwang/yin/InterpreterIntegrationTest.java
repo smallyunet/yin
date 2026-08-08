@@ -27,6 +27,7 @@ class InterpreterIntegrationTest {
         assertEquals("-1", interpret("tests/function1.yin").toString());
         assertEquals("120", interpret("tests/recursion-direct.yin").toString());
         assertEquals("void", interpret("tests/recursion-mutual.yin").toString());
+        assertEquals("42", interpret("tests/record-field-access.yin").toString());
     }
 
     @Test

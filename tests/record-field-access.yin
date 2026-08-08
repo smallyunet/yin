@@ -1,0 +1,4 @@
+(record Position [x Int] [y Int :default 0])
+(record NamedPosition (Position) [name String])
+(define origin (NamedPosition :name "origin" :x 42))
+(field origin :x)

@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.5</strong><span>Current version</span></div>
-          <div><strong>83</strong><span>Automated tests</span></div>
+          <div><strong>0.6</strong><span>Current version</span></div>
+          <div><strong>91</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -171,9 +171,10 @@
           <article class="feature-card feature-wide">
             <span class="feature-index">04</span>
             <h3>Nominal record inheritance</h3>
-            <p>Record constructors support typed fields, default values, and transitive nominal subtyping.</p>
+            <p>Construct typed records, inherit fields transitively, and read them without sacrificing static types.</p>
             <pre><code>(record Point [x Int] [y Int])
-(record NamedPoint (Point) [name String])</code></pre>
+(define point (Point :x 10 :y 20))
+(field point :x)</code></pre>
           </article>
         </div>
       </section>

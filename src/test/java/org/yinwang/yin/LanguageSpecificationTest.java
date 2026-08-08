@@ -192,6 +192,100 @@ class LanguageSpecificationTest {
     }
 
     @Test
+    void fieldAccessReadsLocalAndInheritedFieldsWithPreciseTypes() throws Exception {
+        Path inherited = program("""
+                (record Position [x Int])
+                (record NamedPosition (Position) [name String])
+                (define point (NamedPosition :name "origin" :x 42))
+                (field point :x)
+                """);
+        Path local = program("""
+                (record Position [x Int])
+                (field (Position :x 42) :x)
+                """);
+
+        assertEquals("42", interpret(inherited));
+        assertEquals("Int", typecheck(inherited));
+        assertEquals("42", interpret(local));
+        assertEquals("Int", typecheck(local));
+    }
+
+    @Test
+    void fieldAccessEvaluatesItsTargetExactlyOnce() throws Exception {
+        Path source = program("""
+                (define count 0)
+                (record Box [value Int])
+                (define make-box
+                  (fun ()
+                    (set! count (+ count 1))
+                    (Box :value 41)))
+                (+ (field (make-box) :value) count)
+                """);
+
+        assertEquals("42", interpret(source));
+        assertEquals("Int", typecheck(source));
+    }
+
+    @Test
+    void fieldAccessDistributesAcrossSafeUnionMembers() throws Exception {
+        Path source = program("""
+                (record NumberBox [value Int])
+                (record LabelBox [value String])
+                (define choose
+                  (fun ([flag Bool])
+                    (if flag
+                      (NumberBox :value 42)
+                      (LabelBox :value "forty-two"))))
+                (field (choose true) :value)
+                """);
+
+        YinType type = new TypeChecker(source.toString()).typecheck(source.toString());
+        assertEquals("42", interpret(source));
+        assertTrue(type instanceof UnionType);
+        assertTrue(type.toString().contains("Int"));
+        assertTrue(type.toString().contains("String"));
+    }
+
+    @Test
+    void fieldAccessOnAnyRemainsAnyAndChecksAtRuntime() throws Exception {
+        Path valid = program("""
+                (record Box [value Int])
+                (define read-value
+                  (fun ([item Any] [-> Any])
+                    (field item :value)))
+                (read-value (Box :value 42))
+                """);
+        Path invalid = program("""
+                (define read-value
+                  (fun ([item Any] [-> Any])
+                    (field item :value)))
+                (read-value 42)
+                """);
+
+        assertEquals("42", interpret(valid));
+        assertEquals("Any", typecheck(valid));
+        assertLanguageError(() -> interpret(invalid), "field access requires a record value");
+        assertEquals("Any", typecheck(invalid));
+    }
+
+    @Test
+    void invalidFieldAccessIsRejectedWithStructuredLanguageErrors() throws Exception {
+        Path missing = program("""
+                (record Box [value Int])
+                (field (Box :value 42) :missing)
+                """);
+        Path scalar = program("(field 42 :value)");
+        Path invalidSyntax = program("(field 42 value)");
+
+        assertLanguageError(() -> interpret(missing), "record has no field: missing");
+        assertLanguageError(() -> typecheck(missing), "record type has no field: missing");
+        assertLanguageError(() -> interpret(scalar), "field access requires a record value");
+        assertLanguageError(() -> typecheck(scalar), "field access requires a record type");
+        assertLanguageError(() -> interpret(invalidSyntax), "field name must be a keyword");
+        assertLanguageError(() -> typecheck(invalidSyntax), "field name must be a keyword");
+    }
+
+    @Test
     void unrelatedRecordTypesAreNotSubtypes() throws Exception {
         Path source = program("""
                 (record Expected [value Int])

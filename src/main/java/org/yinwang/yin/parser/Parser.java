@@ -70,6 +70,8 @@ public class Parser {
                                 return parseFun(tuple);
                             case Constants.RECORD_KEYWORD:
                                 return parseRecordDef(tuple);
+                            case Constants.FIELD_KEYWORD:
+                                return parseFieldAccess(tuple);
                             default:
                                 return parseCall(tuple);
                         }
@@ -243,6 +245,20 @@ public class Parser {
         Scope<Object> properties = parseProperties(fields);
         return new RecordDef((Name) name, parents, properties, tuple.file,
                 tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+
+    public static FieldAccess parseFieldAccess(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() != 3) {
+            throw new ParserException("field access must have a target and one field keyword", tuple);
+        }
+        Node field = elements.get(2);
+        if (!(field instanceof Keyword)) {
+            throw new ParserException("field name must be a keyword, but got: " + field, field);
+        }
+        return new FieldAccess(parseNode(elements.get(1)), (Keyword) field,
+                tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
     }
 
 
