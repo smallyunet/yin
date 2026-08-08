@@ -12,11 +12,20 @@ The project is being stabilized before new language features are designed.
 - testable diagnostics without JVM termination inside the language core
 - scoped type-checker state and shared built-in registration
 
+## 0.1.1 — correctness hardening
+
+- semantic regression coverage for scope, assignment, closures, arguments,
+  records, destructuring, unions, primitives, and parser diagnostics
+- runtime errors for unbound names
+- type-preserving assignment checks
+- duplicate keyword and descriptor rejection
+- consistent record inheritance conflicts in interpreter and type checker
+- documented definition-time semantics for function and record defaults
+
 ## 0.2 — semantic cleanup
 
 - separate runtime values from static type representations
 - define structured diagnostics with source spans
-- decide and document default-argument semantics
 - either complete or remove unreachable attribute/subscript syntax
 
 ## 0.3 — language definition

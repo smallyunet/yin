@@ -36,7 +36,9 @@ public class RecordDef extends Node {
                 if (!(pv instanceof RecordType)) {
                     Util.abort(p, "parent is not a record: " + pv);
                 }
-                properties.putAll(((RecordType) pv).properties);
+                Scope parentProperties = ((RecordType) pv).properties;
+                rejectConflictingFields(properties, parentProperties, p, pv);
+                properties.putAll(parentProperties);
             }
         }
         Value r = new RecordType(name.id, this, properties);
@@ -58,15 +60,7 @@ public class RecordDef extends Node {
                 }
                 Scope parentProps = ((RecordType) pv).properties;
 
-                // check for duplicated keys
-                for (String key : parentProps.keySet()) {
-                    Value existing = properties.lookupLocalType(key);
-                    if (existing != null) {
-                        Util.abort(p, "conflicting field " + key +
-                                " inherited from parent " + p + ": " + pv);
-                        return null;
-                    }
-                }
+                rejectConflictingFields(properties, parentProps, p, pv);
 
                 // add all properties or all fields in parent
                 properties.putAll(parentProps);
@@ -76,6 +70,17 @@ public class RecordDef extends Node {
         Value r = new RecordType(name.id, this, properties);
         s.putValue(name.id, r);
         return r;
+    }
+
+
+    private static void rejectConflictingFields(Scope properties, Scope parentProperties,
+                                                Node parent, Value parentValue) {
+        for (String field : parentProperties.keySet()) {
+            if (properties.containsKey(field)) {
+                Util.abort(parent, "conflicting field " + field +
+                        " inherited from parent " + parent + ": " + parentValue);
+            }
+        }
     }
 
 

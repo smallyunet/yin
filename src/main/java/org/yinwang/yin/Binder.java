@@ -3,6 +3,7 @@ package org.yinwang.yin;
 
 import org.yinwang.yin.ast.*;
 import org.yinwang.yin.value.RecordType;
+import org.yinwang.yin.value.Type;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.Vector;
 
@@ -103,6 +104,49 @@ public class Binder {
             }
         } else {
             Util.abort(pattern, "unsupported pattern of assign: " + pattern);
+        }
+    }
+
+
+    /**
+     * Check an assignment without replacing the type stored for an existing
+     * binding. Runtime assignment and static assignment deliberately use
+     * separate paths so type checking cannot accidentally evaluate an lvalue.
+     */
+    public static void assignType(Node pattern, Value value, Scope env) {
+        if (pattern instanceof Name) {
+            String id = ((Name) pattern).id;
+            Scope definingScope = env.findDefiningScope(id);
+            if (definingScope == null) {
+                Util.abort(pattern, "assigned name was not defined: " + id);
+            }
+
+            Value expected = definingScope.lookupLocal(id);
+            if (!Type.subtype(value, expected, false)) {
+                Util.abort(pattern, "assignment type error. expected: " + expected + ", actual: " + value);
+            }
+        } else if (pattern instanceof RecordLiteral && value instanceof RecordType) {
+            Map<String, Node> fields = ((RecordLiteral) pattern).map;
+            Scope types = ((RecordType) value).properties;
+            if (!fields.keySet().equals(types.keySet())) {
+                Util.abort(pattern, "assign with records of different attributes: " +
+                        fields.keySet() + " v.s. " + types.keySet());
+            }
+            for (String field : fields.keySet()) {
+                assignType(fields.get(field), types.lookupLocal(field), env);
+            }
+        } else if (pattern instanceof VectorLiteral && value instanceof Vector) {
+            List<Node> elements = ((VectorLiteral) pattern).elements;
+            List<Value> types = ((Vector) value).values;
+            if (elements.size() != types.size()) {
+                Util.abort(pattern, "assign vectors of different sizes: " +
+                        elements.size() + " v.s. " + types.size());
+            }
+            for (int i = 0; i < elements.size(); i++) {
+                assignType(elements.get(i), types.get(i), env);
+            }
+        } else {
+            Util.abort(pattern, "unsupported pattern of typed assignment: " + pattern);
         }
     }
 

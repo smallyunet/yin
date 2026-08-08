@@ -29,7 +29,7 @@ public class Assign extends Node {
     public Value typecheck(Scope s) {
         Value valueValue = value.typecheck(s);
         Binder.checkDup(pattern);
-        Binder.assign(pattern, valueValue, s);
+        Binder.assignType(pattern, valueValue, s);
         return Value.VOID;
     }
 

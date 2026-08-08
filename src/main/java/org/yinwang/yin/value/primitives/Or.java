@@ -10,7 +10,7 @@ import java.util.List;
 public class Or extends PrimFun {
 
     public Or() {
-        super("and", 2);
+        super("or", 2);
     }
 
 
@@ -23,7 +23,7 @@ public class Or extends PrimFun {
             return new BoolValue(((BoolValue) v1).value || ((BoolValue) v2).value);
         }
 
-        Util.abort(location, "incorrect argument types for and: " + v1 + ", " + v2);
+        Util.abort(location, "incorrect argument types for or: " + v1 + ", " + v2);
         return null;
     }
 

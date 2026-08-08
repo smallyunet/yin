@@ -13,7 +13,7 @@ Use JDK 17 or newer and run:
 
 ## Change guidelines
 
-- Start feature and fix branches from `main`.
+- Work from `main` and keep each commit focused and independently verifiable.
 - Preserve the behavior of programs under `tests/` unless the change explicitly
   updates the documented language semantics.
 - Add interpreter, type-checker, and diagnostic coverage for language changes.
@@ -21,5 +21,5 @@ Use JDK 17 or newer and run:
 - Do not add new syntax without updating `docs/language-reference.md`.
 - Avoid unrelated formatting or file moves in semantic changes.
 
-Pull requests should explain the behavior being changed, why it is changing,
-and which commands were used for verification.
+Commit messages should state the behavior being changed. Run `./mvnw verify`
+before pushing directly to `main`.

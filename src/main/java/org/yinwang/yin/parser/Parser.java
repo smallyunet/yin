@@ -265,7 +265,11 @@ public class Parser {
             if (!(key instanceof Keyword)) {
                 throw new ParserException("key must be a keyword, but got: " + key.toString(), key);
             }
-            ret.put(((Keyword) key).id, value);
+            String id = ((Keyword) key).id;
+            if (ret.containsKey(id)) {
+                throw new ParserException("duplicated keyword: " + key, key);
+            }
+            ret.put(id, value);
         }
         return ret;
     }

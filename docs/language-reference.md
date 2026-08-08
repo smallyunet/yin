@@ -29,6 +29,9 @@ The maintained built-in types are `Int`, `Float`, `Bool`, `String`, and `Any`.
 ```
 
 Definitions are lexical and redefining a name in the same scope is an error.
+Assignment updates the nearest enclosing definition. Assigning an incompatible
+type is rejected by the type checker, and assigning an undefined name is an
+error in both execution modes.
 
 ## Conditionals
 
@@ -62,6 +65,10 @@ Calls use either positional or keyword arguments, never a mixture:
 (subtract :x 3 :y 2)
 ```
 
+Every required parameter must be supplied exactly once. Unknown and duplicated
+keywords are errors. A parameter may declare `:default`; its expression is
+evaluated once, in lexical scope, when the function definition is evaluated.
+
 ## Records
 
 ```yin
@@ -73,7 +80,20 @@ Calls use either positional or keyword arguments, never a mixture:
 ```
 
 Record construction uses keyword arguments. Required fields must be supplied;
-fields with `:default` may be omitted. Record inheritance is experimental.
+fields with `:default` may be omitted. Like function defaults, record defaults
+are evaluated once when the record definition is evaluated.
+
+Records may inherit fields from one or more previously defined records:
+
+```yin
+(record Position [x Int :default 0])
+(record NamedPosition (Position) [name String])
+```
+
+Inherited fields are appended after locally declared fields. Conflicts between
+local fields or multiple parents are rejected. Attribute access and record
+mutation remain unsupported, so inheritance should still be considered
+experimental.
 
 ## Primitive operations
 
