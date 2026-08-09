@@ -22,8 +22,12 @@ public final class ReplSession {
     }
 
     public ReplSession(Consumer<String> output) {
+        this(new RuntimeContext(output, () -> "", java.util.List.of()));
+    }
+
+    public ReplSession(RuntimeContext context) {
         typeChecker = new TypeChecker(SOURCE_NAME);
-        runtimeScope = Scope.buildInitScope(output);
+        runtimeScope = Scope.buildInitScope(context);
         typeScope = Scope.buildInitTypeScope(typeChecker);
     }
 

@@ -6,6 +6,7 @@ import org.yinwang.yin.Formatter;
 import org.yinwang.yin.GeneralError;
 import org.yinwang.yin.ReplSession;
 import org.yinwang.yin.SourceSpan;
+import org.yinwang.yin.RuntimeContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 public final class BrowserBridge {
     private static final List<String> OUTPUT = new ArrayList<>();
     private static ReplSession session = newSession();
+    private static String input = "";
 
     private BrowserBridge() {
     }
@@ -54,8 +56,20 @@ public final class BrowserBridge {
         session = newSession();
     }
 
+    @JSExport
+    public static void yinSetInput(String value) {
+        input = value == null ? "" : value;
+        session = newSession();
+    }
+
     private static ReplSession newSession() {
-        return new ReplSession(OUTPUT::add);
+        return new ReplSession(new RuntimeContext(
+                OUTPUT::add,
+                () -> input,
+                List.of(),
+                path -> {
+                    throw new GeneralError("read-text is unavailable in the browser: " + path);
+                }));
     }
 
     private static String success(String value, String type, List<String> output) {

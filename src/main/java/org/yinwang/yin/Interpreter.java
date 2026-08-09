@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 public class Interpreter {
 
@@ -24,6 +25,10 @@ public class Interpreter {
 
 
     public Value interp(String file) {
+        return interp(file, RuntimeContext.standard());
+    }
+
+    public Value interp(String file, RuntimeContext context) {
         Node program;
         try {
             program = Parser.parse(file);
@@ -31,7 +36,7 @@ public class Interpreter {
             throw new GeneralError(new Diagnostic(
                     Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
         }
-        Scope<Value> scope = Scope.buildInitScope();
+        Scope<Value> scope = Scope.buildInitScope(context);
         return program.interp(scope);
     }
 
@@ -72,18 +77,23 @@ public class Interpreter {
             }
             return;
         }
-        if (args.length != 1) {
-            System.err.println(
-                    "usage: java -jar yin.jar [--version | --lsp | --repl | --format [mode] <file>... | <program.yin>]");
-            System.exit(2);
-        }
-
         try {
             Interpreter i = new Interpreter(args[0]);
-            Util.msg(i.interp(args[0]).toString());
+            List<String> programArguments = Arrays.asList(Arrays.copyOfRange(args, 1, args.length));
+            RuntimeContext context = new RuntimeContext(
+                    System.out::println, Interpreter::readStandardInput, programArguments);
+            Util.msg(i.interp(args[0], context).toString());
         } catch (GeneralError error) {
             System.err.println(error);
             System.exit(1);
+        }
+    }
+
+    private static String readStandardInput() {
+        try {
+            return new String(System.in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException error) {
+            throw new GeneralError("failed to read standard input: " + error.getMessage());
         }
     }
 

@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.8 language specification](language-specification.md). Files in
+[Yin 0.9 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -75,8 +75,24 @@ The call operator and positional arguments evaluate from left to right. Keyword
 values also evaluate in source order, independently of parameter order.
 
 Annotations may name a built-in or record type, or use a non-empty union such
-as `(U Int Float)`. `Any` is the top type. A return descriptor, when present,
-must be the final descriptor in the parameter list.
+as `(U Int Float)`. `(Vector Int)` describes an arbitrary-length immutable
+vector of integers, while `(Fn [Int] String)` describes a positional function
+from `Int` to `String`. `Any` is the top type. A return descriptor, when
+present, must be the final descriptor in the parameter list.
+
+## Pattern matching
+
+`match` evaluates one target and selects the first matching clause:
+
+```yin
+(match (parse-int "42")
+  [(Int value) (+ value 1)]
+  [(Bool _) 0])
+```
+
+Patterns support literals, `_`, bindings, fixed vectors, built-in type
+narrowing, and positional record destructuring. Matches must be exhaustive;
+record and built-in type patterns can cover the members of a union.
 
 ## Records
 
@@ -120,6 +136,11 @@ access through `Any` remains `Any` and is checked at runtime.
 - numeric comparison: `<`, `<=`, `>`, `>=`, `=`
 - boolean operations: `and`, `or`, `not`
 - immutable vectors: `length`, `at`, `append`
+- vector processing: `map`, `filter`, `fold`, `range`, `slice`, `reverse`,
+  `contains`
+- strings: `string-length`, `concat`, `substring`, `split`, `join`, `trim`,
+  `to-string`, `parse-int`, `parse-float`
+- host input: `args`, `read-all`, `read-text`
 - output: `print`
 - union type constructor used by the type checker: `U`
 
@@ -136,6 +157,29 @@ Vector operations retain fixed structural types:
 A dynamic `at` index produces the union of all possible element types. Vector
 indices are zero-based and checked both statically when possible and at
 runtime. `append` constructs a new vector and does not modify either input.
+
+Higher-order operations accept annotated source functions:
+
+```yin
+(define doubled
+  (map [1 2 3]
+    (fun ([value Int] [-> Int]) (* value 2))))
+(fold doubled 0
+  (fun ([total Int] [value Int] [-> Int]) (+ total value)))
+```
+
+String escapes include `\\n`, `\\r`, `\\t`, `\\"`, `\\\\`, and `\\u` followed
+by four hexadecimal digits. Numeric parsing returns either the requested number
+or `false`, making failure explicit through a union and `match`.
+
+The CLI exposes arguments after the source filename through `args`:
+
+```bash
+java -jar yin-0.9.0.jar examples/parse-values.yin 10 bad 32
+```
+
+`read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
+is deliberately unavailable in the browser runtime.
 
 ## Known language gaps
 

@@ -5,17 +5,26 @@ import org.yinwang.yin.Scope;
 import org.yinwang.yin.ast.Node;
 
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /** Runtime record schema and callable constructor. */
 public final class RecordConstructor extends Value {
     public final String name;
     public final Node definition;
     public final Scope<Value> properties;
+    private final Set<String> nominalTypes;
 
-    public RecordConstructor(String name, Node definition, Scope<Value> properties) {
+    public RecordConstructor(String name, Node definition, Scope<Value> properties,
+                             Set<String> nominalTypes) {
         this.name = name;
         this.definition = definition;
         this.properties = properties.copy();
+        this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
+    }
+
+    public Set<String> nominalTypes() {
+        return nominalTypes;
     }
 
     @Override

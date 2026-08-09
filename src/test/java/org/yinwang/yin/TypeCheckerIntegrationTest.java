@@ -27,6 +27,7 @@ class TypeCheckerIntegrationTest {
         assertEquals("Int", typecheck("tests/recursion-direct.yin").toString());
         assertEquals("void", typecheck("tests/recursion-mutual.yin").toString());
         assertEquals("Int", typecheck("tests/record-field-access.yin").toString());
+        assertEquals("[Int String]", typecheck("tests/program-usability.yin").toString());
     }
 
     @Test

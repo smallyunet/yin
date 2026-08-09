@@ -2,6 +2,7 @@ package org.yinwang.yin.ast;
 
 
 import org.yinwang.yin.Constants;
+import org.yinwang.yin.CallableSupport;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.value.*;
@@ -25,6 +26,9 @@ public class Call extends Node {
         Value opv = this.op.interp(s);
         if (opv instanceof Closure) {
             Closure closure = (Closure) opv;
+            if (!args.positional.isEmpty() && args.keywords.isEmpty()) {
+                return CallableSupport.apply(closure, Node.interpList(args.positional, s), this.op);
+            }
             Scope<Value> funScope = new Scope<>(closure.env);
             List<Name> params = closure.fun.params;
 
@@ -33,17 +37,7 @@ public class Call extends Node {
                 Declare.mergeDefault(closure.properties, funScope);
             }
 
-            if (!args.positional.isEmpty() && args.keywords.isEmpty()) {
-                if (args.positional.size() != params.size()) {
-                    Util.abort(this.op,
-                            "calling function with wrong number of arguments. expected: " + params.size()
-                                    + " actual: " + args.positional.size());
-                }
-                for (int i = 0; i < args.positional.size(); i++) {
-                    Value value = args.positional.get(i).interp(s);
-                    funScope.putValue(params.get(i).id, value);
-                }
-            } else {
+            {
                 Set<String> parameterNames = new LinkedHashSet<>();
                 for (Name param : params) {
                     parameterNames.add(param.id);
@@ -101,7 +95,7 @@ public class Call extends Node {
             }
 
             // instantiate
-            return new RecordValue(template.name, values);
+            return new RecordValue(template.name, values, template.nominalTypes());
         } else if (opv instanceof PrimFun) {
             PrimFun prim = (PrimFun) opv;
             if (!args.keywords.isEmpty()) {
@@ -124,6 +118,9 @@ public class Call extends Node {
     public YinType typecheck(Scope<YinType> s) {
         YinType fun = this.op.typecheck(s);
         if (fun instanceof FunctionType funtype) {
+            if (!args.positional.isEmpty() && args.keywords.isEmpty()) {
+                return CallableSupport.apply(funtype, Node.typecheckList(args.positional, s), this.op);
+            }
             Scope<YinType> funScope = new Scope<>(funtype.environment);
             List<Name> params = funtype.function.params;
 
@@ -132,23 +129,7 @@ public class Call extends Node {
                 Declare.mergeType(funtype.properties, funScope);
             }
 
-            if (!args.positional.isEmpty() && args.keywords.isEmpty()) {
-                // positional
-                if (args.positional.size() != params.size()) {
-                    Util.abort(this.op,
-                            "calling function with wrong number of arguments. expected: " + params.size()
-                                    + " actual: " + args.positional.size());
-                }
-
-                for (int i = 0; i < args.positional.size(); i++) {
-                    YinType value = args.positional.get(i).typecheck(s);
-                    YinType expected = funScope.lookup(params.get(i).id);
-                    if (expected != null && !Types.subtype(value, expected)) {
-                        Util.abort(args.positional.get(i), "type error. expected: " + expected + ", actual: " + value);
-                    }
-                    funScope.putValue(params.get(i).id, value);
-                }
-            } else {
+            {
                 // keywords
                 Set<String> parameterNames = new LinkedHashSet<>();
                 for (Name param : params) {
@@ -209,6 +190,11 @@ public class Call extends Node {
                 s.typeChecker.callStack.remove(funtype);
                 return actual;
             }
+        } else if (fun instanceof DeclaredFunctionType) {
+            if (!args.keywords.isEmpty()) {
+                Util.abort(this, "declared function arguments must be positional");
+            }
+            return CallableSupport.apply(fun, Node.typecheckList(args.positional, s), this.op);
         } else if (fun instanceof org.yinwang.yin.type.RecordType) {
             RecordType template = (RecordType) fun;
             Scope<YinType> values = new Scope<>();

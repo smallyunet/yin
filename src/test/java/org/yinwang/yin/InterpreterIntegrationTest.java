@@ -29,6 +29,7 @@ class InterpreterIntegrationTest {
         assertEquals("void", interpret("tests/recursion-mutual.yin").toString());
         assertEquals("42", interpret("tests/record-field-access.yin").toString());
         assertEquals("44", interpret("tests/vector-operations.yin").toString());
+        assertEquals("[30 \"42\"]", interpret("tests/program-usability.yin").toString());
     }
 
     @Test
@@ -58,7 +59,21 @@ class InterpreterIntegrationTest {
             System.setOut(original);
         }
 
-        assertEquals("Yin 0.8.0\n", output.toString(StandardCharsets.UTF_8));
+        assertEquals("Yin 0.9.0\n", output.toString(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void passesTrailingCommandLineArgumentsToTheProgram() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream original = System.out;
+        try {
+            System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+            Interpreter.main(new String[]{"examples/parse-values.yin", "10", "bad", "32"});
+        } finally {
+            System.setOut(original);
+        }
+
+        assertEquals("42\n", output.toString(StandardCharsets.UTF_8));
     }
 
     @Test

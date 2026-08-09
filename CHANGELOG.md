@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.0 — 2026-08-09
+
+- add `(Vector T)` homogeneous collection annotations and `(Fn [T...] R)`
+  positional function types
+- add exhaustive `match` expressions with primitive, vector, record, literal,
+  wildcard, and binding patterns
+- add immutable `map`, `filter`, `fold`, `range`, `slice`, `reverse`, and
+  `contains` operations
+- add structural equality and complete string processing and parsing primitives
+- expose injected `args`, `read-all`, and `read-text` program input boundaries
+- add runnable word-count, quicksort, and argument-parsing examples
+- expand editor syntax highlighting and browser runtime coverage for Yin 0.9
+- expand the automated suite from 107 to 124 tests
+
 ## 0.8.0 — 2026-08-09
 
 - add a minimal Language Server Protocol endpoint over standard input/output

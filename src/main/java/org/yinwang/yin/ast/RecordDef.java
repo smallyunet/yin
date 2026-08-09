@@ -32,6 +32,8 @@ public class RecordDef extends Node {
 
     public Value interp(Scope<Value> s) {
         Scope<Value> properties = Declare.evalProperties(propertyForm, s);
+        Set<String> nominalTypes = new LinkedHashSet<>();
+        nominalTypes.add(name.id);
 
         if (parents != null) {
             for (Node p : parents) {
@@ -40,11 +42,12 @@ public class RecordDef extends Node {
                     Util.abort(p, "parent is not a record: " + pv);
                 }
                 Scope<Value> parentProperties = ((RecordConstructor) pv).properties;
+                nominalTypes.addAll(((RecordConstructor) pv).nominalTypes());
                 rejectConflictingFields(properties, parentProperties, p, pv);
                 properties.putAll(parentProperties);
             }
         }
-        Value r = new RecordConstructor(name.id, this, properties);
+        Value r = new RecordConstructor(name.id, this, properties, nominalTypes);
         s.putValue(name.id, r);
         return r;
     }

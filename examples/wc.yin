@@ -1,0 +1,16 @@
+(define source (read-text (at args 0)))
+(define lines (split source "\n"))
+(define words
+  (fold
+    lines
+    []
+    (fun ([all (Vector String)] [line String] [-> (Vector String)])
+      (append
+        all
+        (filter
+          (split (trim line) " ")
+          (fun ([word String] [-> Bool])
+            (> (string-length word) 0)))))))
+(print "lines" (length lines))
+(print "words" (length words))
+(print "characters" (string-length source))

@@ -72,6 +72,8 @@ public class Parser {
                                 return parseRecordDef(tuple);
                             case Constants.FIELD_KEYWORD:
                                 return parseFieldAccess(tuple);
+                            case Constants.MATCH_KEYWORD:
+                                return parseMatch(tuple);
                             default:
                                 return parseCall(tuple);
                         }
@@ -261,6 +263,77 @@ public class Parser {
                 tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
     }
 
+    public static Match parseMatch(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() < 3) {
+            throw new ParserException("match requires a target and at least one clause", tuple);
+        }
+        Node target = parseNode(elements.get(1));
+        List<Match.Clause> clauses = new ArrayList<>();
+        for (Node clauseNode : elements.subList(2, elements.size())) {
+            if (!(clauseNode instanceof Tuple clause)
+                    || !delimType(clause.open, Constants.SQUARE_BEGIN)
+                    || clause.elements.size() != 2) {
+                throw new ParserException("match clauses must be [pattern expression]", clauseNode);
+            }
+            MatchPattern pattern = parseMatchPattern(clause.elements.get(0));
+            rejectDuplicatePatternBindings(pattern, new java.util.LinkedHashSet<>());
+            clauses.add(new Match.Clause(pattern, parseNode(clause.elements.get(1))));
+        }
+        return new Match(target, clauses, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static MatchPattern parseMatchPattern(Node node) throws ParserException {
+        if (node instanceof Name name) {
+            if (name.id.equals("_")) {
+                return new MatchPattern.Wildcard(name);
+            }
+            if (name.id.equals("true") || name.id.equals("false")) {
+                return new MatchPattern.Literal(name);
+            }
+            return new MatchPattern.Binding(name);
+        }
+        if (node instanceof IntNum || node instanceof FloatNum || node instanceof Str) {
+            return new MatchPattern.Literal(node);
+        }
+        if (!(node instanceof Tuple tuple)) {
+            throw new ParserException("unsupported match pattern: " + node, node);
+        }
+        if (delimType(tuple.open, Constants.SQUARE_BEGIN)) {
+            List<MatchPattern> elements = new ArrayList<>();
+            for (Node element : tuple.elements) {
+                elements.add(parseMatchPattern(element));
+            }
+            return new MatchPattern.VectorPattern(elements, tuple);
+        }
+        if (tuple.elements.isEmpty() || !(tuple.elements.get(0) instanceof Name type)) {
+            throw new ParserException("record pattern must start with a record type", tuple);
+        }
+        List<MatchPattern> fields = new ArrayList<>();
+        for (Node field : tuple.elements.subList(1, tuple.elements.size())) {
+            fields.add(parseMatchPattern(field));
+        }
+        return new MatchPattern.RecordPattern(type, fields, tuple);
+    }
+
+    private static void rejectDuplicatePatternBindings(
+            MatchPattern pattern, java.util.Set<String> bindings) throws ParserException {
+        if (pattern instanceof MatchPattern.Binding binding) {
+            if (!bindings.add(binding.name().id)) {
+                throw new ParserException("duplicate binding in pattern: " + binding.name().id,
+                        binding.name());
+            }
+        } else if (pattern instanceof MatchPattern.VectorPattern vector) {
+            for (MatchPattern element : vector.elements()) {
+                rejectDuplicatePatternBindings(element, bindings);
+            }
+        } else if (pattern instanceof MatchPattern.RecordPattern record) {
+            for (MatchPattern field : record.fields()) {
+                rejectDuplicatePatternBindings(field, bindings);
+            }
+        }
+    }
+
 
     public static Call parseCall(Tuple tuple) throws ParserException {
         List<Node> elements = tuple.elements;
@@ -360,19 +433,27 @@ public class Parser {
         if (node instanceof Name) {
             return true;
         }
-        if (!(node instanceof Call call)
-                || !(call.op instanceof Name operator)
-                || !operator.id.equals(Constants.UNION_KEYWORD)
-                || !call.args.keywords.isEmpty()
-                || call.args.positional.isEmpty()) {
+        if (!(node instanceof Call call) || !(call.op instanceof Name operator)
+                || !call.args.keywords.isEmpty()) {
             return false;
         }
-        for (Node member : call.args.positional) {
-            if (!isTypeExpression(member)) {
+        if (operator.id.equals(Constants.UNION_KEYWORD)) {
+            if (call.args.positional.isEmpty()) {
                 return false;
             }
+            return call.args.positional.stream().allMatch(Parser::isTypeExpression);
         }
-        return true;
+        if (operator.id.equals(Constants.VECTOR_TYPE_KEYWORD)) {
+            return call.args.positional.size() == 1
+                    && isTypeExpression(call.args.positional.get(0));
+        }
+        if (operator.id.equals(Constants.FUNCTION_TYPE_KEYWORD)
+                && call.args.positional.size() == 2
+                && call.args.positional.get(0) instanceof VectorLiteral parameters
+                && isTypeExpression(call.args.positional.get(1))) {
+            return parameters.elements.stream().allMatch(Parser::isTypeExpression);
+        }
+        return false;
     }
 
 

@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.8 language. Behavior not described
+This document defines the normative Yin 0.9 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -10,8 +10,9 @@ otherwise.
 - Whitespace separates tokens.
 - A line comment begins with `--` and ends at the next newline.
 - Strings are enclosed in `"`. They cannot span lines. A backslash causes the
-  lexer to consume the following character without treating it as a delimiter;
-  escape sequences are otherwise retained as source content.
+  lexer to consume the following character without treating it as a delimiter.
+  `\\n`, `\\r`, `\\t`, `\\"`, `\\\\`, and four-digit `\\u` escapes are decoded
+  at runtime; unknown escapes retain their backslash.
 - Integers are decimal, binary with `0b`, or hexadecimal with `0x`, with an
   optional leading sign.
 - Floats use the syntax accepted by Java `Double.parseDouble` after tokenization.
@@ -32,6 +33,7 @@ expression     = atom
                | vector
                | sequence
                | conditional
+               | match
                | definition
                | assignment
                | function
@@ -40,9 +42,15 @@ expression     = atom
                | call ;
 
 atom           = integer | float | string | name ;
+literal        = integer | float | string | "true" | "false" ;
 vector         = "[" { expression } "]" ;
 sequence       = "(" "seq" { expression } ")" ;
 conditional    = "(" "if" expression expression expression ")" ;
+match          = "(" "match" expression match-clause { match-clause } ")" ;
+match-clause   = "[" match-pattern expression "]" ;
+match-pattern  = "_" | literal | name
+               | "[" { match-pattern } "]"
+               | "(" type-name match-pattern { match-pattern } ")" ;
 definition     = "(" "define" pattern expression ")" ;
 assignment     = "(" "set!" pattern expression ")" ;
 
@@ -66,7 +74,10 @@ field-descriptor
 field-access   = "(" "field" expression keyword ")" ;
 
 type-expression
-               = name | "(" "U" type-expression { type-expression } ")" ;
+               = name
+               | "(" "U" type-expression { type-expression } ")"
+               | "(" "Vector" type-expression ")"
+               | "(" "Fn" "[" { type-expression } "]" type-expression ")" ;
 
 call           = "(" expression { expression } ")"
                | "(" expression { keyword expression } ")" ;
@@ -93,6 +104,8 @@ Runtime evaluation is deterministic:
    parameter or record-field declaration order.
 7. Primitive operations receive their already evaluated arguments.
 8. Function bodies evaluate as sequences in a new lexical scope.
+9. `match` evaluates its target once, tests clauses from left to right, and
+   evaluates exactly the first matching branch in a fresh lexical scope.
 
 Function and record default expressions are evaluated once when their
 definition is evaluated, in that definition's lexical environment. Defaults
@@ -112,6 +125,21 @@ environment captured when the function was evaluated.
 
 Vector patterns destructure fixed-length vectors recursively. A size mismatch,
 duplicate pattern name, or incompatible value is an error.
+
+## Pattern matching
+
+`match` supports wildcard (`_`), literal, binding, fixed vector, built-in type,
+and nominal record patterns. `(Int value)`, `(Float value)`, `(Bool value)`, and
+`(String value)` narrow and bind primitive union members. A record pattern such
+as `(Point x y)` follows the record's declared field order; a parent pattern
+also accepts instances of nominal child records. Pattern bindings exist only in
+the selected branch and duplicate bindings in one pattern are rejected.
+
+Every statically checked match must be exhaustive. A wildcard or binding covers
+the remaining type. `true` and `false` together cover `Bool`; irrefutable type,
+record, and exact-vector patterns cover their corresponding union members. A
+runtime value that crosses an `Any` boundary and matches no clause is still a
+language error.
 
 ## Records
 
@@ -147,6 +175,12 @@ Type rules:
 - `Any` is the top type: every type is a subtype of `Any`, including in return
   positions.
 - A vector has a fixed structural type containing one type per element.
+- `(Vector T)` describes an immutable vector of any length whose elements are
+  subtypes of `T`. A compatible fixed vector is a subtype of `(Vector T)`;
+  `[]` is compatible with every homogeneous vector type.
+- `(Fn [T1 ... Tn] R)` describes a positional callable. Source functions must
+  have compatible parameter and return annotations when passed through this
+  type. Parameters are contravariant and results are covariant.
 - Two vector types are equivalent when they have the same length and equivalent
   element types.
 - `length` accepts a vector and returns its length as `Int`.
@@ -169,7 +203,25 @@ Type rules:
   field types. Access through `Any` has type `Any` and remains runtime-checked.
 - Primitive arithmetic accepts `Int` and `Float`; a mixed arithmetic result is
   `Float`.
+- Equality is structural for immutable primitive, vector, and nominal record
+  values; numeric equality continues to compare mixed `Int` and `Float` values.
 - An `if` expression has the union of its branch types.
+- A `match` expression has the normalized union of its branch result types.
+
+## Standard operations and host input
+
+`map`, `filter`, and `fold` invoke typed source functions over immutable
+vectors. `range`, `slice`, `reverse`, and `contains` provide iteration and
+selection without mutable loop state. String programs can use `string-length`,
+`concat`, `substring`, `split`, `join`, `trim`, `to-string`, `parse-int`, and
+`parse-float`. Failed numeric parsing returns `false`, so a match over
+`(U Int Bool)` or `(U Float Bool)` must handle both cases.
+
+`args` is a `(Vector String)` supplied by the host. `read-all` consumes the
+host-provided text input, while `read-text` asks the host for one UTF-8 text
+resource. The CLI maps these to program arguments, standard input, and the
+filesystem. Embedders inject the same capabilities through `RuntimeContext`;
+the browser supports controlled text input but rejects filesystem reads.
 
 Annotated arguments and return values are checked by subtyping. Unannotated
 function result types are inferred from the body at each checked call. A

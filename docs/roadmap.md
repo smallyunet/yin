@@ -81,9 +81,22 @@ The project is being stabilized before new language features are designed.
 - protocol-level regression tests for initialization, document sync, and edits
 - CI-verified VSIX packages published alongside executable release artifacts
 
+## 0.9 — programmable core
+
+- source-expressible homogeneous vector and positional function types
+- exhaustive pattern matching over literals, built-in types, vectors, records,
+  and union members
+- immutable `map`, `filter`, `fold`, range, slice, reverse, and membership
+  operations
+- string comparison, transformation, splitting, joining, and numeric parsing
+- injected program arguments, complete text input, and UTF-8 file reads
+- maintained word-count, quicksort, and argument-parsing programs
+
 ## Later
 
-- modules
+- modules and multi-file type checking
+- persistent dictionaries and sets
+- explicit option and result records
 - bytecode or native compilation
 - hover, completion, definition, and reference navigation
 

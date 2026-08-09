@@ -1,0 +1,11 @@
+(define quicksort
+  (fun ([values (Vector Int)] [-> (Vector Int)])
+    (if (= (length values) 0)
+      values
+      (seq
+        (define pivot (at values 0))
+        (define rest (slice values 1 (length values)))
+        (define lower (filter rest (fun ([value Int] [-> Bool]) (<= value pivot))))
+        (define higher (filter rest (fun ([value Int] [-> Bool]) (> value pivot))))
+        (append (quicksort lower) (append [pivot] (quicksort higher)))))))
+(quicksort [9 3 7 1 8 2 5 4 6])

@@ -4,16 +4,29 @@ package org.yinwang.yin.value;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 public class RecordValue extends Value {
 
     public String name;
     public Scope<Value> properties;
+    private final Set<String> nominalTypes;
 
 
     public RecordValue(String name, Scope<Value> properties) {
+        this(name, properties, name == null ? Set.of() : Set.of(name));
+    }
+
+    public RecordValue(String name, Scope<Value> properties, Set<String> nominalTypes) {
         this.name = name;
         this.properties = properties;
+        this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
+    }
+
+    public Set<String> nominalTypes() {
+        return nominalTypes;
     }
 
 

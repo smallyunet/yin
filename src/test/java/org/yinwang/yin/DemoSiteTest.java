@@ -35,6 +35,7 @@ class DemoSiteTest {
         assertTrue(html.contains("id=\"features\""));
         assertTrue(html.contains("data-example=\"records\""));
         assertTrue(html.contains("data-example=\"vectors\""));
+        assertTrue(html.contains("data-example=\"programs\""));
         assertTrue(html.contains("aria-live=\"polite\""));
         assertFalse(html.contains("href=\"/"), "project-page assets must remain path-relative");
         assertFalse(html.contains("src=\"/"), "project-page assets must remain path-relative");
@@ -58,6 +59,7 @@ class DemoSiteTest {
         assertTrue(app.contains("new Worker(\"worker.js\")"));
         assertTrue(app.contains("(field origin :x)"));
         assertTrue(app.contains("(at extended 3)"));
+        assertTrue(app.contains("(match (parse-int text)"));
         assertTrue(app.contains("}, 1500)"));
         assertTrue(app.contains("worker.terminate()"));
     }

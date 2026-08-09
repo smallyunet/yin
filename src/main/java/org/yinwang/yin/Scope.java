@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.ArrayList;
 
 public class Scope<T> {
 
@@ -133,17 +134,27 @@ public class Scope<T> {
 
 
     public static Scope<Value> buildInitScope() {
-        return buildInitScope(System.out::println);
+        return buildInitScope(RuntimeContext.standard());
     }
 
 
     public static Scope<Value> buildInitScope(Consumer<String> output) {
+        return buildInitScope(new RuntimeContext(output, () -> "", java.util.List.of()));
+    }
+
+
+    public static Scope<Value> buildInitScope(RuntimeContext context) {
         Scope<Value> init = new Scope<>();
 
-        addPrimitiveFunctions(init, output);
+        addPrimitiveFunctions(init, context);
 
         init.putValue("true", new BoolValue(true));
         init.putValue("false", new BoolValue(false));
+        java.util.List<Value> arguments = new ArrayList<>();
+        for (String argument : context.arguments()) {
+            arguments.add(new org.yinwang.yin.value.StringValue(argument));
+        }
+        init.putValue("args", new org.yinwang.yin.value.Vector(arguments));
 
         return init;
     }
@@ -157,6 +168,7 @@ public class Scope<T> {
 
         init.putValue("true", Types.BOOL);
         init.putValue("false", Types.BOOL);
+        init.putValue("args", new org.yinwang.yin.type.HomogeneousVectorType(Types.STRING));
 
         addTypes(init);
 
@@ -164,7 +176,7 @@ public class Scope<T> {
     }
 
 
-    private static void addPrimitiveFunctions(Scope<Value> init, Consumer<String> output) {
+    private static void addPrimitiveFunctions(Scope<Value> init, RuntimeContext context) {
 
         init.putValue("+", new Add());
         init.putValue("-", new Sub());
@@ -183,7 +195,25 @@ public class Scope<T> {
         init.putValue("length", new Length());
         init.putValue("at", new At());
         init.putValue("append", new Append());
-        init.putValue("print", new Print(output));
+        init.putValue("map", new VectorPrimitives.Map());
+        init.putValue("filter", new VectorPrimitives.Filter());
+        init.putValue("fold", new VectorPrimitives.Fold());
+        init.putValue("range", new VectorPrimitives.Range());
+        init.putValue("slice", new VectorPrimitives.Slice());
+        init.putValue("reverse", new VectorPrimitives.Reverse());
+        init.putValue("contains", new VectorPrimitives.Contains());
+        init.putValue("string-length", new StringPrimitives.Length());
+        init.putValue("concat", new StringPrimitives.Concat());
+        init.putValue("substring", new StringPrimitives.Substring());
+        init.putValue("split", new StringPrimitives.Split());
+        init.putValue("join", new StringPrimitives.Join());
+        init.putValue("trim", new StringPrimitives.Trim());
+        init.putValue("to-string", new StringPrimitives.ToString());
+        init.putValue("parse-int", new StringPrimitives.ParseInt());
+        init.putValue("parse-float", new StringPrimitives.ParseFloat());
+        init.putValue("read-all", new ReadAll(context.input()));
+        init.putValue("read-text", new ReadText(context.readText()));
+        init.putValue("print", new Print(context.output()));
     }
 
 
@@ -196,15 +226,35 @@ public class Scope<T> {
         init.putValue("<=", PrimitiveFunctionType.numericComparison("<="));
         init.putValue(">", PrimitiveFunctionType.numericComparison(">"));
         init.putValue(">=", PrimitiveFunctionType.numericComparison(">="));
-        init.putValue("=", PrimitiveFunctionType.numericComparison("="));
+        init.putValue("=", PrimitiveFunctionType.equality());
         init.putValue("and", PrimitiveFunctionType.booleanBinary("and"));
         init.putValue("or", PrimitiveFunctionType.booleanBinary("or"));
         init.putValue("not", PrimitiveFunctionType.booleanUnary("not"));
         init.putValue("length", PrimitiveFunctionType.vectorLength());
         init.putValue("at", PrimitiveFunctionType.vectorAt());
         init.putValue("append", PrimitiveFunctionType.vectorAppend());
+        init.putValue("map", PrimitiveFunctionType.vectorMap());
+        init.putValue("filter", PrimitiveFunctionType.vectorFilter());
+        init.putValue("fold", PrimitiveFunctionType.vectorFold());
+        init.putValue("range", PrimitiveFunctionType.vectorRange());
+        init.putValue("slice", PrimitiveFunctionType.vectorSlice());
+        init.putValue("reverse", PrimitiveFunctionType.vectorReverse());
+        init.putValue("contains", PrimitiveFunctionType.vectorContains());
+        init.putValue("string-length", PrimitiveFunctionType.stringUnary("string-length", Types.INT));
+        init.putValue("concat", PrimitiveFunctionType.stringBinary("concat", Types.STRING));
+        init.putValue("substring", PrimitiveFunctionType.substring());
+        init.putValue("split", PrimitiveFunctionType.split());
+        init.putValue("join", PrimitiveFunctionType.join());
+        init.putValue("trim", PrimitiveFunctionType.stringUnary("trim", Types.STRING));
+        init.putValue("to-string", PrimitiveFunctionType.toStringType());
+        init.putValue("parse-int", PrimitiveFunctionType.parseNumber("parse-int", Types.INT));
+        init.putValue("parse-float", PrimitiveFunctionType.parseNumber("parse-float", Types.FLOAT));
+        init.putValue("read-all", PrimitiveFunctionType.readAll());
+        init.putValue("read-text", PrimitiveFunctionType.stringUnary("read-text", Types.STRING));
         init.putValue("print", PrimitiveFunctionType.print());
         init.putValue("U", PrimitiveFunctionType.union());
+        init.putValue("Vector", PrimitiveFunctionType.vectorType());
+        init.putValue("Fn", PrimitiveFunctionType.functionType());
     }
 
 

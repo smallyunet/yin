@@ -27,11 +27,17 @@ by Git because GitHub Actions recreates it for every deployment.
 
 ## Browser API
 
-TeaVM exports three functions:
+TeaVM exports four functions:
 
 - `yinEvaluate(source)` evaluates a submission in a persistent session
 - `yinFormat(source)` returns canonical source formatting
 - `yinReset()` discards the current runtime and type environments
+- `yinSetInput(text)` replaces the controlled text returned by `read-all` and
+  starts a fresh session
+
+The browser deliberately rejects `read-text`, because static pages do not have
+an ambient filesystem capability. Pure collection, string, and match semantics
+are identical to the JVM runtime.
 
 Each string-returning function returns JSON. Diagnostics include the stable Yin
 error code and, when available, one-based line and column plus source offsets.

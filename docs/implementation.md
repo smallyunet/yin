@@ -18,9 +18,13 @@ source file
 - `ast/` contains evaluation and type-checking behavior for each construct.
 - `ast/FieldAccess.java` implements immutable record field reads and their
   record, union, and `Any` type rules.
+- `ast/Match.java` evaluates patterns and performs branch binding, union
+  narrowing, and exhaustiveness checks.
 - `Scope.java` implements generic lexical environment chains. Runtime scopes
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
+- `RuntimeContext.java` injects output, complete text input, program arguments,
+  and UTF-8 resource reads instead of hiding host effects in language nodes.
 - `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
 - `ReplSession.java` keeps paired runtime and type scopes across interactive
   submissions; `Repl.java` owns terminal input, multiline recovery, and output.
@@ -32,10 +36,14 @@ source file
   diagnostics, and formatting over standard input/output.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
-- `value/Vector.java` stores an immutable element snapshot; `length`, `at`, and
-  `append` expose checked vector operations without subscript syntax.
+- `value/Vector.java` stores an immutable element snapshot; checked primitives
+  provide indexing, concatenation, mapping, filtering, folding, slicing,
+  reversal, ranges, and membership without mutable collection state.
 - `type/` contains static types, record and function types, unions, and
   primitive signatures. No class in this package extends `Value`.
+- `type/HomogeneousVectorType.java` complements precise fixed `VectorType`
+  values, while `DeclaredFunctionType.java` makes positional callable
+  signatures source-expressible for higher-order operations.
 
 Every semantic AST node has two deliberately distinct entry points:
 
@@ -79,6 +87,9 @@ checking, multiline input, error recovery, and incomplete input at EOF.
 modes, invalid input, and canonical formatting of every maintained program.
 `LanguageServerIntegrationTest` drives framed protocol messages to protect
 initialization, diagnostic clearing, shutdown, and formatting responses.
+`LanguageCompletenessTest` protects the Yin 0.9 vertical slice from type
+annotations through match, collection/string processing, host input, and
+complete runnable examples.
 
 Run all checks with:
 

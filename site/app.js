@@ -20,6 +20,16 @@ const examples = {
 
 (print (length extended))
 (at extended 3)`,
+  programs: `(define values
+  (map (split "10 bad 32" " ")
+    (fun ([text String] [-> Int])
+      (match (parse-int text)
+        [(Int value) value]
+        [(Bool _) 0]))))
+
+(fold values 0
+  (fun ([total Int] [value Int] [-> Int])
+    (+ total value)))`,
   unions: `(define numeric-label
   (fun ([value (U Int Float)] [-> String])
     (if (= value 0) "zero" "non-zero")))
@@ -187,7 +197,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.7";
+    resultType.textContent = "Yin 0.9";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

@@ -34,7 +34,7 @@
         <div class="hero-copy">
           <div class="eyebrow"><span></span> Written in Java. Running in your browser.</div>
           <h1 id="hero-title">Small enough to learn.<br><em>Complete enough</em> to explore.</h1>
-          <p>Explore S-expressions, lexical closures, static types, record inheritance, and union types. Your code runs entirely in the browser and is never sent to a server.</p>
+          <p>Explore S-expressions, lexical closures, static types, immutable collections, and exhaustive pattern matching. Your code runs entirely in the browser and is never sent to a server.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#playground">
               Try it now
@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.8</strong><span>Current version</span></div>
-          <div><strong>107</strong><span>Automated tests</span></div>
+          <div><strong>0.9</strong><span>Current version</span></div>
+          <div><strong>124</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -64,6 +64,7 @@
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="programs">Programs</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
         </div>
@@ -184,6 +185,14 @@
             <pre><code>(define values (append [10 20] [30 40]))
 (length values)
 (at values 3)</code></pre>
+          </article>
+          <article class="feature-card feature-wide">
+            <span class="feature-index">06</span>
+            <h3>Pattern-driven programs</h3>
+            <p>Narrow unions, destructure immutable data, and combine typed collection and string operations.</p>
+            <pre><code>(match (parse-int "42")
+  [(Int value) (+ value 1)]
+  [(Bool _) 0])</code></pre>
           </article>
         </div>
       </section>

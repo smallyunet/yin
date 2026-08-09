@@ -59,4 +59,23 @@ class BrowserBridgeTest {
         assertTrue(result.contains("\"value\":\"42\""));
         assertTrue(result.contains("\"type\":\"Int\""));
     }
+
+    @Test
+    void evaluatesMatchCollectionsAndInjectedInputInTheBrowserSession() {
+        BrowserBridge.yinSetInput("  20 22  ");
+
+        String result = BrowserBridge.yinEvaluate("""
+                (define values
+                  (map (split (trim (read-all)) " ")
+                    (fun ([text String] [-> Int])
+                      (match (parse-int text)
+                        [(Int value) value]
+                        [(Bool _) 0]))))
+                (fold values 0
+                  (fun ([total Int] [value Int] [-> Int]) (+ total value)))
+                """);
+
+        assertTrue(result.contains("\"value\":\"42\""));
+        assertTrue(result.contains("\"type\":\"Int\""));
+    }
 }
