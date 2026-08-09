@@ -26,6 +26,10 @@ source file
   submissions; `Repl.java` owns terminal input, multiline recovery, and output.
 - `Formatter.java` validates with the semantic parser, then renders a small
   concrete syntax tree so comments and original string tokens remain intact.
+- `lsp/LanguageService.java` applies the parser, type checker, and formatter to
+  unsaved source text without retaining editor state.
+- `lsp/YinLanguageServer.java` implements JSON-RPC framing, document sync,
+  diagnostics, and formatting over standard input/output.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
 - `value/Vector.java` stores an immutable element snapshot; `length`, `at`, and
@@ -73,6 +77,8 @@ explicitly classified and every migrated replacement remains runnable.
 checking, multiline input, error recovery, and incomplete input at EOF.
 `FormatterTest` covers comment safety, idempotence, semantic preservation, CLI
 modes, invalid input, and canonical formatting of every maintained program.
+`LanguageServerIntegrationTest` drives framed protocol messages to protect
+initialization, diagnostic clearing, shutdown, and formatting responses.
 
 Run all checks with:
 

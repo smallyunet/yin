@@ -1,0 +1,88 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Yin",
+  "scopeName": "source.yin",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#constants" },
+    { "include": "#primitives" },
+    { "include": "#keywordArguments" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-dash.yin",
+          "match": "--.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.yin",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.yin",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.yin",
+          "match": "(?<![\\w])[-+]?(?:0b[01]+|0x[0-9A-Fa-f]+|(?:[0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)(?:[eE][-+]?[0-9]+)?|[0-9]+)(?![\\w])"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.yin",
+          "match": "(?<=\\()(?:(?:seq|if|define|set!|fun|record|field))(?=\\s|\\))"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.yin",
+          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U)(?![\\w])"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.yin",
+          "match": "(?<![\\w])(?:true|false)(?![\\w])"
+        }
+      ]
+    },
+    "primitives": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.yin",
+          "match": "(?<![\\w])(?:length|at|append|print|and|or|not|<=|>=|[+*/<>=-])(?![\\w])"
+        }
+      ]
+    },
+    "keywordArguments": {
+      "patterns": [
+        {
+          "name": "variable.parameter.yin",
+          "match": ":[A-Za-z_~!@$%^&*+=|;,<>?/-][A-Za-z0-9_~!@$%^&*+=|;,<>?/-]*"
+        }
+      ]
+    }
+  }
+}

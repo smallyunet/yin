@@ -24,12 +24,13 @@ and formatting run locally in a Web Worker; no source code is sent to a server.
 - records with typed fields and default values
 - immutable record field access, including inherited fields
 - an experimental type checker
+- editor diagnostics and whole-document formatting through LSP
 
 The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The 101-test suite also covers parser
+both the interpreter and type checker. The 107-test suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.7 defines these
+boundaries between runtime values and static types. Yin 0.8 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -44,7 +45,7 @@ Versioned executable JARs and SHA-256 checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.7.0.jar --version
+java -jar yin-0.8.0.jar --version
 ```
 
 ## Build and test
@@ -53,18 +54,18 @@ java -jar yin-0.7.0.jar --version
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.7.0.jar`.
+This produces the executable JAR at `target/yin-0.8.0.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.7.0.jar tests/recursion-direct.yin
+java -jar target/yin-0.8.0.jar tests/recursion-direct.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.7.0.jar \
+java -cp target/yin-0.8.0.jar \
   org.yinwang.yin.TypeChecker tests/recursion-direct.yin
 ```
 
@@ -73,7 +74,7 @@ java -cp target/yin-0.7.0.jar \
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.7.0.jar
+java -jar target/yin-0.8.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -85,7 +86,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.7.0.jar --format tests/function1.yin
+java -jar target/yin-0.8.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.
@@ -121,6 +122,7 @@ See the normative [Language specification](docs/language-specification.md), the
 short [Language reference](docs/language-reference.md), the
 [historical-program classification](docs/historical-programs.md),
 [REPL guide](docs/repl.md), [Formatter guide](docs/formatter.md),
+[Editor integration](docs/lsp.md),
 [Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
 maintained project boundaries.
 

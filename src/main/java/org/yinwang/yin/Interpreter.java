@@ -2,6 +2,7 @@ package org.yinwang.yin;
 
 
 import org.yinwang.yin.ast.Node;
+import org.yinwang.yin.lsp.YinLanguageServer;
 import org.yinwang.yin.parser.Parser;
 import org.yinwang.yin.parser.ParserException;
 import org.yinwang.yin.value.Value;
@@ -40,6 +41,15 @@ public class Interpreter {
             System.out.println("Yin " + Constants.VERSION);
             return;
         }
+        if (args.length == 1 && args[0].equals("--lsp")) {
+            try {
+                new YinLanguageServer(System.in, System.out).run();
+            } catch (IOException error) {
+                System.err.println("language server failed: " + error.getMessage());
+                System.exit(1);
+            }
+            return;
+        }
         if (args.length > 0 && args[0].equals("--format")) {
             int status = Formatter.run(
                     Arrays.copyOfRange(args, 1, args.length),
@@ -64,7 +74,7 @@ public class Interpreter {
         }
         if (args.length != 1) {
             System.err.println(
-                    "usage: java -jar yin.jar [--version | --repl | --format [mode] <file>... | <program.yin>]");
+                    "usage: java -jar yin.jar [--version | --lsp | --repl | --format [mode] <file>... | <program.yin>]");
             System.exit(2);
         }
 

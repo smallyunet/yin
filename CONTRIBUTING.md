@@ -23,3 +23,10 @@ Use JDK 17 or newer and run:
 
 Commit messages should state the behavior being changed. Run `./mvnw verify`
 before pushing directly to `main`.
+
+## Visual Studio Code extension
+
+The extension under `editors/vscode/` bundles the executable Yin JAR. Run
+`npm install` once, then `npm run package` to rebuild the server, type-check and
+bundle the client, and produce a VSIX. Keep the extension and Maven versions in
+sync. Marketplace credentials belong only in the repository-root `.env` file.

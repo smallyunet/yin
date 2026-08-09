@@ -1,0 +1,96 @@
+{
+  "name": "yin-language-support",
+  "displayName": "Yin Programming Language",
+  "description": "Diagnostics, formatting, and syntax highlighting for the Yin programming language.",
+  "version": "0.8.0",
+  "publisher": "smallyu",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/smallyunet/yin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smallyunet/yin.git",
+    "directory": "editors/vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/smallyunet/yin/issues"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Linters"
+  ],
+  "keywords": [
+    "yin",
+    "language server",
+    "lsp",
+    "formatter"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onLanguage:yin"
+  ],
+  "main": "./dist/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "yin",
+        "aliases": [
+          "Yin",
+          "yin"
+        ],
+        "extensions": [
+          ".yin"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "yin",
+        "scopeName": "source.yin",
+        "path": "./syntaxes/yin.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "Yin",
+      "properties": {
+        "yin.java.path": {
+          "type": "string",
+          "default": "java",
+          "scope": "machine-overridable",
+          "description": "Path to a Java 17 or newer executable used to run the bundled Yin language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "clean": "node ./scripts/clean.mjs",
+    "compile": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js --sourcemap",
+    "check": "tsc --noEmit -p ./tsconfig.json",
+    "package:server": "node ./scripts/package-server.mjs",
+    "vscode:prepublish": "npm run clean && npm run package:server && npm run check && npm run compile",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "dependencies": {
+    "vscode-languageclient": "10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "@types/vscode": "1.96.0",
+    "@vscode/vsce": "3.9.2",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

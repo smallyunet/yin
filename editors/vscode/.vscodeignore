@@ -1,0 +1,9 @@
+.vscode/**
+src/**
+scripts/**
+node_modules/**
+dist/*.map
+tsconfig.json
+package-lock.json
+*.vsix
+server/*.sha256

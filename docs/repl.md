@@ -8,8 +8,8 @@ parser, type checker, and interpreter used for source files.
 After `./mvnw package`, either command starts the REPL:
 
 ```bash
-java -jar target/yin-0.7.0.jar
-java -jar target/yin-0.7.0.jar --repl
+java -jar target/yin-0.8.0.jar
+java -jar target/yin-0.8.0.jar --repl
 ```
 
 When attached to a terminal it displays `yin> ` for a new submission and
@@ -46,5 +46,5 @@ An `Evaluation` contains both the runtime `Value` and inferred `YinType`.
 `Parser.parseSource(sourceName, source)` is available when only in-memory
 parsing is needed; its virtual source name is retained in diagnostics.
 
-Command history, completion, formatter integration, and editor services are
-not implemented yet.
+Command history and completion are not implemented yet. Diagnostics and
+formatter integration are available to editors through the language server.

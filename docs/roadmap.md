@@ -72,11 +72,19 @@ The project is being stabilized before new language features are designed.
 - structured operand, index, empty-vector, and bounds diagnostics
 - maintained CLI, REPL, browser, formatter, and specification coverage
 
+## 0.8 — editor services
+
+- Language Server Protocol transport over standard input/output
+- live syntax and type diagnostics for unsaved documents
+- canonical whole-document formatting
+- self-contained Visual Studio Code extension with a bundled Yin server
+- protocol-level regression tests for initialization, document sync, and edits
+
 ## Later
 
 - modules
 - bytecode or native compilation
-- editor/LSP integration
+- hover, completion, definition, and reference navigation
 
 New syntax should not be added until it has a written rule, interpreter tests,
 type-checker tests, and diagnostic tests.

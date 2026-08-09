@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.0 — 2026-08-09
+
+- add a minimal Language Server Protocol endpoint over standard input/output
+- report syntax and type diagnostics for unsaved documents with full-text sync
+- expose canonical whole-document formatting through the language server
+- add a self-contained Visual Studio Code extension with bundled Yin server
+- keep local Marketplace credentials and generated extension artifacts out of Git
+- expand the automated suite from 101 to 107 tests
+
 ## 0.7.0 — 2026-08-09
 
 - add `length`, `at`, and `append` for immutable vector use
