@@ -10,6 +10,7 @@ import org.yinwang.yin.RuntimeContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** JavaScript exports used by the static Yin playground. */
 public final class BrowserBridge {
@@ -69,7 +70,13 @@ public final class BrowserBridge {
                 List.of(),
                 path -> {
                     throw new GeneralError("read-text is unavailable in the browser: " + path);
-                }));
+                },
+                Map.of("assess-risk", request -> RuntimeContext.ToolResponse.success(
+                        "{\"score\":7,\"reason\":\"browser host policy accepted\"}")),
+                request -> request.descriptor().name().equals("assess-risk")
+                        && request.descriptor().capability().equals("risk.read")
+                        && request.descriptor().effect() == RuntimeContext.Effect.READ,
+                ignored -> { }));
     }
 
     private static String success(String value, String type, List<String> output) {

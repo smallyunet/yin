@@ -19,6 +19,7 @@ public class Scope<T> {
     public Map<String, Map<String, Object>> table = new LinkedHashMap<>();
     public Scope<T> parent;
     public TypeChecker typeChecker;
+    public RuntimeContext runtimeContext;
 
 
     public Scope() {
@@ -29,6 +30,7 @@ public class Scope<T> {
     public Scope(Scope<T> parent) {
         this.parent = parent;
         this.typeChecker = parent == null ? null : parent.typeChecker;
+        this.runtimeContext = parent == null ? null : parent.runtimeContext;
     }
 
 
@@ -145,6 +147,7 @@ public class Scope<T> {
 
     public static Scope<Value> buildInitScope(RuntimeContext context) {
         Scope<Value> init = new Scope<>();
+        init.runtimeContext = context;
 
         addPrimitiveFunctions(init, context);
         org.yinwang.yin.json.JsonSupport.installRuntime(init);

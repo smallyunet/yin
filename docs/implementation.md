@@ -30,7 +30,14 @@ source file
   Its `--json` host mode keeps stdout machine-readable and routes program logs
   to stderr for structured pipelines.
 - `RuntimeContext.java` injects output, complete text input, program arguments,
-  and UTF-8 resource reads instead of hiding host effects in language nodes.
+  UTF-8 resource reads, named tool handlers, authorization policy, and an audit sink
+  instead of hiding host effects in language nodes.
+- `ast/ToolDef.java`, `ast/Invoke.java`, `type/ToolType.java`, and
+  `value/ToolValue.java` keep declared authority, static contracts, runtime
+  handles, and invocation separate. `CapabilityManifest.java` performs
+  type-checked preflight without execution.
+- `tool/McpToolAdapter.java` maps MCP `structuredContent` and `isError` into the
+  stable Yin host boundary. Remote annotations are never used as authorization.
 - `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
 - `ReplSession.java` keeps paired runtime and type scopes across interactive
   submissions; `Repl.java` owns terminal input, multiline recovery, and output.
@@ -104,6 +111,8 @@ construction, covariance, exhaustive narrowing, structural equality, `Any`,
 and the maintained result program.
 `StructuredContractsIntegrationTest` protects the Yin 0.11 variant, Option,
 strict JSON, structured error path, schema, and complete agent-boundary slice.
+`ToolIntegrationTest` protects the Yin 0.12 declaration, manifest, host
+injection, approval, audit, structured-result validation, and MCP adapter slice.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy

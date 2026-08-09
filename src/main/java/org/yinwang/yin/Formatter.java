@@ -129,7 +129,9 @@ public final class Formatter {
             boolean inPrefix = !lineCommentAtEnd
                     && rendered < prefixLength
                     && flatten(child) != null;
-            if (rendered == 0 || inPrefix) {
+            boolean toolMetadataValue = head(form).equals("tool")
+                    && rendered >= 6 && rendered % 2 == 0;
+            if (rendered == 0 || inPrefix || toolMetadataValue) {
                 if (rendered > 0) {
                     output.append(' ');
                 }
@@ -175,7 +177,8 @@ public final class Formatter {
             Element value = form.elements().get(2);
             return value instanceof Form valueForm && head(valueForm).equals("fun");
         }
-        return (head.equals("seq") || head.equals("match") || head.equals("variant"))
+        return (head.equals("seq") || head.equals("match") || head.equals("variant")
+                || head.equals("tool"))
                 && form.elements().size() > 2;
     }
 
@@ -192,8 +195,8 @@ public final class Formatter {
             }
             return 2;
         }
-        if (head.equals("variant") || head.equals("match")) {
-            return 2;
+        if (head.equals("variant") || head.equals("match") || head.equals("tool")) {
+            return head.equals("tool") ? 5 : 2;
         }
         return 1;
     }

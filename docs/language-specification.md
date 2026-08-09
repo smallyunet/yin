@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.11 language. Behavior not described
+This document defines the normative Yin 0.12 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -39,6 +39,8 @@ expression     = atom
                | function
                | record-definition
                | variant-definition
+               | tool-definition
+               | invocation
                | json-operation
                | field-access
                | call ;
@@ -78,6 +80,15 @@ field-descriptor
 variant-definition
                = "(" "variant" name variant-case { variant-case } ")" ;
 variant-case   = "[" name { field-descriptor } "]" ;
+
+tool-definition
+               = "(" "tool" name type-expression type-expression type-expression
+                 ":capability" string
+                 ":effect" (":read" | ":write" | ":destructive")
+                 ":approval" ("true" | "false")
+                 ":idempotent" ("true" | "false")
+                 ":open-world" ("true" | "false") ")" ;
+invocation     = "(" "invoke" expression expression ")" ;
 
 json-operation = "(" "decode-json" type-expression expression ")"
                | "(" "encode-json" expression ")"
@@ -204,9 +215,43 @@ subtype of `E`. Result types are covariant in both payloads.
 Result values print as `(ok value)` and `(err error)`. Equality compares the tag
 and then the immutable payload. A success and a failure are comparable but never
 equal. Results do not catch language diagnostics; they represent expected
-domain failures explicitly. Tool, model, and task integrations are expected to
-return results in later AI-first versions rather than introduce hidden exception
-control flow.
+domain failures explicitly. Tool integrations use the same result control flow;
+model and task integrations are expected to follow it in later AI-first versions.
+
+## Capabilities and typed tools
+
+A `tool` declaration introduces a lexical tool name and a static
+`(Tool Input Output Error)` signature. The three contract types must be valid
+source type expressions and JSON-encodable contracts. A declaration describes
+authority but never grants it; the host must inject an implementation with the
+same name.
+
+Every tool declares a non-empty capability string and an effect of `:read`,
+`:write`, or `:destructive`. It also declares whether approval is required,
+whether repeated identical calls are intended to be idempotent, and whether the
+tool reaches an open world. Destructive tools must declare `:approval true`.
+These source-owned fields are enforcement inputs. Remote protocol annotations,
+including MCP annotations, are untrusted hints and cannot grant authority.
+Metadata pairs may appear in any order but each required field must appear
+exactly once. A host authorization policy evaluates every installed tool call;
+the default policy denies all calls.
+
+`(invoke tool input)` evaluates its tool and input once. Static checking
+requires the input value to be a subtype of the declared input contract. The
+host receives deterministic JSON and returns either success JSON or declared
+business-error JSON. Both are strictly decoded against their declared type.
+The expression has type `(Result Output (U Error ToolError))`.
+
+`ToolError` is a built-in immutable record with `code`, `path`, and `message`
+String fields. Missing implementations, denied approval, handler failure, and
+invalid structured output produce `ToolError` values instead of hidden
+exceptions. Completed calls emit one terminal audit event containing the
+declaration, input JSON, status, and output JSON. Audit delivery itself has no
+source-level authority.
+
+`--capabilities program.yin` type-checks without execution and prints a stable
+JSON manifest of all discovered tool declarations. Conflicting declarations of
+one host tool name are rejected.
 
 ## Records
 

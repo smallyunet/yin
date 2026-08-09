@@ -48,7 +48,7 @@
       "patterns": [
         {
           "name": "keyword.control.yin",
-          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|variant|field|decode-json|encode-json|json-schema))(?=\\s|\\))"
+          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|variant|tool|invoke|field|decode-json|encode-json|json-schema))(?=\\s|\\))"
         }
       ]
     },
@@ -56,7 +56,7 @@
       "patterns": [
         {
           "name": "support.type.yin",
-          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Fn|Result|Option|Ok|Err|Some|None)(?![\\w])"
+          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Fn|Result|Option|Tool|ToolError|Ok|Err|Some|None)(?![\\w])"
         }
       ]
     },

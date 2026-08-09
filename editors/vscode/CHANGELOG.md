@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.0
+
+- highlight `tool`, `invoke`, and tool authority metadata
+- bundle the Yin 0.12.0 language server
+
 ## 0.11.0
 
 - highlight `variant`, `Option`, `Some`, `None`, and typed JSON boundary forms

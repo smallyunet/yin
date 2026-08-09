@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.12.0 — 2026-08-09
+
+- add source-level `tool` declarations with typed input, output, and business-error contracts
+- add `invoke`, returning explicit results and a built-in `ToolError` union for host failures
+- declare capability, effect, approval, idempotency, and open-world metadata per tool
+- enforce destructive-tool approval declarations and deny-by-default host approval policies
+- add deterministic `--capabilities` preflight manifests and terminal tool audit events
+- add a transport-neutral MCP `CallToolResult` adapter with strict structured output validation
+- add a browser-hosted typed-tool example with formatter, editor, TeaVM, and regression coverage
+- expand the automated suite from 165 to 175 tests
+
 - add a complete typed agent-review demo with maintained approval, rejection,
   user-input, and strict boundary-error fixtures
 - add `--json` for clean JSON stdout, stderr-isolated logs, and structured

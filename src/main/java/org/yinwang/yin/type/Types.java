@@ -116,6 +116,9 @@ public final class Types {
                 && expected instanceof DeclaredFunctionType expectedFunction) {
             return functionSubtype(actualFunction, expectedFunction);
         }
+        if (actual instanceof ToolType actualTool && expected instanceof ToolType expectedTool) {
+            return equivalent(actualTool, expectedTool);
+        }
         return equivalent(actual, expected);
     }
 
@@ -170,6 +173,12 @@ public final class Types {
             return equivalent(leftSome.value(), rightSome.value());
         }
         if (left instanceof NoneType && right instanceof NoneType) return true;
+        if (left instanceof ToolType leftTool && right instanceof ToolType rightTool) {
+            return equivalent(leftTool.input(), rightTool.input())
+                    && equivalent(leftTool.output(), rightTool.output())
+                    && equivalent(leftTool.error(), rightTool.error())
+                    && leftTool.descriptor().equals(rightTool.descriptor());
+        }
         if (left instanceof VariantType leftVariant && right instanceof VariantType rightVariant) {
             return leftVariant.name().equals(rightVariant.name());
         }

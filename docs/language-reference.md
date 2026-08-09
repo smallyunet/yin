@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.11 language specification](language-specification.md). Files in
+[Yin 0.12 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -217,7 +217,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.11.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar yin-0.12.0.jar examples/cli/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
@@ -226,12 +226,35 @@ is deliberately unavailable in the browser runtime.
 For structured pipelines, `--json` reserves stdout for the final raw JSON:
 
 ```bash
-java -jar yin-0.11.0.jar --json program.yin < request.json
+java -jar yin-0.12.0.jar --json program.yin < request.json
 ```
 
 The program must return `String` or `(Result String E)`. `Ok String` is
 unwrapped, program `print` output is routed to stderr, and an `Err` payload is
 JSON-encoded with a non-zero process status.
+
+## Typed tools and capabilities
+
+Declare a host tool with source-owned contracts and authority metadata:
+
+```yin
+(tool assess-risk RiskRequest RiskAssessment RiskFailure
+  :capability "risk.read"
+  :effect :read
+  :approval false
+  :idempotent true
+  :open-world false)
+(invoke assess-risk (RiskRequest :amount 42))
+```
+
+`invoke` returns `(Result Output (U Error ToolError))`. The host must install
+the implementation; missing authority, denied approval, transport failures,
+and contract-invalid output are ordinary `ToolError` values. Destructive tools
+must require approval. Inspect declarations without executing source using:
+
+```bash
+java -jar yin-0.12.0.jar --capabilities program.yin
+```
 
 ## Known language gaps
 

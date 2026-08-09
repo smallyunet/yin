@@ -127,7 +127,7 @@ public final class JsonCodec {
                 return recordSchema(name, definition.cases.get(name), constructor,
                         definition.name.id, scope);
             }
-            if (name.equals("DecodeError") || name.equals("EncodeError")) {
+            if (name.equals("DecodeError") || name.equals("EncodeError") || name.equals("ToolError")) {
                 Map<String, Field> fields = new LinkedHashMap<>();
                 fields.put("code", new Field(new Primitive("String"), null));
                 fields.put("path", new Field(new Primitive("String"), null));

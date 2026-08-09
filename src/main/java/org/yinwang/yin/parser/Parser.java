@@ -82,6 +82,10 @@ public class Parser {
                                 return parseJsonOperation(tuple, JsonOperation.Kind.ENCODE);
                             case Constants.JSON_SCHEMA_KEYWORD:
                                 return parseJsonOperation(tuple, JsonOperation.Kind.SCHEMA);
+                            case Constants.TOOL_KEYWORD:
+                                return parseToolDef(tuple);
+                            case Constants.INVOKE_KEYWORD:
+                                return parseInvoke(tuple);
                             default:
                                 return parseCall(tuple);
                         }
@@ -309,6 +313,66 @@ public class Parser {
             throw new ParserException("field name must be a keyword, but got: " + field, field);
         }
         return new FieldAccess(parseNode(elements.get(1)), (Keyword) field,
+                tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static ToolDef parseToolDef(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() < 5 || !(elements.get(1) instanceof Name name)) {
+            throw new ParserException(
+                    "tool requires a name and input, output, and error types", tuple);
+        }
+        Node input = parseNode(elements.get(2));
+        Node output = parseNode(elements.get(3));
+        Node error = parseNode(elements.get(4));
+        if (!isTypeExpression(input) || !isTypeExpression(output) || !isTypeExpression(error)) {
+            throw new ParserException("tool contracts must be type expressions", tuple);
+        }
+        Map<String, Node> metadata = parseMap(elements.subList(5, elements.size()));
+        java.util.Set<String> expected = java.util.Set.of(
+                "capability", "effect", "approval", "idempotent", "open-world");
+        if (!metadata.keySet().equals(expected)) {
+            throw new ParserException("tool metadata must contain exactly :capability, :effect, "
+                    + ":approval, :idempotent, and :open-world", tuple);
+        }
+        if (!(metadata.get("capability") instanceof Str capability) || capability.value.isBlank()) {
+            throw new ParserException("tool capability must be a non-empty string",
+                    metadata.get("capability"));
+        }
+        if (!(metadata.get("effect") instanceof Keyword effectNode)) {
+            throw new ParserException("tool effect must be :read, :write, or :destructive",
+                    metadata.get("effect"));
+        }
+        org.yinwang.yin.RuntimeContext.Effect effect;
+        try {
+            effect = org.yinwang.yin.RuntimeContext.Effect.parse(effectNode.id);
+        } catch (IllegalArgumentException invalid) {
+            throw new ParserException(invalid.getMessage(), effectNode);
+        }
+        boolean approval = booleanLiteral(metadata.get("approval"), "approval");
+        boolean idempotent = booleanLiteral(metadata.get("idempotent"), "idempotent");
+        boolean openWorld = booleanLiteral(metadata.get("open-world"), "open-world");
+        if (effect == org.yinwang.yin.RuntimeContext.Effect.DESTRUCTIVE && !approval) {
+            throw new ParserException("destructive tools must require approval",
+                    metadata.get("approval"));
+        }
+        return new ToolDef(name, input, output, error, capability.value, effect,
+                approval, idempotent, openWorld,
+                tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static boolean booleanLiteral(Node node, String property) throws ParserException {
+        if (node instanceof Name name && (name.id.equals("true") || name.id.equals("false"))) {
+            return name.id.equals("true");
+        }
+        throw new ParserException("tool :" + property + " must be true or false", node);
+    }
+
+    private static Invoke parseInvoke(Tuple tuple) throws ParserException {
+        if (tuple.elements.size() != 3) {
+            throw new ParserException("invoke requires a tool and one input value", tuple);
+        }
+        return new Invoke(parseNode(tuple.elements.get(1)), parseNode(tuple.elements.get(2)),
                 tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
     }
 

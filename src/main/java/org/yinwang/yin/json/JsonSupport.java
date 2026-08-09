@@ -17,11 +17,13 @@ public final class JsonSupport {
     public static void installRuntime(Scope<Value> scope) {
         scope.putValue("DecodeError", errorConstructor("DecodeError"));
         scope.putValue("EncodeError", errorConstructor("EncodeError"));
+        scope.putValue("ToolError", errorConstructor("ToolError"));
     }
 
     public static void installTypes(Scope<YinType> scope) {
         scope.putValue("DecodeError", errorType("DecodeError"));
         scope.putValue("EncodeError", errorType("EncodeError"));
+        scope.putValue("ToolError", errorType("ToolError"));
     }
 
     public static RecordType errorType(String name) {

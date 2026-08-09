@@ -238,15 +238,19 @@ public final class Match extends Node {
         }
         Scope<YinType> candidateFields;
         Set<String> nominalTypes;
+        boolean valueFields;
         if (candidate instanceof RecordValueType record) {
             candidateFields = record.fields;
             nominalTypes = record.nominalTypes();
+            valueFields = true;
         } else if (candidate instanceof RecordType record) {
             candidateFields = record.properties;
             nominalTypes = record.nominalTypes();
+            valueFields = false;
         } else if (candidate instanceof org.yinwang.yin.type.AnyType) {
             candidateFields = patternType.properties;
             nominalTypes = patternType.nominalTypes();
+            valueFields = false;
         } else {
             return null;
         }
@@ -255,7 +259,9 @@ public final class Match extends Node {
             return null;
         }
         List<YinType> fields = patternType.properties.keySet().stream()
-                .map(candidateFields::lookupLocalType).toList();
+                .map(field -> valueFields
+                        ? candidateFields.lookupLocal(field)
+                        : candidateFields.lookupLocalType(field)).toList();
         return analyzeChildren(recordPattern.fields(), fields, scope);
     }
 

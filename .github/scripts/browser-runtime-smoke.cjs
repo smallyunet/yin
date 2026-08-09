@@ -58,4 +58,26 @@ assert.equal(structuredContract.ok, true);
 assert.equal(structuredContract.value,
   '(ok "{\\\"tag\\\":\\\"Approve\\\",\\\"reason\\\":\\\"review\\\"}")');
 
+const typedTool = JSON.parse(yinEvaluate(`
+  (record RiskRequest [amount Int])
+  (record RiskAssessment [score Int] [reason String])
+  (variant RiskFailure [Offline [message String]] [Rejected [message String]])
+  (tool assess-risk RiskRequest RiskAssessment RiskFailure
+    :capability "risk.read"
+    :effect :read
+    :approval false
+    :idempotent true
+    :open-world false)
+  (match (invoke assess-risk (RiskRequest :amount 42))
+    [(Ok assessment) (field assessment :reason)]
+    [(Err error)
+      (match error
+        [(Offline message) message]
+        [(Rejected message) message]
+        [(ToolError _ _ message) message])])
+`));
+assert.equal(typedTool.ok, true);
+assert.equal(typedTool.value, '"browser host policy accepted"');
+assert.equal(typedTool.type, "String");
+
 console.log("Browser runtime smoke test passed");

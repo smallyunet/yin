@@ -6,7 +6,7 @@ All maintained examples live under this directory and are grouped by purpose:
 | --- | --- | --- |
 | `algorithms/` | `quicksort.yin` | Pure language and collection algorithms |
 | `cli/` | `parse-values.yin`, `wc.yin` | Arguments, standard input, and file-oriented CLI programs |
-| `agents/` | `structured-agent.yin`, `agent-review/` | Typed AI request, decision, and JSON-boundary workflows |
+| `agents/` | `structured-agent.yin`, `typed-tool.yin`, `agent-review/` | Typed AI requests, tool boundaries, decisions, and JSON workflows |
 | `web3/` | `transaction-guard/` | Deterministic policy between an AI agent and a wallet host |
 
 Runnable demos include their own README, input fixtures, shell entry point, and

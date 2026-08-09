@@ -1,0 +1,18 @@
+(record RiskRequest [amount Int])
+(record RiskAssessment [score Int] [reason String])
+(variant RiskFailure
+  [Offline [message String]]
+  [Rejected [message String]])
+(tool assess-risk RiskRequest RiskAssessment RiskFailure
+  :capability "risk.read"
+  :effect :read
+  :approval false
+  :idempotent true
+  :open-world false)
+(match (invoke assess-risk (RiskRequest :amount 42))
+  [(Ok assessment) (field assessment :reason)]
+  [(Err error)
+    (match error
+      [(Offline message) message]
+      [(Rejected message) message]
+      [(ToolError _ _ message) message])])

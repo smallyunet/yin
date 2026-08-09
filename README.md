@@ -22,6 +22,8 @@ Worker; no source code or JSON input is sent to a server.
 - typed `Result` outcomes with exhaustive `Ok` and `Err` handling
 - closed tagged variants and first-class `Option` values
 - strict typed JSON decoding, deterministic encoding, and Draft 2020-12 schemas
+- source-declared capabilities and typed host tools with explicit `Result` outcomes
+- deterministic capability manifests, approval enforcement, and tool-call audit events
 - string transformation, parsing, program arguments, and controlled text input
 - arithmetic, comparison, and boolean primitives
 - lexical scopes and first-class closures
@@ -36,7 +38,7 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.11 defines these
+boundaries between runtime values and static types. Yin 0.12 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -52,13 +54,13 @@ checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.11.0.jar --version
+java -jar yin-0.12.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.11.0.vsix
+code --install-extension yin-language-support-0.12.0.vsix
 ```
 
 ## Build and test
@@ -67,29 +69,29 @@ code --install-extension yin-language-support-0.11.0.vsix
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.11.0.jar`.
+This produces the executable JAR at `target/yin-0.12.0.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.11.0.jar tests/program-usability.yin
+java -jar target/yin-0.12.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.11.0.jar \
+java -cp target/yin-0.12.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.11.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.11.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.12.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.12.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.11.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.11.0.jar examples/cli/wc.yin README.md
+  java -jar target/yin-0.12.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.12.0.jar examples/cli/wc.yin README.md
 ```
 
 The [typed agent review demo](examples/agents/agent-review/README.md) provides a
@@ -99,13 +101,26 @@ errors.
 The [Web3 transaction guard](examples/web3/transaction-guard/README.md) applies
 the same boundary to normalized wallet intents, including simulation,
 verification, unlimited-approval, value-limit, chain, and address policies.
+The [typed-tool example](examples/agents/typed-tool.yin) declares a host-injected
+risk tool, invokes it through a checked contract, and handles both business and
+host boundary errors without granting ambient authority.
+
+Inspect every tool capability without executing the program:
+
+```bash
+java -jar target/yin-0.12.0.jar --capabilities examples/agents/typed-tool.yin
+```
+
+The manifest is deterministic and includes effect, approval, idempotency, and
+open-world metadata. Tool implementations and approval decisions remain host
+responsibilities; declarations never grant authority by themselves.
 
 ## Interactive REPL
 
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.11.0.jar
+java -jar target/yin-0.12.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -117,7 +132,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.11.0.jar --format tests/function1.yin
+java -jar target/yin-0.12.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.

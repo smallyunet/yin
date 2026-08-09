@@ -20,6 +20,7 @@ public class TypeChecker {
     public String file;
     public Set<FunctionType> uncalled = new HashSet<>();
     public Set<FunctionType> callStack = new HashSet<>();
+    private final List<RuntimeContext.ToolDescriptor> tools = new ArrayList<>();
 
 
     public TypeChecker(String file) {
@@ -30,6 +31,7 @@ public class TypeChecker {
     public YinType typecheck(String file) {
         uncalled.clear();
         callStack.clear();
+        tools.clear();
         Node program;
         try {
             program = Parser.parse(file);
@@ -43,6 +45,22 @@ public class TypeChecker {
         finishChecks(s);
 
         return ret;
+    }
+
+    public void registerTool(RuntimeContext.ToolDescriptor descriptor, Node location) {
+        for (RuntimeContext.ToolDescriptor existing : tools) {
+            if (existing.name().equals(descriptor.name())) {
+                if (!existing.equals(descriptor)) {
+                    Util.abort(location, "conflicting tool declaration: " + descriptor.name());
+                }
+                return;
+            }
+        }
+        tools.add(descriptor);
+    }
+
+    public List<RuntimeContext.ToolDescriptor> tools() {
+        return List.copyOf(tools);
     }
 
 

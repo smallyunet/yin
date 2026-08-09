@@ -140,6 +140,24 @@ const examples = {
         (concat
           (concat (field error :code) (concat " at " (field error :path)))
           (concat ": " (field error :message)))))])`,
+  typedTool: `(record RiskRequest [amount Int])
+(record RiskAssessment [score Int] [reason String])
+(variant RiskFailure
+  [Offline [message String]]
+  [Rejected [message String]])
+(tool assess-risk RiskRequest RiskAssessment RiskFailure
+  :capability "risk.read"
+  :effect :read
+  :approval false
+  :idempotent true
+  :open-world false)
+(match (invoke assess-risk (RiskRequest :amount 42))
+  [(Ok assessment) (field assessment :reason)]
+  [(Err error)
+    (match error
+      [(Offline message) message]
+      [(Rejected message) message]
+      [(ToolError _ _ message) message])])`,
   web3Guard: `(record TransactionIntent
   [requestId String]
   [chainId Int]
@@ -218,6 +236,7 @@ const exampleFiles = {
   quicksort: "examples/algorithms/quicksort.yin",
   structuredAgent: "examples/agents/structured-agent.yin",
   agentReview: "examples/agents/agent-review/main.yin",
+  typedTool: "examples/agents/typed-tool.yin",
   web3Guard: "examples/web3/transaction-guard/main.yin"
 };
 
@@ -377,7 +396,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.11";
+    resultType.textContent = "Yin 0.12";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

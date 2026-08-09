@@ -112,12 +112,21 @@ The project is being stabilized before new language features are designed.
 - maintained structured-agent standard-input/output example
 - CLI, REPL, browser, formatter, LSP, editor, specification, and regression coverage
 
+## 0.12 — capabilities and tools
+
+- source-declared typed tool contracts with input, output, and business-error types
+- explicit capability, read/write/destructive effect, approval, idempotency, and open-world metadata
+- host-injected implementations with deny-by-default approval enforcement
+- `Result` outcomes that distinguish business failures from built-in `ToolError` boundary failures
+- deterministic preflight capability manifests and structured terminal audit events
+- transport-neutral MCP `CallToolResult` adapter with strict output-contract validation
+- maintained browser-hosted typed-tool example and JVM integration coverage
+
 ## Later
 
 - modules and multi-file type checking
 - persistent dictionaries and sets
-- effect and host-capability declarations
-- typed tool and model boundaries
+- typed model boundaries
 - durable tasks, checkpoints, approval, and record/replay
 - bytecode or native compilation
 - hover, completion, definition, and reference navigation

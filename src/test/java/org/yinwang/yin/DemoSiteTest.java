@@ -41,6 +41,7 @@ class DemoSiteTest {
         assertTrue(html.contains("data-example=\"quicksort\""));
         assertTrue(html.contains("data-example=\"structuredAgent\""));
         assertTrue(html.contains("data-example=\"agentReview\""));
+        assertTrue(html.contains("data-example=\"typedTool\""));
         assertTrue(html.contains("data-example=\"web3Guard\""));
         assertTrue(html.contains("<label for=\"input-editor\">JSON input</label>"));
         assertTrue(html.contains("id=\"input-editor\""));
@@ -75,6 +76,7 @@ class DemoSiteTest {
                 "examples/algorithms/quicksort.yin",
                 "examples/agents/structured-agent.yin",
                 "examples/agents/agent-review/main.yin",
+                "examples/agents/typed-tool.yin",
                 "examples/web3/transaction-guard/main.yin")) {
             String source = Files.readString(Path.of(program), StandardCharsets.UTF_8).strip();
             assertTrue(app.contains(source), program + " must stay synchronized with the playground");

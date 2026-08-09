@@ -41,14 +41,15 @@ typed input
 - **0.11 structured contracts:** shipped tagged variants, `Option`, strict
   type-directed JSON decoding, deterministic encoding, structured boundary
   errors, and JSON Schema Draft 2020-12 generation.
-- **0.12 capabilities and tools:** declared effects, injected permissions,
-  typed `Tool<Input, Output, Error>`, approval metadata, and an MCP adapter.
+- **0.12 capabilities and tools:** shipped declared effects, injected permissions,
+  typed tool contracts, approval metadata, deterministic manifests and audit
+  events, plus a transport-neutral MCP adapter.
 - **0.13 model boundaries:** typed generation, provider-neutral configuration,
   token/cost budgets, provenance, mocks, and record/replay.
 - **0.14 durable agents:** tasks, structured concurrency, checkpointing,
   suspension, user input, approval tokens, cancellation, and recovery.
 
-The static checker should eventually be able to list every capability and
-potential external write required by an agent before that agent runs. Until
-those semantics are specified and tested, AI services remain host integrations
-rather than ad hoc language primitives.
+The static checker now lists every declared tool capability and potential
+external write before execution. Model and durable-task authority will extend
+the same manifest contract in later versions; those services remain host
+integrations rather than ad hoc language primitives until then.
