@@ -6,6 +6,7 @@
 - report syntax and type diagnostics for unsaved documents with full-text sync
 - expose canonical whole-document formatting through the language server
 - add a self-contained Visual Studio Code extension with bundled Yin server
+- verify and publish the version-matched VSIX with GitHub release artifacts
 - keep local Marketplace credentials and generated extension artifacts out of Git
 - expand the automated suite from 101 to 107 tests
 

@@ -40,12 +40,19 @@ behaviors normatively rather than relying on historical implementation details.
 
 ## Releases
 
-Versioned executable JARs and SHA-256 checksum files are published on the
+Versioned executable JARs, Visual Studio Code extension packages, and SHA-256
+checksum files are published on the
 [GitHub Releases page](https://github.com/smallyunet/yin/releases). Confirm a
 downloaded JAR before running it:
 
 ```bash
 java -jar yin-0.8.0.jar --version
+```
+
+Install the matching editor extension from the downloaded VSIX:
+
+```bash
+code --install-extension yin-language-support-0.8.0.vsix
 ```
 
 ## Build and test

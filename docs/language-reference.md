@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.7 language specification](language-specification.md). Files in
+[Yin 0.8 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -141,5 +141,7 @@ runtime. `append` constructs a new vector and does not modify either input.
 
 - record mutation and generic subscript syntax are unsupported
 - the type system is experimental and is not a formal soundness guarantee
-- there is no module system, package manager, bytecode/native compiler, or LSP
+- there is no module system, package manager, or bytecode/native compiler
+- the LSP currently provides diagnostics and formatting, but not semantic
+  navigation or completion
 - several files under `experiments/` represent abandoned syntax designs

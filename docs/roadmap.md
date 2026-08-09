@@ -79,6 +79,7 @@ The project is being stabilized before new language features are designed.
 - canonical whole-document formatting
 - self-contained Visual Studio Code extension with a bundled Yin server
 - protocol-level regression tests for initialization, document sync, and edits
+- CI-verified VSIX packages published alongside executable release artifacts
 
 ## Later
 

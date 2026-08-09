@@ -7,10 +7,12 @@ formatter.
 
 ## Visual Studio Code
 
-The Marketplace extension bundles the executable Yin server, so a separate Yin
-installation is not required. A Java 17 or newer runtime must be available on
-`PATH`. If it is installed elsewhere, set `yin.java.path` in Visual Studio Code
-settings to the Java executable.
+The extension bundles the executable Yin server, so a separate Yin installation
+is not required. Download the versioned VSIX from the
+[GitHub Releases page](https://github.com/smallyunet/yin/releases) and install it
+with **Extensions: Install from VSIX...** in Visual Studio Code. A Java 17 or
+newer runtime must be available on `PATH`. If it is installed elsewhere, set
+`yin.java.path` in Visual Studio Code settings to the Java executable.
 
 The first release intentionally supports only full-document synchronization,
 diagnostics, and formatting. Hover, completion, definitions, and references are
@@ -40,4 +42,5 @@ npm run package
 
 Packaging rebuilds the root Maven project, copies the version-matched executable
 JAR into the extension, validates TypeScript, bundles the client, and creates a
-VSIX suitable for local installation.
+VSIX suitable for local installation. CI performs the same packaging path and
+checks that the VSIX contains a runnable, version-matched Yin server.
