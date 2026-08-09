@@ -6,6 +6,9 @@ import org.yinwang.yin.lsp.YinLanguageServer;
 import org.yinwang.yin.parser.Parser;
 import org.yinwang.yin.parser.ParserException;
 import org.yinwang.yin.value.Value;
+import org.yinwang.yin.value.ResultValue;
+import org.yinwang.yin.value.StringValue;
+import org.yinwang.yin.json.JsonCodec;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +16,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.io.PrintStream;
+import java.util.function.Supplier;
 
 public class Interpreter {
 
@@ -55,6 +60,13 @@ public class Interpreter {
             }
             return;
         }
+        if (args.length > 0 && args[0].equals("--json")) {
+            int status = runJson(
+                    Arrays.copyOfRange(args, 1, args.length),
+                    System.out, System.err, Interpreter::readStandardInput);
+            if (status != 0) System.exit(status);
+            return;
+        }
         if (args.length > 0 && args[0].equals("--format")) {
             int status = Formatter.run(
                     Arrays.copyOfRange(args, 1, args.length),
@@ -94,6 +106,47 @@ public class Interpreter {
             return new String(System.in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException error) {
             throw new GeneralError("failed to read standard input: " + error.getMessage());
+        }
+    }
+
+    /** Runs a JSON-boundary program without mixing Yin debug rendering into stdout. */
+    public static int runJson(String[] args, PrintStream output, PrintStream error,
+                              Supplier<String> input) {
+        if (args.length == 0) {
+            error.println("usage: --json <program.yin> [arguments...]");
+            return 2;
+        }
+        try {
+            String file = args[0];
+            RuntimeContext context = new RuntimeContext(
+                    error::println,
+                    input,
+                    Arrays.asList(Arrays.copyOfRange(args, 1, args.length)));
+            Value result = new Interpreter(file).interp(file, context);
+            if (result instanceof StringValue text) {
+                output.println(text.value);
+                return 0;
+            }
+            if (result instanceof ResultValue outcome) {
+                if (outcome.tag() == ResultValue.Tag.OK
+                        && outcome.payload() instanceof StringValue text) {
+                    output.println(text.value);
+                    return 0;
+                }
+                if (outcome.tag() == ResultValue.Tag.ERR) {
+                    output.println(JsonCodec.encode(outcome.payload()));
+                    return 1;
+                }
+            }
+            error.println("--json expects String or (Result String E), got: " + result);
+            return 1;
+        } catch (GeneralError languageError) {
+            error.println(languageError);
+            return 1;
+        } catch (JsonCodec.Failure encodingError) {
+            error.println("failed to encode JSON error at " + encodingError.path()
+                    + ": " + encodingError.getMessage());
+            return 1;
         }
     }
 

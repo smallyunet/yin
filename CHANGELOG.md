@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- add a complete typed agent-review demo with maintained approval, rejection,
+  user-input, and strict boundary-error fixtures
+- add `--json` for clean JSON stdout, stderr-isolated logs, and structured
+  non-zero failure output
+
 ## 0.11.0 — 2026-08-09
 
 - add closed `variant` declarations with named-field constructors and exhaustive matching

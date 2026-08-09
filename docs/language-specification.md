@@ -188,6 +188,11 @@ with a `tag` field. `(json-schema Type)` returns a deterministic JSON Schema
 Draft 2020-12 document with closed objects, required fields, and `oneOf` for
 closed variants and Results.
 
+The CLI `--json` execution mode is a host boundary rather than language syntax.
+It accepts a final `String` or `(Result String E)`, writes successful string
+payloads without Yin debug quoting, routes `print` output to stderr, and
+JSON-encodes an `Err` payload while returning a non-zero status.
+
 ## Explicit results
 
 `(ok value)` constructs an immutable success value with precise type `(Ok T)`.

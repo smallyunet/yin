@@ -1,0 +1,54 @@
+(record ReviewRequest
+  [requestId String]
+  [action String]
+  [amount Int]
+  [risk String]
+  [context (Option String) :default none])
+(variant Decision
+  [Approve [requestId String] [reason String]]
+  [Reject [requestId String] [reason String]]
+  [NeedsInput [requestId String] [question String]])
+(define decide
+  (fun ([request ReviewRequest] [-> Decision])
+    (if (= (field request :risk) "blocked")
+      (Reject
+        :requestId
+        (field request :requestId)
+        :reason
+        "risk policy blocked this request")
+      (if (> (field request :amount) 10000)
+        (NeedsInput
+          :requestId
+          (field request :requestId)
+          :question
+          "manual approval context is required for a high amount")
+        (if (= (field request :action) "transfer")
+          (match (field request :context)
+            [(Some _)
+              (Approve
+                :requestId
+                (field request :requestId)
+                :reason
+                "transfer context accepted")]
+            [(None)
+              (NeedsInput
+                :requestId
+                (field request :requestId)
+                :question
+                "provide transfer approval context")])
+          (Approve
+            :requestId
+            (field request :requestId)
+            :reason
+            "within automatic policy"))))))
+(match (decode-json ReviewRequest (read-all))
+  [(Ok request) (encode-json (decide request))]
+  [(Err error)
+    (encode-json
+      (Reject
+        :requestId
+        "invalid-request"
+        :reason
+        (concat
+          (concat (field error :code) (concat " at " (field error :path)))
+          (concat ": " (field error :message)))))])

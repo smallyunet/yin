@@ -223,6 +223,16 @@ java -jar yin-0.11.0.jar examples/parse-values.yin 10 bad 32
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
 is deliberately unavailable in the browser runtime.
 
+For structured pipelines, `--json` reserves stdout for the final raw JSON:
+
+```bash
+java -jar yin-0.11.0.jar --json program.yin < request.json
+```
+
+The program must return `String` or `(Result String E)`. `Ok String` is
+unwrapped, program `print` output is routed to stderr, and an `Err` payload is
+JSON-encoded with a non-zero process status.
+
 ## Known language gaps
 
 - record mutation and generic subscript syntax are unsupported

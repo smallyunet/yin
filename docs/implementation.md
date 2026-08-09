@@ -27,6 +27,8 @@ source file
 - `Scope.java` implements generic lexical environment chains. Runtime scopes
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
+  Its `--json` host mode keeps stdout machine-readable and routes program logs
+  to stderr for structured pipelines.
 - `RuntimeContext.java` injects output, complete text input, program arguments,
   and UTF-8 resource reads instead of hiding host effects in language nodes.
 - `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
@@ -102,6 +104,8 @@ construction, covariance, exhaustive narrowing, structural equality, `Any`,
 and the maintained result program.
 `StructuredContractsIntegrationTest` protects the Yin 0.11 variant, Option,
 strict JSON, structured error path, schema, and complete agent-boundary slice.
+`AgentReviewDemoTest` executes every maintained policy and malformed-input
+fixture through the raw JSON CLI boundary.
 
 Run all checks with:
 

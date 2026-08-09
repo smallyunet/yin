@@ -87,9 +87,14 @@ Run complete example programs:
 java -jar target/yin-0.11.0.jar examples/quicksort.yin
 java -jar target/yin-0.11.0.jar examples/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.11.0.jar examples/structured-agent.yin
+  java -jar target/yin-0.11.0.jar --json examples/structured-agent.yin
 java -jar target/yin-0.11.0.jar examples/wc.yin README.md
 ```
+
+The [typed agent review demo](examples/agent-review/README.md) provides a
+complete strict-JSON request, exhaustive decision, and raw-JSON response flow
+with maintained fixtures for approval, rejection, user input, and boundary
+errors.
 
 ## Interactive REPL
 
