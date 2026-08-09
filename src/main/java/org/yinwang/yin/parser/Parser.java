@@ -313,6 +313,10 @@ public class Parser {
         for (Node field : tuple.elements.subList(1, tuple.elements.size())) {
             fields.add(parseMatchPattern(field));
         }
+        if ((type.id.equals(Constants.OK_PATTERN) || type.id.equals(Constants.ERR_PATTERN))
+                && fields.size() != 1) {
+            throw new ParserException(type.id + " pattern expects exactly one payload", tuple);
+        }
         return new MatchPattern.RecordPattern(type, fields, tuple);
     }
 
@@ -452,6 +456,10 @@ public class Parser {
                 && call.args.positional.get(0) instanceof VectorLiteral parameters
                 && isTypeExpression(call.args.positional.get(1))) {
             return parameters.elements.stream().allMatch(Parser::isTypeExpression);
+        }
+        if (operator.id.equals(Constants.RESULT_TYPE_KEYWORD)) {
+            return call.args.positional.size() == 2
+                    && call.args.positional.stream().allMatch(Parser::isTypeExpression);
         }
         return false;
     }

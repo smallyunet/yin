@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.0
+
+- highlight `Result`, `Ok`, `Err`, `ok`, and `err` explicit-outcome forms
+- bundle the Yin 0.10.0 language server
+
 ## 0.9.0
 
 - understand Yin 0.9 collection, function type, and match syntax

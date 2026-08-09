@@ -208,6 +208,21 @@ public final class PrimitiveFunctionType extends YinType {
         });
     }
 
+    public static PrimitiveFunctionType resultType() {
+        return new PrimitiveFunctionType("Result", 2,
+                (arguments, location) -> new ResultType(arguments.get(0), arguments.get(1)));
+    }
+
+    public static PrimitiveFunctionType resultOk() {
+        return new PrimitiveFunctionType("ok", 1,
+                (arguments, location) -> new OkType(arguments.get(0)));
+    }
+
+    public static PrimitiveFunctionType resultErr() {
+        return new PrimitiveFunctionType("err", 1,
+                (arguments, location) -> new ErrType(arguments.get(0)));
+    }
+
     public static PrimitiveFunctionType vectorMap() {
         return new PrimitiveFunctionType("map", 2, (arguments, location) ->
                 mapVector(arguments.get(0), arguments.get(1), location));

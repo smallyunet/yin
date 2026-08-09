@@ -92,11 +92,25 @@ The project is being stabilized before new language features are designed.
 - injected program arguments, complete text input, and UTF-8 file reads
 - maintained word-count, quicksort, and argument-parsing programs
 
+## 0.10 — explicit outcomes
+
+- source-expressible `(Result T E)` outcome types
+- precise `(Ok T)` and `(Err E)` variant types from immutable `ok` and `err`
+  constructors
+- covariant widening into declared Result boundaries
+- exhaustive `Ok` and `Err` pattern matching with typed payload narrowing
+- structural Result equality and explicit behavior across `Any`
+- maintained CLI, REPL, browser, formatter, specification, and editor coverage
+
 ## Later
 
 - modules and multi-file type checking
 - persistent dictionaries and sets
-- explicit option and result records
+- explicit option values
+- JSON values, schema validation, and record encoding
+- effect and host-capability declarations
+- typed tool and model boundaries
+- durable tasks, checkpoints, approval, and record/replay
 - bytecode or native compilation
 - hover, completion, definition, and reference navigation
 

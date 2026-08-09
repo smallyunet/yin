@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.9 language. Behavior not described
+This document defines the normative Yin 0.10 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -50,7 +50,8 @@ match          = "(" "match" expression match-clause { match-clause } ")" ;
 match-clause   = "[" match-pattern expression "]" ;
 match-pattern  = "_" | literal | name
                | "[" { match-pattern } "]"
-               | "(" type-name match-pattern { match-pattern } ")" ;
+               | "(" type-name match-pattern { match-pattern } ")"
+               | "(" ("Ok" | "Err") match-pattern ")" ;
 definition     = "(" "define" pattern expression ")" ;
 assignment     = "(" "set!" pattern expression ")" ;
 
@@ -77,7 +78,8 @@ type-expression
                = name
                | "(" "U" type-expression { type-expression } ")"
                | "(" "Vector" type-expression ")"
-               | "(" "Fn" "[" { type-expression } "]" type-expression ")" ;
+               | "(" "Fn" "[" { type-expression } "]" type-expression ")"
+               | "(" "Result" type-expression type-expression ")" ;
 
 call           = "(" expression { expression } ")"
                | "(" expression { keyword expression } ")" ;
@@ -141,6 +143,25 @@ record, and exact-vector patterns cover their corresponding union members. A
 runtime value that crosses an `Any` boundary and matches no clause is still a
 language error.
 
+A `(Result OkType ErrorType)` target is analyzed as two alternatives. `(Ok value)`
+and `(Err error)` patterns select and bind their respective payloads. Both
+variants must be covered unless a wildcard or binding covers the remainder.
+
+## Explicit results
+
+`(ok value)` constructs an immutable success value with precise type `(Ok T)`.
+`(err error)` constructs an immutable failure value with precise type `(Err E)`.
+`(Result T E)` is the source-expressible common outcome type: `(Ok A)` is its
+subtype when `A` is a subtype of `T`, and `(Err B)` is its subtype when `B` is a
+subtype of `E`. Result types are covariant in both payloads.
+
+Result values print as `(ok value)` and `(err error)`. Equality compares the tag
+and then the immutable payload. A success and a failure are comparable but never
+equal. Results do not catch language diagnostics; they represent expected
+domain failures explicitly. Tool, model, and task integrations are expected to
+return results in later AI-first versions rather than introduce hidden exception
+control flow.
+
 ## Records
 
 A record definition creates a callable runtime constructor and a nominal static
@@ -181,6 +202,9 @@ Type rules:
 - `(Fn [T1 ... Tn] R)` describes a positional callable. Source functions must
   have compatible parameter and return annotations when passed through this
   type. Parameters are contravariant and results are covariant.
+- `(Result T E)` describes an explicit success or failure outcome. `ok` and
+  `err` retain precise `(Ok T)` and `(Err E)` variant types until widened by an
+  annotation.
 - Two vector types are equivalent when they have the same length and equivalent
   element types.
 - `length` accepts a vector and returns its length as `Int`.
@@ -216,6 +240,9 @@ selection without mutable loop state. String programs can use `string-length`,
 `concat`, `substring`, `split`, `join`, `trim`, `to-string`, `parse-int`, and
 `parse-float`. Failed numeric parsing returns `false`, so a match over
 `(U Int Bool)` or `(U Float Bool)` must handle both cases.
+
+`ok` and `err` are total one-argument constructors. They do not perform I/O or
+intercept diagnostics.
 
 `args` is a `(Vector String)` supplied by the host. `read-all` consumes the
 host-provided text input, while `read-text` asks the host for one UTF-8 text

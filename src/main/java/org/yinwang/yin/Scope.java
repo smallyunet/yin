@@ -202,6 +202,8 @@ public class Scope<T> {
         init.putValue("slice", new VectorPrimitives.Slice());
         init.putValue("reverse", new VectorPrimitives.Reverse());
         init.putValue("contains", new VectorPrimitives.Contains());
+        init.putValue("ok", new ResultPrimitives.Ok());
+        init.putValue("err", new ResultPrimitives.Err());
         init.putValue("string-length", new StringPrimitives.Length());
         init.putValue("concat", new StringPrimitives.Concat());
         init.putValue("substring", new StringPrimitives.Substring());
@@ -240,6 +242,8 @@ public class Scope<T> {
         init.putValue("slice", PrimitiveFunctionType.vectorSlice());
         init.putValue("reverse", PrimitiveFunctionType.vectorReverse());
         init.putValue("contains", PrimitiveFunctionType.vectorContains());
+        init.putValue("ok", PrimitiveFunctionType.resultOk());
+        init.putValue("err", PrimitiveFunctionType.resultErr());
         init.putValue("string-length", PrimitiveFunctionType.stringUnary("string-length", Types.INT));
         init.putValue("concat", PrimitiveFunctionType.stringBinary("concat", Types.STRING));
         init.putValue("substring", PrimitiveFunctionType.substring());
@@ -255,6 +259,7 @@ public class Scope<T> {
         init.putValue("U", PrimitiveFunctionType.union());
         init.putValue("Vector", PrimitiveFunctionType.vectorType());
         init.putValue("Fn", PrimitiveFunctionType.functionType());
+        init.putValue("Result", PrimitiveFunctionType.resultType());
     }
 
 

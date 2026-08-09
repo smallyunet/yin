@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.0 — 2026-08-09
+
+- establish the AI-first direction around typed boundaries, injected
+  capabilities, approval, durable work, and replay
+- add source-expressible `(Result T E)` outcome annotations
+- add immutable `ok` and `err` constructors with precise `(Ok T)` and `(Err E)`
+  variant types
+- add covariant Result subtyping and exhaustive payload-narrowing patterns
+- add structural Result equality and an explicit runtime-checked `Any` boundary
+- add a maintained explicit-outcome program and browser Playground example
+- expand editor syntax highlighting for the Yin 0.10 outcome forms
+- expand the automated suite from 124 to 132 tests
+
 ## 0.9.0 — 2026-08-09
 
 - add `(Vector T)` homogeneous collection annotations and `(Fn [T...] R)`

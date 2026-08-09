@@ -40,6 +40,22 @@ public final class Types {
         if (expected instanceof UnionType union) {
             return union.members().stream().anyMatch(member -> subtype(actual, member));
         }
+        if (actual instanceof OkType ok && expected instanceof ResultType result) {
+            return subtype(ok.value(), result.ok());
+        }
+        if (actual instanceof ErrType error && expected instanceof ResultType result) {
+            return subtype(error.error(), result.error());
+        }
+        if (actual instanceof OkType actualOk && expected instanceof OkType expectedOk) {
+            return subtype(actualOk.value(), expectedOk.value());
+        }
+        if (actual instanceof ErrType actualErr && expected instanceof ErrType expectedErr) {
+            return subtype(actualErr.error(), expectedErr.error());
+        }
+        if (actual instanceof ResultType actualResult && expected instanceof ResultType expectedResult) {
+            return subtype(actualResult.ok(), expectedResult.ok())
+                    && subtype(actualResult.error(), expectedResult.error());
+        }
         if (actual instanceof VectorType actualVector
                 && expected instanceof HomogeneousVectorType expectedVector) {
             return actualVector.elements().stream()
@@ -118,6 +134,16 @@ public final class Types {
             }
             return equivalent(leftFunction.result(), rightFunction.result());
         }
+        if (left instanceof OkType leftOk && right instanceof OkType rightOk) {
+            return equivalent(leftOk.value(), rightOk.value());
+        }
+        if (left instanceof ErrType leftErr && right instanceof ErrType rightErr) {
+            return equivalent(leftErr.error(), rightErr.error());
+        }
+        if (left instanceof ResultType leftResult && right instanceof ResultType rightResult) {
+            return equivalent(leftResult.ok(), rightResult.ok())
+                    && equivalent(leftResult.error(), rightResult.error());
+        }
         if (left instanceof UnionType leftUnion && right instanceof UnionType rightUnion) {
             return leftUnion.members().size() == rightUnion.members().size()
                     && leftUnion.members().stream().allMatch(leftMember ->
@@ -152,6 +178,32 @@ public final class Types {
         }
         if (numeric(left) && numeric(right)) {
             return true;
+        }
+        if (left instanceof ResultType leftResult && right instanceof ResultType rightResult) {
+            return overlaps(leftResult.ok(), rightResult.ok())
+                    || overlaps(leftResult.error(), rightResult.error());
+        }
+        if (left instanceof OkType && right instanceof ErrType
+                || left instanceof ErrType && right instanceof OkType) {
+            return true;
+        }
+        if (left instanceof OkType leftOk && right instanceof OkType rightOk) {
+            return overlaps(leftOk.value(), rightOk.value());
+        }
+        if (left instanceof ErrType leftErr && right instanceof ErrType rightErr) {
+            return overlaps(leftErr.error(), rightErr.error());
+        }
+        if (left instanceof OkType leftOk && right instanceof ResultType rightResult) {
+            return overlaps(leftOk.value(), rightResult.ok());
+        }
+        if (left instanceof ResultType leftResult && right instanceof OkType rightOk) {
+            return overlaps(leftResult.ok(), rightOk.value());
+        }
+        if (left instanceof ErrType leftErr && right instanceof ResultType rightResult) {
+            return overlaps(leftErr.error(), rightResult.error());
+        }
+        if (left instanceof ResultType leftResult && right instanceof ErrType rightErr) {
+            return overlaps(leftResult.error(), rightErr.error());
         }
         return subtype(left, right) || subtype(right, left);
     }

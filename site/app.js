@@ -30,6 +30,13 @@ const examples = {
 (fold values 0
   (fun ([total Int] [value Int] [-> Int])
     (+ total value)))`,
+  results: `(define fetch
+  (fun ([available Bool] [-> (Result Int String)])
+    (if available (ok 42) (err "unavailable"))))
+
+(match (fetch true)
+  [(Ok value) value]
+  [(Err message) (seq (print message) 0)])`,
   unions: `(define numeric-label
   (fun ([value (U Int Float)] [-> String])
     (if (= value 0) "zero" "non-zero")))
@@ -197,7 +204,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.9";
+    resultType.textContent = "Yin 0.10";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

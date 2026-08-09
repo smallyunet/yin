@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Constants {
 
-    public static final String VERSION = "0.9.0";
+    public static final String VERSION = "0.10.0";
 
     // delimiters and delimeter pairs
     public static final String LINE_COMMENT = "--";
@@ -39,7 +39,10 @@ public class Constants {
     public static final String UNION_KEYWORD = "U";
     public static final String VECTOR_TYPE_KEYWORD = "Vector";
     public static final String FUNCTION_TYPE_KEYWORD = "Fn";
+    public static final String RESULT_TYPE_KEYWORD = "Result";
     public static final String MATCH_KEYWORD = "match";
+    public static final String OK_PATTERN = "Ok";
+    public static final String ERR_PATTERN = "Err";
 
     public static List<Character> IDENT_CHARS =
             Arrays.asList('~', '!', '@', '#', '$', '%', '^', '&', '*', '-', '_', '=', '+', '|',

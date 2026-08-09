@@ -18,6 +18,7 @@ and formatting run locally in a Web Worker; no source code is sent to a server.
 - integers, floats, booleans, strings, and vectors
 - exact and homogeneous immutable vectors with higher-order processing
 - exhaustive pattern matching over primitives, vectors, records, and unions
+- typed `Result` outcomes with exhaustive `Ok` and `Err` handling
 - string transformation, parsing, program arguments, and controlled text input
 - arithmetic, comparison, and boolean primitives
 - lexical scopes and first-class closures
@@ -32,7 +33,7 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.9 defines these
+boundaries between runtime values and static types. Yin 0.10 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -48,13 +49,13 @@ checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.9.0.jar --version
+java -jar yin-0.10.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.9.0.vsix
+code --install-extension yin-language-support-0.10.0.vsix
 ```
 
 ## Build and test
@@ -63,27 +64,27 @@ code --install-extension yin-language-support-0.9.0.vsix
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.9.0.jar`.
+This produces the executable JAR at `target/yin-0.10.0.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.9.0.jar tests/program-usability.yin
+java -jar target/yin-0.10.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.9.0.jar \
+java -cp target/yin-0.10.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.9.0.jar examples/quicksort.yin
-java -jar target/yin-0.9.0.jar examples/parse-values.yin 10 bad 32
-java -jar target/yin-0.9.0.jar examples/wc.yin README.md
+java -jar target/yin-0.10.0.jar examples/quicksort.yin
+java -jar target/yin-0.10.0.jar examples/parse-values.yin 10 bad 32
+java -jar target/yin-0.10.0.jar examples/wc.yin README.md
 ```
 
 ## Interactive REPL
@@ -91,7 +92,7 @@ java -jar target/yin-0.9.0.jar examples/wc.yin README.md
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.9.0.jar
+java -jar target/yin-0.10.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -103,7 +104,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.9.0.jar --format tests/function1.yin
+java -jar target/yin-0.10.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.
@@ -143,6 +144,9 @@ short [Language reference](docs/language-reference.md), the
 [Editor integration](docs/lsp.md),
 [Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
 maintained project boundaries.
+The [AI-first direction](docs/ai-first.md) defines the intended Result,
+capability, tool, model, and durable-agent sequence without binding Yin syntax
+to one provider protocol.
 
 ## License
 

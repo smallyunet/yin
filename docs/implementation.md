@@ -36,6 +36,9 @@ source file
   diagnostics, and formatting over standard input/output.
 - `value/` contains runtime values, closures, record constructors, and runtime
   primitives.
+- `value/ResultValue.java` and the distinct `OkType`, `ErrType`, and
+  `ResultType` static representations keep expected failures explicit without
+  mixing runtime values into the type environment.
 - `value/Vector.java` stores an immutable element snapshot; checked primitives
   provide indexing, concatenation, mapping, filtering, folding, slicing,
   reversal, ranges, and membership without mutable collection state.
@@ -87,9 +90,12 @@ checking, multiline input, error recovery, and incomplete input at EOF.
 modes, invalid input, and canonical formatting of every maintained program.
 `LanguageServerIntegrationTest` drives framed protocol messages to protect
 initialization, diagnostic clearing, shutdown, and formatting responses.
-`LanguageCompletenessTest` protects the Yin 0.9 vertical slice from type
+`LanguageCompletenessTest` protects the Yin 0.9 programmable-core slice from type
 annotations through match, collection/string processing, host input, and
 complete runnable examples.
+`ResultIntegrationTest` protects the Yin 0.10 explicit-outcome slice across
+construction, covariance, exhaustive narrowing, structural equality, `Any`,
+and the maintained result program.
 
 Run all checks with:
 

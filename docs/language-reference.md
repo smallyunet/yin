@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.9 language specification](language-specification.md). Files in
+[Yin 0.10 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -23,6 +23,25 @@ false
 ```
 
 The maintained built-in types are `Int`, `Float`, `Bool`, `String`, and `Any`.
+
+## Explicit results
+
+Expected failure is represented with an immutable, typed `Result` rather than
+an exception or sentinel value:
+
+```yin
+(define lookup
+  (fun ([available Bool] [-> (Result Int String)])
+    (if available (ok 42) (err "unavailable"))))
+
+(match (lookup true)
+  [(Ok value) value]
+  [(Err _) 0])
+```
+
+`(ok value)` has precise type `(Ok T)` and `(err error)` has `(Err E)`.
+Both are accepted by a compatible `(Result T E)` annotation. Matching a Result
+must cover both variants, and each pattern binds only its typed payload.
 
 ## Definitions and assignment
 
@@ -77,7 +96,8 @@ values also evaluate in source order, independently of parameter order.
 Annotations may name a built-in or record type, or use a non-empty union such
 as `(U Int Float)`. `(Vector Int)` describes an arbitrary-length immutable
 vector of integers, while `(Fn [Int] String)` describes a positional function
-from `Int` to `String`. `Any` is the top type. A return descriptor, when
+from `Int` to `String`. `(Result Int String)` describes an explicit success or
+failure. `Any` is the top type. A return descriptor, when
 present, must be the final descriptor in the parameter list.
 
 ## Pattern matching
@@ -92,7 +112,8 @@ present, must be the final descriptor in the parameter list.
 
 Patterns support literals, `_`, bindings, fixed vectors, built-in type
 narrowing, and positional record destructuring. Matches must be exhaustive;
-record and built-in type patterns can cover the members of a union.
+record and built-in type patterns can cover the members of a union, while
+`Ok` and `Err` patterns cover the variants of a Result.
 
 ## Records
 
@@ -135,6 +156,7 @@ access through `Any` remains `Any` and is checked at runtime.
 - arithmetic: `+`, `-`, `*`, `/`
 - numeric comparison: `<`, `<=`, `>`, `>=`, `=`
 - boolean operations: `and`, `or`, `not`
+- explicit result constructors: `ok`, `err`
 - immutable vectors: `length`, `at`, `append`
 - vector processing: `map`, `filter`, `fold`, `range`, `slice`, `reverse`,
   `contains`
@@ -143,6 +165,7 @@ access through `Any` remains `Any` and is checked at runtime.
 - host input: `args`, `read-all`, `read-text`
 - output: `print`
 - union type constructor used by the type checker: `U`
+- result type constructor used by the type checker: `Result`
 
 `print` accepts zero or more positional arguments and returns `void`.
 
@@ -175,7 +198,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.9.0.jar examples/parse-values.yin 10 bad 32
+java -jar yin-0.10.0.jar examples/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but

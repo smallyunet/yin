@@ -6,6 +6,9 @@ import org.yinwang.yin.type.BoolType;
 import org.yinwang.yin.type.HomogeneousVectorType;
 import org.yinwang.yin.type.RecordType;
 import org.yinwang.yin.type.RecordValueType;
+import org.yinwang.yin.type.ErrType;
+import org.yinwang.yin.type.OkType;
+import org.yinwang.yin.type.ResultType;
 import org.yinwang.yin.type.Types;
 import org.yinwang.yin.type.UnionType;
 import org.yinwang.yin.type.VectorType;
@@ -15,6 +18,7 @@ import org.yinwang.yin.value.FloatValue;
 import org.yinwang.yin.value.IntValue;
 import org.yinwang.yin.value.RecordConstructor;
 import org.yinwang.yin.value.RecordValue;
+import org.yinwang.yin.value.ResultValue;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.ValueEquality;
 import org.yinwang.yin.value.Vector;
@@ -119,6 +123,13 @@ public final class Match extends Node {
             return true;
         }
         MatchPattern.RecordPattern recordPattern = (MatchPattern.RecordPattern) pattern;
+        ResultValue.Tag resultTag = resultTag(recordPattern.type().id);
+        if (resultTag != null) {
+            return recordPattern.fields().size() == 1
+                    && value instanceof ResultValue result
+                    && result.tag() == resultTag
+                    && matches(recordPattern.fields().get(0), result.payload(), scope, bindings);
+        }
         YinType builtIn = builtInType(recordPattern.type().id);
         if (builtIn != null) {
             return recordPattern.fields().size() == 1
@@ -176,6 +187,17 @@ public final class Match extends Node {
         }
 
         MatchPattern.RecordPattern recordPattern = (MatchPattern.RecordPattern) pattern;
+        if (resultTag(recordPattern.type().id) != null) {
+            YinType resultPayload = resultPayload(recordPattern.type().id, candidate);
+            if (recordPattern.fields().size() != 1) {
+                Util.abort(recordPattern.location(), recordPattern.type().id
+                        + " pattern expects exactly one payload");
+            }
+            if (resultPayload == null) {
+                return null;
+            }
+            return analyzeChildren(recordPattern.fields(), List.of(resultPayload), scope);
+        }
         YinType declared = scope.lookup(recordPattern.type().id);
         YinType builtIn = builtInType(recordPattern.type().id);
         if (builtIn != null) {
@@ -259,6 +281,13 @@ public final class Match extends Node {
             return true;
         }
         if (pattern instanceof MatchPattern.RecordPattern recordPattern) {
+            if (resultTag(recordPattern.type().id) != null) {
+                YinType resultPayload = resultPayload(recordPattern.type().id, candidate);
+                return recordPattern.fields().size() == 1
+                        && resultPayload != null
+                        && (candidate instanceof OkType || candidate instanceof ErrType)
+                        && irrefutable(recordPattern.fields().get(0), resultPayload, scope);
+            }
             YinType builtIn = builtInType(recordPattern.type().id);
             if (builtIn != null) {
                 return Types.subtype(candidate, builtIn)
@@ -283,9 +312,58 @@ public final class Match extends Node {
     }
 
     private static List<YinType> alternatives(YinType type) {
-        return type instanceof UnionType union
-                ? new ArrayList<>(union.members())
-                : List.of(type);
+        List<YinType> alternatives = new ArrayList<>();
+        collectAlternatives(type, alternatives);
+        return alternatives;
+    }
+
+    private static void collectAlternatives(YinType type, List<YinType> alternatives) {
+        if (type instanceof UnionType union) {
+            union.members().forEach(member -> collectAlternatives(member, alternatives));
+        } else if (type instanceof ResultType result) {
+            alternatives.add(new OkType(result.ok()));
+            alternatives.add(new ErrType(result.error()));
+        } else {
+            alternatives.add(type);
+        }
+    }
+
+    private static ResultValue.Tag resultTag(String name) {
+        return switch (name) {
+            case "Ok" -> ResultValue.Tag.OK;
+            case "Err" -> ResultValue.Tag.ERR;
+            default -> null;
+        };
+    }
+
+    private static YinType resultPayload(String name, YinType candidate) {
+        return switch (name) {
+            case "Ok" -> {
+                if (candidate instanceof OkType ok) {
+                    yield ok.value();
+                }
+                if (candidate instanceof ResultType result) {
+                    yield result.ok();
+                }
+                if (candidate instanceof org.yinwang.yin.type.AnyType) {
+                    yield Types.ANY;
+                }
+                yield null;
+            }
+            case "Err" -> {
+                if (candidate instanceof ErrType error) {
+                    yield error.error();
+                }
+                if (candidate instanceof ResultType result) {
+                    yield result.error();
+                }
+                if (candidate instanceof org.yinwang.yin.type.AnyType) {
+                    yield Types.ANY;
+                }
+                yield null;
+            }
+            default -> null;
+        };
     }
 
     private static YinType builtInType(String name) {

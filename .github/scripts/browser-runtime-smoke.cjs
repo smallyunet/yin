@@ -35,4 +35,16 @@ const programmable = JSON.parse(yinEvaluate(`
 assert.equal(programmable.ok, true);
 assert.equal(programmable.value, "42");
 
+const explicitOutcome = JSON.parse(yinEvaluate(`
+  (define fetch
+    (fun ([available Bool] [-> (Result Int String)])
+      (if available (ok 42) (err "unavailable"))))
+  (match (fetch false)
+    [(Ok value) value]
+    [(Err _) 0])
+`));
+assert.equal(explicitOutcome.ok, true);
+assert.equal(explicitOutcome.value, "0");
+assert.equal(explicitOutcome.type, "Int");
+
 console.log("Browser runtime smoke test passed");
