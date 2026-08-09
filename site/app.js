@@ -37,6 +37,14 @@ const examples = {
 (match (fetch true)
   [(Ok value) value]
   [(Err message) (seq (print message) 0)])`,
+  contracts: `(record Request [task String] [note (Option String)])
+(variant Decision
+  [Approve [reason String]]
+  [NeedsInput [question String]])
+
+(match (decode-json Request "{\\\"task\\\":\\\"review\\\",\\\"note\\\":null}")
+  [(Ok request) (encode-json (Approve :reason (field request :task)))]
+  [(Err error) (field error :path)])`,
   unions: `(define numeric-label
   (fun ([value (U Int Float)] [-> String])
     (if (= value 0) "zero" "non-zero")))
@@ -204,7 +212,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.10";
+    resultType.textContent = "Yin 0.11";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

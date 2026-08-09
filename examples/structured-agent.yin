@@ -1,0 +1,16 @@
+(record AgentRequest
+  [task String]
+  [confidence Float]
+  [context (Option String) :default none])
+(variant Decision
+  [Approve [reason String]]
+  [Reject [reason String]]
+  [NeedsInput [question String]])
+(define decide
+  (fun ([request AgentRequest] [-> Decision])
+    (if (>= (field request :confidence) 0.9)
+      (Approve :reason "high confidence")
+      (NeedsInput :question "provide more context"))))
+(match (decode-json AgentRequest (read-all))
+  [(Ok request) (encode-json (decide request))]
+  [(Err error) (encode-json (Reject :reason (field error :message)))])

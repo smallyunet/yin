@@ -1,11 +1,12 @@
 (record Failure [message String])
 (define parse-positive
   (fun ([text String] [-> (Result Int Failure)])
-    (match
-      (parse-int text)
+    (match (parse-int text)
       [(Int value)
         (if (> value 0)
           (ok value)
           (err (Failure :message "expected a positive integer")))]
       [(Bool _) (err (Failure :message "expected an integer"))])))
-(match (parse-positive "42") [(Ok value) value] [(Err _) 0])
+(match (parse-positive "42")
+  [(Ok value) value]
+  [(Err _) 0])

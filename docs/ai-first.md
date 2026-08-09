@@ -38,8 +38,9 @@ typed input
 
 - **0.10 explicit outcomes:** typed `Result`, `Ok`, `Err`, and exhaustive
   narrowing. This is the shared failure contract for every later boundary.
-- **0.11 structured data:** tagged data, JSON values, schema validation, and
-  record encoding/decoding.
+- **0.11 structured contracts:** shipped tagged variants, `Option`, strict
+  type-directed JSON decoding, deterministic encoding, structured boundary
+  errors, and JSON Schema Draft 2020-12 generation.
 - **0.12 capabilities and tools:** declared effects, injected permissions,
   typed `Tool<Input, Output, Error>`, approval metadata, and an MCP adapter.
 - **0.13 model boundaries:** typed generation, provider-neutral configuration,

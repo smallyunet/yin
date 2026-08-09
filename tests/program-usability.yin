@@ -5,8 +5,7 @@
     (fold values 0 (fun ([sum Int] [value Int] [-> Int]) (+ sum value)))))
 (define describe
   (fun ([value (U Point Problem)] [-> String])
-    (match
-      value
+    (match value
       [(Point x y) (concat (to-string x) (to-string y))]
       [(Problem message) message])))
 [(total (filter (range 1 10) (fun ([value Int] [-> Bool]) (> value 5))))

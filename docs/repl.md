@@ -8,8 +8,8 @@ parser, type checker, and interpreter used for source files.
 After `./mvnw package`, either command starts the REPL:
 
 ```bash
-java -jar target/yin-0.10.0.jar
-java -jar target/yin-0.10.0.jar --repl
+java -jar target/yin-0.11.0.jar
+java -jar target/yin-0.11.0.jar --repl
 ```
 
 When attached to a terminal it displays `yin> ` for a new submission and

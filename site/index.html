@@ -34,7 +34,7 @@
         <div class="hero-copy">
           <div class="eyebrow"><span></span> Written in Java. Running in your browser.</div>
           <h1 id="hero-title">Small enough to learn.<br><em>Complete enough</em> to explore.</h1>
-          <p>Explore S-expressions, lexical closures, static types, immutable collections, explicit outcomes, and exhaustive pattern matching. Your code runs entirely in the browser and is never sent to a server.</p>
+          <p>Explore S-expressions, static types, immutable collections, closed variants, explicit outcomes, and typed JSON contracts. Your code runs entirely in the browser and is never sent to a server.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#playground">
               Try it now
@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.10</strong><span>Current version</span></div>
-          <div><strong>132</strong><span>Automated tests</span></div>
+          <div><strong>0.11</strong><span>Current version</span></div>
+          <div><strong>158</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -66,6 +66,7 @@
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="programs">Programs</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="results">Results</button>
+          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="contracts">Contracts</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
           <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
         </div>
@@ -202,6 +203,14 @@
             <pre><code>(match (fetch true)
   [(Ok value) value]
   [(Err message) (report message)])</code></pre>
+          </article>
+          <article class="feature-card feature-wide">
+            <span class="feature-index">08</span>
+            <h3>Structured contracts</h3>
+            <p>Decode untrusted JSON into a closed source type, handle structured errors, and export the same contract as JSON Schema.</p>
+            <pre><code>(match (decode-json Request text)
+  [(Ok request) (handle request)]
+  [(Err error) (field error :path)])</code></pre>
           </article>
         </div>
       </section>

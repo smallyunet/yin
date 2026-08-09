@@ -7,6 +7,7 @@ public final class Types {
     public static final YinType FLOAT = new FloatType();
     public static final YinType STRING = new StringType();
     public static final YinType VOID = new VoidType();
+    public static final YinType NONE = new NoneType();
 
     private Types() {
     }
@@ -55,6 +56,24 @@ public final class Types {
         if (actual instanceof ResultType actualResult && expected instanceof ResultType expectedResult) {
             return subtype(actualResult.ok(), expectedResult.ok())
                     && subtype(actualResult.error(), expectedResult.error());
+        }
+        if (actual instanceof SomeType some && expected instanceof OptionType option) {
+            return subtype(some.value(), option.value());
+        }
+        if (actual instanceof NoneType && expected instanceof OptionType) return true;
+        if (actual instanceof SomeType leftSome && expected instanceof SomeType rightSome) {
+            return subtype(leftSome.value(), rightSome.value());
+        }
+        if (actual instanceof OptionType leftOption && expected instanceof OptionType rightOption) {
+            return subtype(leftOption.value(), rightOption.value());
+        }
+        if (actual instanceof RecordValueType record && expected instanceof VariantType variant) {
+            return variant.cases().containsKey(record.name)
+                    && variant.name().equals(record.variantName());
+        }
+        if (actual instanceof RecordType record && expected instanceof VariantType variant) {
+            return variant.cases().containsKey(record.name)
+                    && variant.name().equals(record.variantName());
         }
         if (actual instanceof VectorType actualVector
                 && expected instanceof HomogeneousVectorType expectedVector) {
@@ -144,6 +163,16 @@ public final class Types {
             return equivalent(leftResult.ok(), rightResult.ok())
                     && equivalent(leftResult.error(), rightResult.error());
         }
+        if (left instanceof OptionType leftOption && right instanceof OptionType rightOption) {
+            return equivalent(leftOption.value(), rightOption.value());
+        }
+        if (left instanceof SomeType leftSome && right instanceof SomeType rightSome) {
+            return equivalent(leftSome.value(), rightSome.value());
+        }
+        if (left instanceof NoneType && right instanceof NoneType) return true;
+        if (left instanceof VariantType leftVariant && right instanceof VariantType rightVariant) {
+            return leftVariant.name().equals(rightVariant.name());
+        }
         if (left instanceof UnionType leftUnion && right instanceof UnionType rightUnion) {
             return leftUnion.members().size() == rightUnion.members().size()
                     && leftUnion.members().stream().allMatch(leftMember ->
@@ -179,10 +208,25 @@ public final class Types {
         if (numeric(left) && numeric(right)) {
             return true;
         }
+        if (left instanceof RecordValueType leftRecord
+                && right instanceof RecordValueType rightRecord
+                && leftRecord.variantName() != null
+                && leftRecord.variantName().equals(rightRecord.variantName())) return true;
+        if (left instanceof RecordType leftRecord && right instanceof RecordType rightRecord
+                && leftRecord.variantName() != null
+                && leftRecord.variantName().equals(rightRecord.variantName())) return true;
         if (left instanceof ResultType leftResult && right instanceof ResultType rightResult) {
             return overlaps(leftResult.ok(), rightResult.ok())
                     || overlaps(leftResult.error(), rightResult.error());
         }
+        if (left instanceof SomeType leftSome && right instanceof OptionType rightOption) {
+            return overlaps(leftSome.value(), rightOption.value());
+        }
+        if (left instanceof OptionType leftOption && right instanceof SomeType rightSome) {
+            return overlaps(leftOption.value(), rightSome.value());
+        }
+        if (left instanceof NoneType && right instanceof OptionType
+                || left instanceof OptionType && right instanceof NoneType) return true;
         if (left instanceof OkType && right instanceof ErrType
                 || left instanceof ErrType && right instanceof OkType) {
             return true;

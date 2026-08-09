@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.10 language. Behavior not described
+This document defines the normative Yin 0.11 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -38,6 +38,8 @@ expression     = atom
                | assignment
                | function
                | record-definition
+               | variant-definition
+               | json-operation
                | field-access
                | call ;
 
@@ -51,7 +53,8 @@ match-clause   = "[" match-pattern expression "]" ;
 match-pattern  = "_" | literal | name
                | "[" { match-pattern } "]"
                | "(" type-name match-pattern { match-pattern } ")"
-               | "(" ("Ok" | "Err") match-pattern ")" ;
+               | "(" ("Ok" | "Err" | "Some") match-pattern ")"
+               | "(" "None" ")" ;
 definition     = "(" "define" pattern expression ")" ;
 assignment     = "(" "set!" pattern expression ")" ;
 
@@ -72,6 +75,14 @@ parent-list    = "(" { name } ")" ;
 field-descriptor
                = "[" name type-expression [ ":default" expression ] "]" ;
 
+variant-definition
+               = "(" "variant" name variant-case { variant-case } ")" ;
+variant-case   = "[" name { field-descriptor } "]" ;
+
+json-operation = "(" "decode-json" type-expression expression ")"
+               | "(" "encode-json" expression ")"
+               | "(" "json-schema" type-expression ")" ;
+
 field-access   = "(" "field" expression keyword ")" ;
 
 type-expression
@@ -79,7 +90,8 @@ type-expression
                | "(" "U" type-expression { type-expression } ")"
                | "(" "Vector" type-expression ")"
                | "(" "Fn" "[" { type-expression } "]" type-expression ")"
-               | "(" "Result" type-expression type-expression ")" ;
+               | "(" "Result" type-expression type-expression ")"
+               | "(" "Option" type-expression ")" ;
 
 call           = "(" expression { expression } ")"
                | "(" expression { keyword expression } ")" ;
@@ -147,6 +159,35 @@ A `(Result OkType ErrorType)` target is analyzed as two alternatives. `(Ok value
 and `(Err error)` patterns select and bind their respective payloads. Both
 variants must be covered unless a wildcard or binding covers the remainder.
 
+An `(Option T)` target is analyzed as `(Some T)` and `None`. A tagged variant
+target is analyzed as its declared cases. Every case pattern is positional in
+the case's field declaration order, and every case must be covered.
+
+## Structured contracts
+
+`(variant Name [Case [field Type] ...] ...)` defines one closed nominal type and
+one keyword constructor per case. A case value is a subtype of its variant and
+prints as its record-shaped case value. Variants are immutable and exhaustively
+matched.
+
+`(some value)` has precise type `(Some T)`; `none` has type `None`. Both widen
+covariantly into `(Option T)`. Option equality compares presence and then the
+payload.
+
+`(decode-json Type text)` returns `(Result Type DecodeError)`. Decoding is
+strict: malformed JSON, duplicate keys, missing or unknown fields, incorrect
+types, integer overflow, non-finite numbers, and unknown tags become structured
+errors with `code`, `path`, and `message`. Defaults fill missing record fields.
+`Any` accepts JSON values but never bypasses the rules of an explicitly named
+contract.
+
+`(encode-json value)` returns `(Result String EncodeError)` and uses stable
+field order. Records map to objects, vectors to arrays, `none` to `null`,
+`some` to its payload, Results to tagged objects, and variant cases to objects
+with a `tag` field. `(json-schema Type)` returns a deterministic JSON Schema
+Draft 2020-12 document with closed objects, required fields, and `oneOf` for
+closed variants and Results.
+
 ## Explicit results
 
 `(ok value)` constructs an immutable success value with precise type `(Ok T)`.
@@ -205,6 +246,8 @@ Type rules:
 - `(Result T E)` describes an explicit success or failure outcome. `ok` and
   `err` retain precise `(Ok T)` and `(Err E)` variant types until widened by an
   annotation.
+- `(Option T)` describes a present `some` payload or `none`, and is covariant.
+- A declared variant is a closed nominal supertype of exactly its case values.
 - Two vector types are equivalent when they have the same length and equivalent
   element types.
 - `length` accepts a vector and returns its length as `Int`.

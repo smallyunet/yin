@@ -70,10 +70,18 @@ public class Parser {
                                 return parseFun(tuple);
                             case Constants.RECORD_KEYWORD:
                                 return parseRecordDef(tuple);
+                            case Constants.VARIANT_KEYWORD:
+                                return parseVariantDef(tuple);
                             case Constants.FIELD_KEYWORD:
                                 return parseFieldAccess(tuple);
                             case Constants.MATCH_KEYWORD:
                                 return parseMatch(tuple);
+                            case Constants.DECODE_JSON_KEYWORD:
+                                return parseJsonOperation(tuple, JsonOperation.Kind.DECODE);
+                            case Constants.ENCODE_JSON_KEYWORD:
+                                return parseJsonOperation(tuple, JsonOperation.Kind.ENCODE);
+                            case Constants.JSON_SCHEMA_KEYWORD:
+                                return parseJsonOperation(tuple, JsonOperation.Kind.SCHEMA);
                             default:
                                 return parseCall(tuple);
                         }
@@ -249,6 +257,47 @@ public class Parser {
                 tuple.start, tuple.end, tuple.line, tuple.col);
     }
 
+    public static VariantDef parseVariantDef(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() < 3 || !(elements.get(1) instanceof Name name)) {
+            throw new ParserException("variant requires a name and at least one case", tuple);
+        }
+        Map<String, Scope<Object>> cases = new LinkedHashMap<>();
+        for (Node caseNode : elements.subList(2, elements.size())) {
+            if (!(caseNode instanceof Tuple caseTuple)
+                    || !delimType(caseTuple.open, Constants.SQUARE_BEGIN)
+                    || caseTuple.elements.isEmpty()
+                    || !(caseTuple.elements.get(0) instanceof Name caseName)) {
+                throw new ParserException("variant cases must be [Case [field Type] ...]", caseNode);
+            }
+            if (cases.containsKey(caseName.id)) {
+                throw new ParserException("duplicated variant case: " + caseName.id, caseName);
+            }
+            cases.put(caseName.id, parseProperties(
+                    caseTuple.elements.subList(1, caseTuple.elements.size())));
+        }
+        return new VariantDef(name, cases, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static JsonOperation parseJsonOperation(Tuple tuple, JsonOperation.Kind kind)
+            throws ParserException {
+        int expected = kind == JsonOperation.Kind.DECODE ? 3 : 2;
+        if (tuple.elements.size() != expected) {
+            throw new ParserException(kind.sourceName() + " expects " + (expected - 1) + " argument(s)", tuple);
+        }
+        if (kind == JsonOperation.Kind.ENCODE) {
+            return new JsonOperation(kind, null, parseNode(tuple.elements.get(1)),
+                    tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+        }
+        Node type = parseNode(tuple.elements.get(1));
+        if (!isTypeExpression(type)) {
+            throw new ParserException("expected a type expression", tuple.elements.get(1));
+        }
+        Node value = kind == JsonOperation.Kind.DECODE ? parseNode(tuple.elements.get(2)) : null;
+        return new JsonOperation(kind, type, value,
+                tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
 
     public static FieldAccess parseFieldAccess(Tuple tuple) throws ParserException {
         List<Node> elements = tuple.elements;
@@ -316,6 +365,12 @@ public class Parser {
         if ((type.id.equals(Constants.OK_PATTERN) || type.id.equals(Constants.ERR_PATTERN))
                 && fields.size() != 1) {
             throw new ParserException(type.id + " pattern expects exactly one payload", tuple);
+        }
+        if (type.id.equals("Some") && fields.size() != 1) {
+            throw new ParserException("Some pattern expects exactly one payload", tuple);
+        }
+        if (type.id.equals("None") && !fields.isEmpty()) {
+            throw new ParserException("None pattern expects no payload", tuple);
         }
         return new MatchPattern.RecordPattern(type, fields, tuple);
     }
@@ -460,6 +515,10 @@ public class Parser {
         if (operator.id.equals(Constants.RESULT_TYPE_KEYWORD)) {
             return call.args.positional.size() == 2
                     && call.args.positional.stream().allMatch(Parser::isTypeExpression);
+        }
+        if (operator.id.equals(Constants.OPTION_TYPE_KEYWORD)) {
+            return call.args.positional.size() == 1
+                    && isTypeExpression(call.args.positional.get(0));
         }
         return false;
     }

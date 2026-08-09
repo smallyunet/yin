@@ -14,18 +14,27 @@ public final class RecordConstructor extends Value {
     public final Node definition;
     public final Scope<Value> properties;
     private final Set<String> nominalTypes;
+    private final String variantName;
 
     public RecordConstructor(String name, Node definition, Scope<Value> properties,
                              Set<String> nominalTypes) {
+        this(name, definition, properties, nominalTypes, null);
+    }
+
+    public RecordConstructor(String name, Node definition, Scope<Value> properties,
+                             Set<String> nominalTypes, String variantName) {
         this.name = name;
         this.definition = definition;
         this.properties = properties.copy();
         this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
+        this.variantName = variantName;
     }
 
     public Set<String> nominalTypes() {
         return nominalTypes;
     }
+
+    public String variantName() { return variantName; }
 
     @Override
     public String toString() {

@@ -1,0 +1,9 @@
+(variant Decision
+  [Approve [reason String]]
+  [Reject [reason String]])
+(define render
+  (fun ([decision Decision] [-> String])
+    (match decision
+      [(Approve reason) reason]
+      [(Reject reason) reason])))
+(render (Approve :reason "42"))

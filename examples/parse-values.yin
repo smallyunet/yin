@@ -1,5 +1,7 @@
 (define parse-value
   (fun ([text String] [-> Int])
-    (match (parse-int text) [(Int value) value] [(Bool _) 0])))
+    (match (parse-int text)
+      [(Int value) value]
+      [(Bool _) 0])))
 (define values (map args (fun ([text String] [-> Int]) (parse-value text))))
 (fold values 0 (fun ([total Int] [value Int] [-> Int]) (+ total value)))

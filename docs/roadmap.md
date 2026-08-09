@@ -102,12 +102,20 @@ The project is being stabilized before new language features are designed.
 - structural Result equality and explicit behavior across `Any`
 - maintained CLI, REPL, browser, formatter, specification, and editor coverage
 
+## 0.11 — structured contracts
+
+- closed user-defined tagged variants with named-field constructors
+- first-class covariant `(Option T)`, `some`, `none`, `Some`, and `None`
+- strict type-directed JSON decoding with structured error codes and paths
+- deterministic JSON encoding for records, vectors, options, results, and variants
+- deterministic JSON Schema Draft 2020-12 generation with closed object shapes
+- maintained structured-agent standard-input/output example
+- CLI, REPL, browser, formatter, LSP, editor, specification, and regression coverage
+
 ## Later
 
 - modules and multi-file type checking
 - persistent dictionaries and sets
-- explicit option values
-- JSON values, schema validation, and record encoding
 - effect and host-capability declarations
 - typed tool and model boundaries
 - durable tasks, checkpoints, approval, and record/replay

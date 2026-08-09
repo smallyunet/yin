@@ -47,4 +47,15 @@ assert.equal(explicitOutcome.ok, true);
 assert.equal(explicitOutcome.value, "0");
 assert.equal(explicitOutcome.type, "Int");
 
+const structuredContract = JSON.parse(yinEvaluate(`
+  (record Request [task String] [note (Option String)])
+  (variant Decision [Approve [reason String]] [NeedsInput [question String]])
+  (match (decode-json Request "{\\\"task\\\":\\\"review\\\",\\\"note\\\":null}")
+    [(Ok request) (encode-json (Approve :reason (field request :task)))]
+    [(Err error) (err error)])
+`));
+assert.equal(structuredContract.ok, true);
+assert.equal(structuredContract.value,
+  '(ok "{\\\"tag\\\":\\\"Approve\\\",\\\"reason\\\":\\\"review\\\"}")');
+
 console.log("Browser runtime smoke test passed");

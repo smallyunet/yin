@@ -20,6 +20,10 @@ source file
   record, union, and `Any` type rules.
 - `ast/Match.java` evaluates patterns and performs branch binding, union
   narrowing, and exhaustiveness checks.
+- `ast/VariantDef.java` installs closed tagged unions and their named case
+  constructors; `ast/JsonOperation.java` preserves type-directed boundaries.
+- `json/JsonCodec.java` owns strict parsing, deterministic value encoding, and
+  deterministic Draft 2020-12 schema generation.
 - `Scope.java` implements generic lexical environment chains. Runtime scopes
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
@@ -96,6 +100,8 @@ complete runnable examples.
 `ResultIntegrationTest` protects the Yin 0.10 explicit-outcome slice across
 construction, covariance, exhaustive narrowing, structural equality, `Any`,
 and the maintained result program.
+`StructuredContractsIntegrationTest` protects the Yin 0.11 variant, Option,
+strict JSON, structured error path, schema, and complete agent-boundary slice.
 
 Run all checks with:
 

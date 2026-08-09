@@ -48,7 +48,7 @@
       "patterns": [
         {
           "name": "keyword.control.yin",
-          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|field))(?=\\s|\\))"
+          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|variant|field|decode-json|encode-json|json-schema))(?=\\s|\\))"
         }
       ]
     },
@@ -56,7 +56,7 @@
       "patterns": [
         {
           "name": "support.type.yin",
-          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Fn|Result|Ok|Err)(?![\\w])"
+          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Fn|Result|Option|Ok|Err|Some|None)(?![\\w])"
         }
       ]
     },
@@ -72,7 +72,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.yin",
-          "match": "(?<![\\w])(?:length|at|append|map|filter|fold|range|slice|reverse|contains|ok|err|string-length|concat|substring|split|join|trim|to-string|parse-int|parse-float|read-all|read-text|print|and|or|not|<=|>=|[+*/<>=-])(?![\\w])"
+          "match": "(?<![\\w])(?:length|at|append|map|filter|fold|range|slice|reverse|contains|ok|err|some|none|string-length|concat|substring|split|join|trim|to-string|parse-int|parse-float|read-all|read-text|print|and|or|not|<=|>=|[+*/<>=-])(?![\\w])"
         }
       ]
     },

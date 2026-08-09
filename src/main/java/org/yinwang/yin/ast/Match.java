@@ -12,6 +12,10 @@ import org.yinwang.yin.type.ResultType;
 import org.yinwang.yin.type.Types;
 import org.yinwang.yin.type.UnionType;
 import org.yinwang.yin.type.VectorType;
+import org.yinwang.yin.type.OptionType;
+import org.yinwang.yin.type.SomeType;
+import org.yinwang.yin.type.NoneType;
+import org.yinwang.yin.type.VariantType;
 import org.yinwang.yin.type.YinType;
 import org.yinwang.yin.value.BoolValue;
 import org.yinwang.yin.value.FloatValue;
@@ -23,6 +27,7 @@ import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.ValueEquality;
 import org.yinwang.yin.value.Vector;
 import org.yinwang.yin.value.StringValue;
+import org.yinwang.yin.value.OptionValue;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -130,6 +135,15 @@ public final class Match extends Node {
                     && result.tag() == resultTag
                     && matches(recordPattern.fields().get(0), result.payload(), scope, bindings);
         }
+        if (recordPattern.type().id.equals("Some")) {
+            return recordPattern.fields().size() == 1 && value instanceof OptionValue option
+                    && option.present()
+                    && matches(recordPattern.fields().get(0), option.value(), scope, bindings);
+        }
+        if (recordPattern.type().id.equals("None")) {
+            return recordPattern.fields().isEmpty() && value instanceof OptionValue option
+                    && !option.present();
+        }
         YinType builtIn = builtInType(recordPattern.type().id);
         if (builtIn != null) {
             return recordPattern.fields().size() == 1
@@ -197,6 +211,18 @@ public final class Match extends Node {
                 return null;
             }
             return analyzeChildren(recordPattern.fields(), List.of(resultPayload), scope);
+        }
+        if (recordPattern.type().id.equals("Some") || recordPattern.type().id.equals("None")) {
+            boolean some = recordPattern.type().id.equals("Some");
+            int expected = some ? 1 : 0;
+            if (recordPattern.fields().size() != expected) {
+                Util.abort(recordPattern.location(), recordPattern.type().id
+                        + " pattern expects " + expected + " payload(s)");
+            }
+            YinType payload = optionPayload(some, candidate);
+            if (payload == null) return null;
+            return some ? analyzeChildren(recordPattern.fields(), List.of(payload), scope)
+                    : new PatternTypes(Map.of());
         }
         YinType declared = scope.lookup(recordPattern.type().id);
         YinType builtIn = builtInType(recordPattern.type().id);
@@ -288,6 +314,15 @@ public final class Match extends Node {
                         && (candidate instanceof OkType || candidate instanceof ErrType)
                         && irrefutable(recordPattern.fields().get(0), resultPayload, scope);
             }
+            if (recordPattern.type().id.equals("Some") || recordPattern.type().id.equals("None")) {
+                boolean some = recordPattern.type().id.equals("Some");
+                YinType payload = optionPayload(some, candidate);
+                return payload != null
+                        && (some ? candidate instanceof SomeType
+                        && recordPattern.fields().size() == 1
+                        && irrefutable(recordPattern.fields().get(0), payload, scope)
+                        : candidate instanceof NoneType && recordPattern.fields().isEmpty());
+            }
             YinType builtIn = builtInType(recordPattern.type().id);
             if (builtIn != null) {
                 return Types.subtype(candidate, builtIn)
@@ -323,9 +358,25 @@ public final class Match extends Node {
         } else if (type instanceof ResultType result) {
             alternatives.add(new OkType(result.ok()));
             alternatives.add(new ErrType(result.error()));
+        } else if (type instanceof OptionType option) {
+            alternatives.add(new SomeType(option.value()));
+            alternatives.add(Types.NONE);
+        } else if (type instanceof VariantType variant) {
+            alternatives.addAll(variant.alternatives());
         } else {
             alternatives.add(type);
         }
+    }
+
+    private static YinType optionPayload(boolean some, YinType candidate) {
+        if (some) {
+            if (candidate instanceof SomeType present) return present.value();
+            if (candidate instanceof OptionType option) return option.value();
+            if (candidate instanceof org.yinwang.yin.type.AnyType) return Types.ANY;
+            return null;
+        }
+        return candidate instanceof NoneType || candidate instanceof OptionType
+                || candidate instanceof org.yinwang.yin.type.AnyType ? Types.VOID : null;
     }
 
     private static ResultValue.Tag resultTag(String name) {

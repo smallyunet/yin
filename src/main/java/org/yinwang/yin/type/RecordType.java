@@ -13,18 +13,27 @@ public final class RecordType extends YinType {
     public final Node definition;
     public final Scope<YinType> properties;
     private final Set<String> nominalTypes;
+    private final String variantName;
 
     public RecordType(String name, Node definition, Scope<YinType> properties,
                       Set<String> nominalTypes) {
+        this(name, definition, properties, nominalTypes, null);
+    }
+
+    public RecordType(String name, Node definition, Scope<YinType> properties,
+                      Set<String> nominalTypes, String variantName) {
         this.name = name;
         this.definition = definition;
         this.properties = properties.copy();
         this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
+        this.variantName = variantName;
     }
 
     public Set<String> nominalTypes() {
         return nominalTypes;
     }
+
+    public String variantName() { return variantName; }
 
     @Override
     public String toString() {

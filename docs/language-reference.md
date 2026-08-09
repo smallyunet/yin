@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.10 language specification](language-specification.md). Files in
+[Yin 0.11 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -42,6 +42,22 @@ an exception or sentinel value:
 `(ok value)` has precise type `(Ok T)` and `(err error)` has `(Err E)`.
 Both are accepted by a compatible `(Result T E)` annotation. Matching a Result
 must cover both variants, and each pattern binds only its typed payload.
+
+## Structured contracts
+
+Closed variants model agent decisions without stringly typed tags:
+
+```yin
+(variant Decision
+  [Approve [reason String]]
+  [Reject [reason String]]
+  [NeedsInput [question String]])
+```
+
+`(Option T)` uses `(some value)` and `none`, with exhaustive `(Some value)` and
+`(None)` patterns. Typed boundaries use `(decode-json Request text)`,
+`(encode-json value)`, and `(json-schema Request)`. Decode and encode return
+`Result`; boundary errors expose `code`, `path`, and `message` fields.
 
 ## Definitions and assignment
 
@@ -97,7 +113,7 @@ Annotations may name a built-in or record type, or use a non-empty union such
 as `(U Int Float)`. `(Vector Int)` describes an arbitrary-length immutable
 vector of integers, while `(Fn [Int] String)` describes a positional function
 from `Int` to `String`. `(Result Int String)` describes an explicit success or
-failure. `Any` is the top type. A return descriptor, when
+failure, and `(Option String)` describes present or absent text. `Any` is the top type. A return descriptor, when
 present, must be the final descriptor in the parameter list.
 
 ## Pattern matching
@@ -114,6 +130,7 @@ Patterns support literals, `_`, bindings, fixed vectors, built-in type
 narrowing, and positional record destructuring. Matches must be exhaustive;
 record and built-in type patterns can cover the members of a union, while
 `Ok` and `Err` patterns cover the variants of a Result.
+`Some` and `None` cover an Option, while every named case covers a variant.
 
 ## Records
 
@@ -157,6 +174,8 @@ access through `Any` remains `Any` and is checked at runtime.
 - numeric comparison: `<`, `<=`, `>`, `>=`, `=`
 - boolean operations: `and`, `or`, `not`
 - explicit result constructors: `ok`, `err`
+- optional values: `some`, `none`
+- structured JSON: `decode-json`, `encode-json`, `json-schema`
 - immutable vectors: `length`, `at`, `append`
 - vector processing: `map`, `filter`, `fold`, `range`, `slice`, `reverse`,
   `contains`
@@ -198,7 +217,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.10.0.jar examples/parse-values.yin 10 bad 32
+java -jar yin-0.11.0.jar examples/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but

@@ -213,6 +213,16 @@ public final class PrimitiveFunctionType extends YinType {
                 (arguments, location) -> new ResultType(arguments.get(0), arguments.get(1)));
     }
 
+    public static PrimitiveFunctionType optionType() {
+        return new PrimitiveFunctionType("Option", 1,
+                (arguments, location) -> new OptionType(arguments.get(0)));
+    }
+
+    public static PrimitiveFunctionType optionSome() {
+        return new PrimitiveFunctionType("some", 1,
+                (arguments, location) -> new SomeType(arguments.get(0)));
+    }
+
     public static PrimitiveFunctionType resultOk() {
         return new PrimitiveFunctionType("ok", 1,
                 (arguments, location) -> new OkType(arguments.get(0)));

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.0 — 2026-08-09
+
+- add closed `variant` declarations with named-field constructors and exhaustive matching
+- add covariant `(Option T)`, `some`, `none`, `Some`, and `None`
+- add strict type-directed `decode-json` with structured `DecodeError` codes and JSON paths
+- add deterministic `encode-json` for records, vectors, Option, Result, and variants
+- add deterministic JSON Schema Draft 2020-12 generation through `json-schema`
+- add a complete typed standard-input/output structured-agent example
+- extend formatter, browser runtime, LSP, VS Code syntax, specification, and documentation coverage
+- expand the automated suite from 132 to 158 tests
+
 ## 0.10.0 — 2026-08-09
 
 - establish the AI-first direction around typed boundaries, injected

@@ -5,6 +5,7 @@ import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
 import org.yinwang.yin.type.AnyType;
 import org.yinwang.yin.type.RecordValueType;
+import org.yinwang.yin.type.RecordType;
 import org.yinwang.yin.type.Types;
 import org.yinwang.yin.type.UnionType;
 import org.yinwang.yin.type.YinType;
@@ -54,6 +55,11 @@ public final class FieldAccess extends Node {
             if (result == null) {
                 Util.abort(field, "record type has no field: " + field.id);
             }
+            return result;
+        }
+        if (targetType instanceof RecordType record) {
+            YinType result = record.properties.lookupLocalType(field.id);
+            if (result == null) Util.abort(field, "record type has no field: " + field.id);
             return result;
         }
         if (targetType instanceof UnionType union) {

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Constants {
 
-    public static final String VERSION = "0.10.0";
+    public static final String VERSION = "0.11.0";
 
     // delimiters and delimeter pairs
     public static final String LINE_COMMENT = "--";
@@ -34,13 +34,18 @@ public class Constants {
     public static final String DEF_KEYWORD = "define";
     public static final String ASSIGN_KEYWORD = "set!";
     public static final String RECORD_KEYWORD = "record";
+    public static final String VARIANT_KEYWORD = "variant";
     public static final String FIELD_KEYWORD = "field";
     public static final String DECLARE_KEYWORD = "declare";
     public static final String UNION_KEYWORD = "U";
     public static final String VECTOR_TYPE_KEYWORD = "Vector";
     public static final String FUNCTION_TYPE_KEYWORD = "Fn";
     public static final String RESULT_TYPE_KEYWORD = "Result";
+    public static final String OPTION_TYPE_KEYWORD = "Option";
     public static final String MATCH_KEYWORD = "match";
+    public static final String DECODE_JSON_KEYWORD = "decode-json";
+    public static final String ENCODE_JSON_KEYWORD = "encode-json";
+    public static final String JSON_SCHEMA_KEYWORD = "json-schema";
     public static final String OK_PATTERN = "Ok";
     public static final String ERR_PATTERN = "Err";
 

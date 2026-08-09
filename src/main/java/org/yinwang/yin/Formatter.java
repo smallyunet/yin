@@ -175,7 +175,8 @@ public final class Formatter {
             Element value = form.elements().get(2);
             return value instanceof Form valueForm && head(valueForm).equals("fun");
         }
-        return head.equals("seq") && form.elements().size() > 2;
+        return (head.equals("seq") || head.equals("match") || head.equals("variant"))
+                && form.elements().size() > 2;
     }
 
     private static int prefixLength(Form form) {
@@ -189,6 +190,9 @@ public final class Formatter {
                     && parents.open() == '(') {
                 return 3;
             }
+            return 2;
+        }
+        if (head.equals("variant") || head.equals("match")) {
             return 2;
         }
         return 1;

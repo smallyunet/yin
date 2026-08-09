@@ -46,6 +46,10 @@ public final class ValueEquality {
             return leftResult.tag() == rightResult.tag()
                     && equal(leftResult.payload(), rightResult.payload());
         }
+        if (left instanceof OptionValue leftOption && right instanceof OptionValue rightOption) {
+            return leftOption.present() == rightOption.present()
+                    && (!leftOption.present() || equal(leftOption.value(), rightOption.value()));
+        }
         if (left instanceof RecordValue leftRecord && right instanceof RecordValue rightRecord) {
             if (!java.util.Objects.equals(leftRecord.name, rightRecord.name)
                     || !leftRecord.properties.keySet().equals(rightRecord.properties.keySet())) {

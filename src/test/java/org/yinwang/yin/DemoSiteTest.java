@@ -37,6 +37,7 @@ class DemoSiteTest {
         assertTrue(html.contains("data-example=\"vectors\""));
         assertTrue(html.contains("data-example=\"programs\""));
         assertTrue(html.contains("data-example=\"results\""));
+        assertTrue(html.contains("data-example=\"contracts\""));
         assertTrue(html.contains("aria-live=\"polite\""));
         assertFalse(html.contains("href=\"/"), "project-page assets must remain path-relative");
         assertFalse(html.contains("src=\"/"), "project-page assets must remain path-relative");
@@ -63,6 +64,7 @@ class DemoSiteTest {
         assertTrue(app.contains("(match (parse-int text)"));
         assertTrue(app.contains("[-> (Result Int String)]"));
         assertTrue(app.contains("[(Err message)"));
+        assertTrue(app.contains("(decode-json Request"));
         assertTrue(app.contains("}, 1500)"));
         assertTrue(app.contains("worker.terminate()"));
     }
