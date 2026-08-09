@@ -1,0 +1,1 @@
+{"requestId":"tx-empty-address","chainId":1,"kind":"erc20-transfer","to":"","asset":"USDC","rawAmount":"1000000","valueUsd":1,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true}

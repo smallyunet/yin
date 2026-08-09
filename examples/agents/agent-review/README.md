@@ -14,7 +14,7 @@ Build Yin, then run one input:
 
 ```bash
 ./mvnw package
-./examples/agent-review/run.sh examples/agent-review/inputs/approve.json
+./examples/agents/agent-review/run.sh examples/agents/agent-review/inputs/approve.json
 ```
 
 The output is raw JSON suitable for `jq` or another process:
@@ -26,9 +26,9 @@ The output is raw JSON suitable for `jq` or another process:
 Run every maintained path:
 
 ```bash
-for input in examples/agent-review/inputs/*.json; do
+for input in examples/agents/agent-review/inputs/*.json; do
   echo "==> $input"
-  ./examples/agent-review/run.sh "$input"
+  ./examples/agents/agent-review/run.sh "$input"
 done
 ```
 

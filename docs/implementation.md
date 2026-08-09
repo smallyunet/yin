@@ -106,6 +106,8 @@ and the maintained result program.
 strict JSON, structured error path, schema, and complete agent-boundary slice.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
+`Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy
+boundary without claiming RPC, ABI, signing, or broadcast support.
 
 Run all checks with:
 

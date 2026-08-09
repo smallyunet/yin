@@ -98,8 +98,10 @@ class FormatterTest {
     @Test
     void maintainedProgramsUseCanonicalFormatting() throws Exception {
         List<Path> programs;
-        try (var files = Files.list(Path.of("tests"))) {
+        try (var files = java.util.stream.Stream.concat(
+                Files.walk(Path.of("tests")), Files.walk(Path.of("examples")))) {
             programs = files
+                    .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().endsWith(".yin"))
                     .sorted()
                     .toList();

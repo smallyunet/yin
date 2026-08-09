@@ -45,7 +45,7 @@
         </div>
         <div class="hero-stats" aria-label="Project status">
           <div><strong>0.11</strong><span>Current version</span></div>
-          <div><strong>163</strong><span>Automated tests</span></div>
+          <div><strong>165</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -59,16 +59,30 @@
           <p>Choose an example, edit the code, then press <kbd>⌘</kbd><span>+</span><kbd>Enter</kbd> to run it.</p>
         </div>
 
-        <div class="example-tabs" role="tablist" aria-label="Yin examples">
-          <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">Recursion</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="programs">Programs</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="results">Results</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="contracts">Contracts</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
-          <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
+        <div class="example-catalog">
+          <div class="example-group">
+            <span class="example-group-label">Language</span>
+            <div class="example-tabs" role="tablist" aria-label="Language examples">
+              <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">Recursion</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="programs">Programs</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="results">Results</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="contracts">Contracts</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="unions">Union types</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="keywords">Keyword arguments</button>
+            </div>
+          </div>
+          <div class="example-group">
+            <span class="example-group-label">Runnable demos</span>
+            <div class="example-tabs" role="tablist" aria-label="Runnable project examples">
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="quicksort">Quick sort</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="structuredAgent">Structured agent</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="agentReview">Agent review</button>
+              <button class="example-tab example-tab-featured" type="button" role="tab" aria-selected="false" data-example="web3Guard">Web3 guard</button>
+            </div>
+          </div>
         </div>
 
         <div class="workbench">
@@ -93,6 +107,14 @@
               <pre class="line-numbers" id="line-numbers" aria-hidden="true">1</pre>
               <label class="sr-only" for="code-editor">Yin source code</label>
               <textarea id="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="editor-help"></textarea>
+            </div>
+            <div class="input-panel is-hidden" id="input-panel">
+              <div class="input-heading">
+                <label for="input-editor">JSON input</label>
+                <span>available through <code>read-all</code></span>
+              </div>
+              <textarea id="input-editor" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="input-help"></textarea>
+              <span class="sr-only" id="input-help">Edit the JSON passed to this example through standard input.</span>
             </div>
             <div class="editor-footer" id="editor-help">
               <span id="cursor-position">Ln 1, Col 1</span>

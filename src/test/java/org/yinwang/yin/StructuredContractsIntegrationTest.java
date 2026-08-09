@@ -204,7 +204,7 @@ class StructuredContractsIntegrationTest {
     }
 
     @Test void maintainedStructuredAgentExampleIsRunnableAndTyped() {
-        Path source = Path.of("examples/structured-agent.yin");
+        Path source = Path.of("examples/agents/structured-agent.yin");
         RuntimeContext context = new RuntimeContext(ignored -> { },
                 () -> "{\"task\":\"review\",\"confidence\":0.95}", java.util.List.of());
         assertEquals("(ok \"{\\\"tag\\\":\\\"Approve\\\",\\\"reason\\\":\\\"high confidence\\\"}\")",

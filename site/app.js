@@ -58,10 +58,174 @@ const examples = {
 (define pair
   (fun (left right) [left right]))
 
-(pair :right (next) :left (next))`
+(pair :right (next) :left (next))`,
+  quicksort: `(define quicksort
+  (fun ([values (Vector Int)] [-> (Vector Int)])
+    (if (= (length values) 0)
+      values
+      (seq
+        (define pivot (at values 0))
+        (define rest (slice values 1 (length values)))
+        (define lower (filter rest (fun ([value Int] [-> Bool]) (<= value pivot))))
+        (define higher (filter rest (fun ([value Int] [-> Bool]) (> value pivot))))
+        (append (quicksort lower) (append [pivot] (quicksort higher)))))))
+(quicksort [9 3 7 1 8 2 5 4 6])`,
+  structuredAgent: `(record AgentRequest
+  [task String]
+  [confidence Float]
+  [context (Option String) :default none])
+(variant Decision
+  [Approve [reason String]]
+  [Reject [reason String]]
+  [NeedsInput [question String]])
+(define decide
+  (fun ([request AgentRequest] [-> Decision])
+    (if (>= (field request :confidence) 0.9)
+      (Approve :reason "high confidence")
+      (NeedsInput :question "provide more context"))))
+(match (decode-json AgentRequest (read-all))
+  [(Ok request) (encode-json (decide request))]
+  [(Err error) (encode-json (Reject :reason (field error :message)))])`,
+  agentReview: `(record ReviewRequest
+  [requestId String]
+  [action String]
+  [amount Int]
+  [risk String]
+  [context (Option String) :default none])
+(variant Decision
+  [Approve [requestId String] [reason String]]
+  [Reject [requestId String] [reason String]]
+  [NeedsInput [requestId String] [question String]])
+(define decide
+  (fun ([request ReviewRequest] [-> Decision])
+    (if (= (field request :risk) "blocked")
+      (Reject
+        :requestId
+        (field request :requestId)
+        :reason
+        "risk policy blocked this request")
+      (if (> (field request :amount) 10000)
+        (NeedsInput
+          :requestId
+          (field request :requestId)
+          :question
+          "manual approval context is required for a high amount")
+        (if (= (field request :action) "transfer")
+          (match (field request :context)
+            [(Some _)
+              (Approve
+                :requestId
+                (field request :requestId)
+                :reason
+                "transfer context accepted")]
+            [(None)
+              (NeedsInput
+                :requestId
+                (field request :requestId)
+                :question
+                "provide transfer approval context")])
+          (Approve
+            :requestId
+            (field request :requestId)
+            :reason
+            "within automatic policy"))))))
+(match (decode-json ReviewRequest (read-all))
+  [(Ok request) (encode-json (decide request))]
+  [(Err error)
+    (encode-json
+      (Reject
+        :requestId
+        "invalid-request"
+        :reason
+        (concat
+          (concat (field error :code) (concat " at " (field error :path)))
+          (concat ": " (field error :message)))))])`,
+  web3Guard: `(record TransactionIntent
+  [requestId String]
+  [chainId Int]
+  [kind String]
+  [to String]
+  [asset String]
+  [rawAmount String]
+  [valueUsd Float]
+  [unlimitedApproval Bool]
+  [verifiedContract Bool]
+  [simulationSucceeded Bool]
+  [context (Option String) :default none])
+(variant TransactionDecision
+  [Approve [requestId String] [reason String]]
+  [Reject [requestId String] [code String] [reason String]]
+  [NeedsApproval [requestId String] [risk String] [reason String]])
+(define supported-chain
+  (fun ([chainId Int] [-> Bool])
+    (or (= chainId 1) (= chainId 137))))
+(define valid-address
+  (fun ([address String] [-> Bool])
+    (if (= (string-length address) 42) (= (substring address 0 2) "0x") false)))
+(define reject
+  (fun ([tx TransactionIntent] [code String] [reason String] [-> TransactionDecision])
+    (Reject :requestId (field tx :requestId) :code code :reason reason)))
+(define require-approval
+  (fun ([tx TransactionIntent] [risk String] [reason String] [-> TransactionDecision])
+    (NeedsApproval :requestId (field tx :requestId) :risk risk :reason reason)))
+(define review-transaction
+  (fun ([tx TransactionIntent] [-> TransactionDecision])
+    (if (not (valid-address (field tx :to)))
+      (reject tx "invalid-address" "target must be a 20-byte 0x address")
+      (if (not (supported-chain (field tx :chainId)))
+        (reject tx "unsupported-chain" "chain is outside the configured policy")
+        (if (not (field tx :simulationSucceeded))
+          (reject tx "simulation-failed" "transaction simulation did not succeed")
+          (if (not (field tx :verifiedContract))
+            (reject tx "unverified-contract" "target contract is not verified")
+            (if (= (field tx :kind) "contract-upgrade")
+              (require-approval
+                tx
+                "critical"
+                "contract upgrades require human approval")
+              (if (field tx :unlimitedApproval)
+                (require-approval tx "high" "unlimited token approval requested")
+                (if (> (field tx :valueUsd) 1000.0)
+                  (require-approval
+                    tx
+                    "medium"
+                    "transaction exceeds the automatic USD limit")
+                  (Approve
+                    :requestId
+                    (field tx :requestId)
+                    :reason
+                    "simulation and policy checks passed"))))))))))
+(match (decode-json TransactionIntent (read-all))
+  [(Ok transaction) (encode-json (review-transaction transaction))]
+  [(Err error)
+    (encode-json
+      (Reject
+        :requestId
+        "invalid-request"
+        :code
+        (field error :code)
+        :reason
+        (concat (concat (field error :path) ": ") (field error :message))))])`
+};
+
+const exampleInputs = {
+  structuredAgent: `{"task":"review","confidence":0.95}`,
+  agentReview: `{"requestId":"req-approve","action":"review","amount":800,"risk":"low"}`,
+  web3Guard: `{"requestId":"tx-approve","chainId":1,"kind":"erc20-transfer","to":"0x1111111111111111111111111111111111111111","asset":"USDC","rawAmount":"115792089237316195423570985008687907853269984665640564039457584007913129639935","valueUsd":250,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true}`
+};
+
+const exampleFiles = {
+  quicksort: "examples/algorithms/quicksort.yin",
+  structuredAgent: "examples/agents/structured-agent.yin",
+  agentReview: "examples/agents/agent-review/main.yin",
+  web3Guard: "examples/web3/transaction-guard/main.yin"
 };
 
 const editor = document.querySelector("#code-editor");
+const editorPanel = document.querySelector(".editor-panel");
+const editorTitle = document.querySelector("#editor-title");
+const inputPanel = document.querySelector("#input-panel");
+const inputEditor = document.querySelector("#input-editor");
 const lineNumbers = document.querySelector("#line-numbers");
 const runButton = document.querySelector("#run-button");
 const formatButton = document.querySelector("#format-button");
@@ -88,6 +252,7 @@ let workerReady = false;
 let requestId = 0;
 let pendingRequest = null;
 let lastDiagnostic = null;
+let activeExample = "recursion";
 
 function createWorker() {
   workerReady = false;
@@ -129,7 +294,7 @@ function handleWorkerMessage(event) {
   }
 }
 
-function request(action, source = "") {
+function request(action, source = "", input) {
   if (!workerReady || pendingRequest) return;
   setBusy(true);
   const id = ++requestId;
@@ -142,7 +307,7 @@ function request(action, source = "") {
     createWorker();
   }, 1500);
   pendingRequest = { id, action, startedAt, timeout };
-  worker.postMessage({ id, action, source });
+  worker.postMessage({ id, action, source, input });
 }
 
 function setBusy(busy) {
@@ -220,7 +385,14 @@ function handleFormatResult(payload) {
 }
 
 function loadExample(name, persist = true) {
+  if (!Object.hasOwn(examples, name)) return;
+  activeExample = name;
   editor.value = examples[name];
+  inputEditor.value = exampleInputs[name] || "";
+  const acceptsInput = Object.hasOwn(exampleInputs, name);
+  inputPanel.classList.toggle("is-hidden", !acceptsInput);
+  editorPanel.classList.toggle("has-input", acceptsInput);
+  editorTitle.textContent = exampleFiles[name] || "main.yin";
   document.querySelectorAll(".example-tab").forEach((tab) => {
     const active = tab.dataset.example === name;
     tab.classList.toggle("is-active", active);
@@ -228,6 +400,7 @@ function loadExample(name, persist = true) {
   });
   if (persist) localStorage.setItem("yin-playground-example", name);
   saveEditor();
+  saveInput();
   updateEditorChrome();
   editor.focus();
   if (workerReady && !pendingRequest) request("reset");
@@ -247,6 +420,23 @@ function saveEditor() {
   localStorage.setItem("yin-playground-source", editor.value);
 }
 
+function saveInput() {
+  localStorage.setItem("yin-playground-input", inputEditor.value);
+}
+
+function restoreExampleChrome(name) {
+  activeExample = Object.hasOwn(examples, name) ? name : "recursion";
+  const acceptsInput = Object.hasOwn(exampleInputs, activeExample);
+  inputPanel.classList.toggle("is-hidden", !acceptsInput);
+  editorPanel.classList.toggle("has-input", acceptsInput);
+  editorTitle.textContent = exampleFiles[activeExample] || "main.yin";
+  document.querySelectorAll(".example-tab").forEach((tab) => {
+    const active = tab.dataset.example === activeExample;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+}
+
 function insertTab(event) {
   if (event.key !== "Tab") return;
   event.preventDefault();
@@ -260,7 +450,11 @@ function insertTab(event) {
 document.querySelectorAll(".example-tab").forEach((tab) => {
   tab.addEventListener("click", () => loadExample(tab.dataset.example));
 });
-runButton.addEventListener("click", () => request("run", editor.value));
+runButton.addEventListener("click", () => request(
+  "run",
+  editor.value,
+  Object.hasOwn(exampleInputs, activeExample) ? inputEditor.value : undefined
+));
 formatButton.addEventListener("click", () => request("format", editor.value));
 resetButton.addEventListener("click", () => {
   if (!pendingRequest) request("reset");
@@ -279,6 +473,7 @@ diagnostic.addEventListener("click", () => {
   updateEditorChrome();
 });
 editor.addEventListener("input", () => { saveEditor(); updateEditorChrome(); });
+inputEditor.addEventListener("input", saveInput);
 editor.addEventListener("scroll", () => { lineNumbers.scrollTop = editor.scrollTop; });
 editor.addEventListener("click", updateEditorChrome);
 editor.addEventListener("keyup", updateEditorChrome);
@@ -286,19 +481,21 @@ editor.addEventListener("keydown", (event) => {
   insertTab(event);
   if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
     event.preventDefault();
-    request("run", editor.value);
+    request(
+      "run",
+      editor.value,
+      Object.hasOwn(exampleInputs, activeExample) ? inputEditor.value : undefined
+    );
   }
 });
 
 const savedSource = localStorage.getItem("yin-playground-source");
+const savedInput = localStorage.getItem("yin-playground-input");
 const savedExample = localStorage.getItem("yin-playground-example") || "recursion";
 if (savedSource) {
   editor.value = savedSource;
-  document.querySelectorAll(".example-tab").forEach((tab) => {
-    const active = tab.dataset.example === savedExample;
-    tab.classList.toggle("is-active", active);
-    tab.setAttribute("aria-selected", String(active));
-  });
+  inputEditor.value = savedInput || exampleInputs[savedExample] || "";
+  restoreExampleChrome(savedExample);
   updateEditorChrome();
 } else {
   loadExample("recursion", false);

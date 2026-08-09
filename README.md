@@ -11,7 +11,8 @@ production-ready language. The untouched historical state is preserved by the
 
 Try the language in the browser at the
 [Yin Playground](https://smallyunet.github.io/yin/). Evaluation, type checking,
-and formatting run locally in a Web Worker; no source code is sent to a server.
+formatting, and the editable-input Agent and Web3 demos run locally in a Web
+Worker; no source code or JSON input is sent to a server.
 
 ## Implemented and tested
 
@@ -84,17 +85,20 @@ java -cp target/yin-0.11.0.jar \
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.11.0.jar examples/quicksort.yin
-java -jar target/yin-0.11.0.jar examples/parse-values.yin 10 bad 32
+java -jar target/yin-0.11.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.11.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.11.0.jar --json examples/structured-agent.yin
-java -jar target/yin-0.11.0.jar examples/wc.yin README.md
+  java -jar target/yin-0.11.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.11.0.jar examples/cli/wc.yin README.md
 ```
 
-The [typed agent review demo](examples/agent-review/README.md) provides a
+The [typed agent review demo](examples/agents/agent-review/README.md) provides a
 complete strict-JSON request, exhaustive decision, and raw-JSON response flow
 with maintained fixtures for approval, rejection, user input, and boundary
 errors.
+The [Web3 transaction guard](examples/web3/transaction-guard/README.md) applies
+the same boundary to normalized wallet intents, including simulation,
+verification, unlimited-approval, value-limit, chain, and address policies.
 
 ## Interactive REPL
 
@@ -138,7 +142,7 @@ src/main/java/   language implementation
   .../value/     runtime values, closures, constructors, and primitives
 src/test/java/   automated integration and regression tests
 tests/           maintained runnable Yin programs
-examples/        complete command-line and algorithm examples
+examples/        categorized algorithm, CLI, agent, and Web3 examples
 experiments/     historical, potentially outdated language experiments
 prototype1/      original Racket prototype
 emacs/           historical Emacs modes

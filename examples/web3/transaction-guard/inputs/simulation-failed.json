@@ -1,0 +1,1 @@
+{"requestId":"tx-simulation","chainId":1,"kind":"swap","to":"0x4444444444444444444444444444444444444444","asset":"ETH","rawAmount":"1000000000000000000","valueUsd":3000,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":false}

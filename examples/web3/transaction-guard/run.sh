@@ -2,12 +2,12 @@
 set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
+REPOSITORY_ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../../.." && pwd)
 YIN_VERSION=0.11.0
 YIN_JAR="$REPOSITORY_ROOT/target/yin-$YIN_VERSION.jar"
 
 if [ "$#" -ne 1 ]; then
-  echo "usage: $0 <input.json>" >&2
+  echo "usage: $0 <transaction-intent.json>" >&2
   exit 2
 fi
 

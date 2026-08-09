@@ -6,6 +6,11 @@
   user-input, and strict boundary-error fixtures
 - add `--json` for clean JSON stdout, stderr-isolated logs, and structured
   non-zero failure output
+- organize maintained examples by algorithms, CLI, agents, and Web3
+- add a Web3 transaction guard with wallet-intent policy fixtures for
+  simulation, verification, chain, address, value, upgrade, and approval risk
+- expose quicksort, structured-agent, agent-review, and Web3 guard in the
+  browser Playground with editable JSON standard input
 
 ## 0.11.0 — 2026-08-09
 

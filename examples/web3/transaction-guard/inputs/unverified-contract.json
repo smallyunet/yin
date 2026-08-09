@@ -1,0 +1,1 @@
+{"requestId":"tx-unverified","chainId":1,"kind":"contract-call","to":"0x5555555555555555555555555555555555555555","asset":"ETH","rawAmount":"0","valueUsd":0,"unlimitedApproval":false,"verifiedContract":false,"simulationSucceeded":true}

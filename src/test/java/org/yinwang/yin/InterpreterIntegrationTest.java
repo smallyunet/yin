@@ -68,7 +68,7 @@ class InterpreterIntegrationTest {
         PrintStream original = System.out;
         try {
             System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
-            Interpreter.main(new String[]{"examples/parse-values.yin", "10", "bad", "32"});
+            Interpreter.main(new String[]{"examples/cli/parse-values.yin", "10", "bad", "32"});
         } finally {
             System.setOut(original);
         }

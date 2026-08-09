@@ -158,7 +158,10 @@ main { overflow: hidden; }
 .section-heading > p { max-width: 480px; margin: 0; color: var(--muted); text-align: right; }
 kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 0.3rem; background: var(--surface); color: var(--text-soft); font-family: var(--mono); font-size: 0.72rem; }
 
-.example-tabs { display: flex; gap: 0.45rem; overflow-x: auto; padding: 0.2rem 0 0.8rem; scrollbar-width: thin; }
+.example-catalog { display: grid; gap: 0.55rem; margin-bottom: 0.8rem; }
+.example-group { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: 0.8rem; }
+.example-group-label { color: var(--muted); font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.example-tabs { display: flex; gap: 0.45rem; overflow-x: auto; padding: 0.2rem 0; scrollbar-width: thin; }
 .example-tab {
   min-height: 44px;
   flex: 0 0 auto;
@@ -171,6 +174,7 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 }
 .example-tab:hover { color: var(--text); }
 .example-tab.is-active { border-color: var(--border); background: var(--surface); color: var(--text); }
+.example-tab-featured { color: #93c5fd; }
 
 .workbench {
   display: grid;
@@ -219,6 +223,7 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 .run-button:disabled, .text-button:disabled { cursor: wait; opacity: 0.55; }
 
 .editor-wrap { position: relative; display: grid; flex: 1; grid-template-columns: 3.4rem minmax(0, 1fr); min-height: 470px; overflow: hidden; }
+.editor-panel.has-input .editor-wrap { min-height: 380px; }
 .line-numbers, #code-editor {
   margin: 0;
   border: 0;
@@ -230,6 +235,12 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 .line-numbers { overflow: hidden; padding: 1.25rem 0.8rem; border-right: 1px solid var(--border-subtle); color: #52627b; text-align: right; user-select: none; }
 #code-editor { width: 100%; height: 100%; resize: none; padding: 1.25rem 1.35rem; outline: none; background: transparent; color: #dbeafe; caret-color: var(--accent); white-space: pre; overflow: auto; }
 #code-editor::selection { background: rgb(74 222 128 / 22%); }
+.input-panel { padding: 0.9rem 1rem 1rem; border-top: 1px solid var(--border-subtle); background: #0a1220; }
+.input-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; color: var(--muted); font-family: var(--mono); font-size: 0.67rem; }
+.input-heading label { color: var(--text-soft); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.input-heading code { color: #93c5fd; }
+#input-editor { display: block; width: 100%; min-height: 112px; resize: vertical; padding: 0.8rem 0.9rem; border: 1px solid var(--border); border-radius: 0.55rem; outline: none; background: #0d1728; color: #dbeafe; font-family: var(--mono); font-size: 0.75rem; line-height: 1.6; }
+#input-editor::selection { background: rgb(74 222 128 / 22%); }
 .editor-footer, .output-footer {
   display: flex;
   min-height: 34px;
@@ -318,12 +329,15 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
   .section-heading { align-items: flex-start; flex-direction: column; }
   .section-heading > p { text-align: left; }
   .playground-section, .features-section { padding: 3.5rem 0; }
+  .example-group { grid-template-columns: 1fr; gap: 0.15rem; }
   .workbench { border-radius: 0.75rem; }
   .panel-bar { padding-left: 0.8rem; }
   .traffic-lights, .panel-actions .icon-button { display: none; }
   .editor-wrap { grid-template-columns: 2.7rem minmax(0, 1fr); }
   .line-numbers, #code-editor { font-size: 0.78rem; }
   #code-editor { padding-right: 0.8rem; padding-left: 0.8rem; }
+  .input-panel { padding-right: 0.8rem; padding-left: 0.8rem; }
+  .input-heading { align-items: flex-start; flex-direction: column; gap: 0.2rem; }
   .output-content { padding: 1rem; }
   .feature-grid { grid-template-columns: 1fr; }
   .feature-wide { grid-column: auto; }

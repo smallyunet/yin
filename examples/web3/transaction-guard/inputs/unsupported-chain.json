@@ -1,0 +1,1 @@
+{"requestId":"tx-chain","chainId":8453,"kind":"erc20-transfer","to":"0x6666666666666666666666666666666666666666","asset":"USDC","rawAmount":"1000000","valueUsd":1,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true}

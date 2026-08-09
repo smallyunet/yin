@@ -173,13 +173,13 @@ class LanguageCompletenessTest {
 
     @Test
     void quicksortExampleIsRunnableAndTyped() {
-        assertEquals("[1 2 3 4 5 6 7 8 9]", interpret(Path.of("examples/quicksort.yin")));
-        assertEquals("(Vector Int)", typecheck(Path.of("examples/quicksort.yin")));
+        assertEquals("[1 2 3 4 5 6 7 8 9]", interpret(Path.of("examples/algorithms/quicksort.yin")));
+        assertEquals("(Vector Int)", typecheck(Path.of("examples/algorithms/quicksort.yin")));
     }
 
     @Test
     void parseValuesExampleConsumesProgramArguments() {
-        Path source = Path.of("examples/parse-values.yin");
+        Path source = Path.of("examples/cli/parse-values.yin");
         RuntimeContext context = new RuntimeContext(
                 ignored -> { }, () -> "", List.of("10", "bad", "32"));
 
@@ -193,7 +193,7 @@ class LanguageCompletenessTest {
     void wordCountExampleReadsARealUtf8TextFile() throws Exception {
         Path input = Files.writeString(tempDir.resolve("input.txt"),
                 "yin makes programs\nsmall and useful", StandardCharsets.UTF_8);
-        Path source = Path.of("examples/wc.yin");
+        Path source = Path.of("examples/cli/wc.yin");
         List<String> output = new ArrayList<>();
         RuntimeContext context = new RuntimeContext(
                 output::add, () -> "", List.of(input.toString()));

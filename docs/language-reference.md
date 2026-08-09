@@ -217,7 +217,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.11.0.jar examples/parse-values.yin 10 bad 32
+java -jar yin-0.11.0.jar examples/cli/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but

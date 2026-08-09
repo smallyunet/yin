@@ -38,6 +38,12 @@ class DemoSiteTest {
         assertTrue(html.contains("data-example=\"programs\""));
         assertTrue(html.contains("data-example=\"results\""));
         assertTrue(html.contains("data-example=\"contracts\""));
+        assertTrue(html.contains("data-example=\"quicksort\""));
+        assertTrue(html.contains("data-example=\"structuredAgent\""));
+        assertTrue(html.contains("data-example=\"agentReview\""));
+        assertTrue(html.contains("data-example=\"web3Guard\""));
+        assertTrue(html.contains("<label for=\"input-editor\">JSON input</label>"));
+        assertTrue(html.contains("id=\"input-editor\""));
         assertTrue(html.contains("aria-live=\"polite\""));
         assertFalse(html.contains("href=\"/"), "project-page assets must remain path-relative");
         assertFalse(html.contains("src=\"/"), "project-page assets must remain path-relative");
@@ -65,7 +71,25 @@ class DemoSiteTest {
         assertTrue(app.contains("[-> (Result Int String)]"));
         assertTrue(app.contains("[(Err message)"));
         assertTrue(app.contains("(decode-json Request"));
+        for (String program : List.of(
+                "examples/algorithms/quicksort.yin",
+                "examples/agents/structured-agent.yin",
+                "examples/agents/agent-review/main.yin",
+                "examples/web3/transaction-guard/main.yin")) {
+            String source = Files.readString(Path.of(program), StandardCharsets.UTF_8).strip();
+            assertTrue(app.contains(source), program + " must stay synchronized with the playground");
+        }
+        String agentInput = Files.readString(
+                Path.of("examples/agents/agent-review/inputs/approve.json"),
+                StandardCharsets.UTF_8).strip();
+        String web3Input = Files.readString(
+                Path.of("examples/web3/transaction-guard/inputs/approve.json"),
+                StandardCharsets.UTF_8).strip();
+        assertTrue(app.contains(agentInput));
+        assertTrue(app.contains(web3Input));
+        assertTrue(app.contains("Object.hasOwn(exampleInputs, activeExample)"));
         assertTrue(app.contains("}, 1500)"));
         assertTrue(app.contains("worker.terminate()"));
+        assertTrue(worker.contains("yinSetInput(input)"));
     }
 }

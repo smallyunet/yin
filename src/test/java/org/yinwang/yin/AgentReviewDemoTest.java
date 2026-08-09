@@ -28,8 +28,8 @@ class AgentReviewDemoTest {
         expected.put("unknown-field.json", "{\"tag\":\"Reject\",\"requestId\":\"invalid-request\",\"reason\":\"unknown-field at $.debug: unknown field: debug\"}");
 
         for (Map.Entry<String, String> fixture : expected.entrySet()) {
-            Path input = Path.of("examples/agent-review/inputs", fixture.getKey());
-            Run result = runJson(Path.of("examples/agent-review/main.yin"),
+            Path input = Path.of("examples/agents/agent-review/inputs", fixture.getKey());
+            Run result = runJson(Path.of("examples/agents/agent-review/main.yin"),
                     Files.readString(input, StandardCharsets.UTF_8));
             assertEquals(0, result.status, fixture.getKey() + " stderr: " + result.error);
             assertEquals(fixture.getValue() + "\n", result.output, fixture.getKey());
@@ -38,8 +38,8 @@ class AgentReviewDemoTest {
     }
 
     @Test void demoProgramIsStaticallyTypedAsJsonBoundary() {
-        String type = new TypeChecker("examples/agent-review/main.yin")
-                .typecheck("examples/agent-review/main.yin").toString();
+        String type = new TypeChecker("examples/agents/agent-review/main.yin")
+                .typecheck("examples/agents/agent-review/main.yin").toString();
         assertEquals("(Result String (record EncodeError [code String] [path String] [message String]))", type);
     }
 

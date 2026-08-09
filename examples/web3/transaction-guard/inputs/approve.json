@@ -1,0 +1,1 @@
+{"requestId":"tx-approve","chainId":1,"kind":"erc20-transfer","to":"0x1111111111111111111111111111111111111111","asset":"USDC","rawAmount":"115792089237316195423570985008687907853269984665640564039457584007913129639935","valueUsd":250,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true}

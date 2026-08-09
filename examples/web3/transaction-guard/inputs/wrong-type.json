@@ -1,0 +1,1 @@
+{"requestId":"tx-wrong-type","chainId":1,"kind":"erc20-transfer","to":"0x8888888888888888888888888888888888888888","asset":"USDC","rawAmount":"1000000","valueUsd":"one","unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true}

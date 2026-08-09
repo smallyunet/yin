@@ -1,0 +1,1 @@
+{"requestId":"tx-upgrade","chainId":1,"kind":"contract-upgrade","to":"0x7777777777777777777777777777777777777777","asset":"ETH","rawAmount":"0","valueUsd":0,"unlimitedApproval":false,"verifiedContract":true,"simulationSucceeded":true,"context":"upgrade proposal 42"}

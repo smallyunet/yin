@@ -10,6 +10,9 @@ TeaVM compiles `BrowserBridge` and the reachable Yin implementation to a
 minified JavaScript runtime. The page sends source text to a dedicated Web
 Worker, which calls the exported bridge methods and returns JSON containing the
 runtime value, inferred type, captured `print` output, or structured diagnostic.
+The runnable-demo group mirrors the maintained quicksort, structured-agent,
+agent-review, and Web3 transaction-guard programs. Programs that use `read-all`
+show a labeled JSON input editor and inject that text before evaluation.
 
 The UI terminates and recreates the worker when a request exceeds 1.5 seconds.
 This prevents an infinite Yin computation from freezing the page. Termination

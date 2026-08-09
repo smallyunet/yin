@@ -1,0 +1,66 @@
+(record TransactionIntent
+  [requestId String]
+  [chainId Int]
+  [kind String]
+  [to String]
+  [asset String]
+  [rawAmount String]
+  [valueUsd Float]
+  [unlimitedApproval Bool]
+  [verifiedContract Bool]
+  [simulationSucceeded Bool]
+  [context (Option String) :default none])
+(variant TransactionDecision
+  [Approve [requestId String] [reason String]]
+  [Reject [requestId String] [code String] [reason String]]
+  [NeedsApproval [requestId String] [risk String] [reason String]])
+(define supported-chain
+  (fun ([chainId Int] [-> Bool])
+    (or (= chainId 1) (= chainId 137))))
+(define valid-address
+  (fun ([address String] [-> Bool])
+    (if (= (string-length address) 42) (= (substring address 0 2) "0x") false)))
+(define reject
+  (fun ([tx TransactionIntent] [code String] [reason String] [-> TransactionDecision])
+    (Reject :requestId (field tx :requestId) :code code :reason reason)))
+(define require-approval
+  (fun ([tx TransactionIntent] [risk String] [reason String] [-> TransactionDecision])
+    (NeedsApproval :requestId (field tx :requestId) :risk risk :reason reason)))
+(define review-transaction
+  (fun ([tx TransactionIntent] [-> TransactionDecision])
+    (if (not (valid-address (field tx :to)))
+      (reject tx "invalid-address" "target must be a 20-byte 0x address")
+      (if (not (supported-chain (field tx :chainId)))
+        (reject tx "unsupported-chain" "chain is outside the configured policy")
+        (if (not (field tx :simulationSucceeded))
+          (reject tx "simulation-failed" "transaction simulation did not succeed")
+          (if (not (field tx :verifiedContract))
+            (reject tx "unverified-contract" "target contract is not verified")
+            (if (= (field tx :kind) "contract-upgrade")
+              (require-approval
+                tx
+                "critical"
+                "contract upgrades require human approval")
+              (if (field tx :unlimitedApproval)
+                (require-approval tx "high" "unlimited token approval requested")
+                (if (> (field tx :valueUsd) 1000.0)
+                  (require-approval
+                    tx
+                    "medium"
+                    "transaction exceeds the automatic USD limit")
+                  (Approve
+                    :requestId
+                    (field tx :requestId)
+                    :reason
+                    "simulation and policy checks passed"))))))))))
+(match (decode-json TransactionIntent (read-all))
+  [(Ok transaction) (encode-json (review-transaction transaction))]
+  [(Err error)
+    (encode-json
+      (Reject
+        :requestId
+        "invalid-request"
+        :code
+        (field error :code)
+        :reason
+        (concat (concat (field error :path) ": ") (field error :message))))])
