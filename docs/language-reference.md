@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.14 language specification](language-specification.md). Files in
+[Yin 0.15 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -242,7 +242,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.14.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar yin-0.15.0.jar examples/cli/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
@@ -251,7 +251,7 @@ is deliberately unavailable in the browser runtime.
 For structured pipelines, `--json` reserves stdout for the final raw JSON:
 
 ```bash
-java -jar yin-0.14.0.jar --json program.yin < request.json
+java -jar yin-0.15.0.jar --json program.yin < request.json
 ```
 
 The program must return `String` or `(Result String E)`. `Ok String` is
@@ -278,7 +278,7 @@ and contract-invalid output are ordinary `ToolError` values. Destructive tools
 must require approval. Inspect declarations without executing source using:
 
 ```bash
-java -jar yin-0.14.0.jar --capabilities program.yin
+java -jar yin-0.15.0.jar --capabilities program.yin
 ```
 
 Run a program against the root-confined reference host and record a trace with
@@ -291,6 +291,8 @@ in the [reference policy runtime guide](policy-runtime.md).
 - record mutation and generic subscript syntax are unsupported
 - the type system is experimental and is not a formal soundness guarantee
 - there is no module system, package manager, or bytecode/native compiler
+- the deterministic contract profile is a restricted evaluator, not yet a
+  metered bytecode VM or hostile-code sandbox
 - the LSP currently provides diagnostics and formatting, but not semantic
   navigation or completion
 - several files under `experiments/` represent abandoned syntax designs

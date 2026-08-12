@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.15.0 — 2026-08-12
+
+- define `deterministic-policy-v1` as the executable, side-effect-free Agent
+  decision profile ahead of a portable bytecode VM
+- add `--contract-check` to type-check contracts and reject `Float`, `Any`,
+  mutation, filesystem access, output, and tool authority
+- add `--contract-run` for exact JSON input and digest-bound program, input,
+  structured result, and result hashes
+- add a maintained wallet-swap capability example with approve, reject, and
+  human-approval conformance fixtures
+- document the language/compiler/VM/host layers, repository boundary, and the
+  deliberate absence of bytecode, fuel metering, and hostile-code isolation
+- expand the automated suite from 191 to 197 tests
+
 ## 0.14.0 — 2026-08-12
 
 - add `--guard` as a deny-by-default reference host for typed local-tool calls

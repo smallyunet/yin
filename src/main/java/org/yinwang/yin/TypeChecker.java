@@ -29,16 +29,33 @@ public class TypeChecker {
 
 
     public YinType typecheck(String file) {
-        uncalled.clear();
-        callStack.clear();
-        tools.clear();
+        return typecheckProgram(parseFile(file));
+    }
+
+    public YinType typecheckSource(String sourceName, String source) {
         Node program;
         try {
-            program = Parser.parse(file);
+            program = Parser.parseSource(sourceName, source);
         } catch (ParserException e) {
             throw new GeneralError(new Diagnostic(
                     Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
         }
+        return typecheckProgram(program);
+    }
+
+    private Node parseFile(String file) {
+        try {
+            return Parser.parse(file);
+        } catch (ParserException e) {
+            throw new GeneralError(new Diagnostic(
+                    Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
+        }
+    }
+
+    private YinType typecheckProgram(Node program) {
+        uncalled.clear();
+        callStack.clear();
+        tools.clear();
         Scope<YinType> s = Scope.buildInitTypeScope(this);
         YinType ret = program.typecheck(s);
 

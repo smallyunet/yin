@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Constants {
 
-    public static final String VERSION = "0.14.0";
+    public static final String VERSION = "0.15.0";
 
     // delimiters and delimeter pairs
     public static final String LINE_COMMENT = "--";

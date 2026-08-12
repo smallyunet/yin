@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.0
+
+- bundle the Yin 0.15.0 language server and deterministic-contract CLI
+
 ## 0.14.0
 
 - bundle the Yin 0.14.0 language server and reference-runtime CLI

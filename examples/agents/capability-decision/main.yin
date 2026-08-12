@@ -1,0 +1,41 @@
+(record SwapRequest
+  [requestId String]
+  [amount Int]
+  [dailyRemaining Int]
+  [priceImpactBps Int]
+  [simulationSucceeded Bool])
+(variant Decision
+  [Approve [requestId String] [capability String] [maxAmount Int]]
+  [Reject [requestId String] [reason String]]
+  [NeedsApproval [requestId String] [reason String]])
+(policy authorize-swap
+  ([request SwapRequest] [-> Decision])
+  (when (not request.simulationSucceeded)
+    (Reject :requestId request.requestId :reason "simulation failed"))
+  (when (> request.amount request.dailyRemaining)
+    (Reject :requestId request.requestId :reason "daily limit exceeded"))
+  (when (> request.priceImpactBps 100)
+    (NeedsApproval
+      :requestId
+      request.requestId
+      :reason
+      "price impact exceeds automatic limit"))
+  (otherwise
+    (Approve
+      :requestId
+      request.requestId
+      :capability
+      "wallet.swap"
+      :maxAmount
+      request.amount)))
+(match (decode-json SwapRequest (read-all))
+  [(Ok request) (encode-json (authorize-swap request))]
+  [(Err error)
+    (encode-json
+      (Reject
+        :requestId
+        "invalid-request"
+        :reason
+        (concat
+          (concat error.code (concat " at " error.path))
+          (concat ": " error.message))))])

@@ -66,6 +66,18 @@ public class Interpreter {
             if (status != 0) System.exit(status);
             return;
         }
+        if (args.length > 0 && args[0].equals("--contract-check")) {
+            int status = DeterministicContractRuntime.checkCommand(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--contract-run")) {
+            int status = DeterministicContractRuntime.runCommand(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
         if (args.length > 0 && args[0].equals("--json")) {
             int status = runJson(
                     Arrays.copyOfRange(args, 1, args.length),

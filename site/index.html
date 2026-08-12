@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.14</strong><span>Current version</span></div>
-          <div><strong>191</strong><span>Automated tests</span></div>
+          <div><strong>0.15</strong><span>Current version</span></div>
+          <div><strong>197</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -241,6 +241,13 @@
             <p>The JVM reference host checks installed capabilities, requires explicit write approval, and records a hash-chained trace that can be replayed without repeating effects.</p>
             <pre><code>yin --guard policy.yin --host host.json --trace run.jsonl
 yin --replay run.jsonl</code></pre>
+          </article>
+          <article class="feature-card feature-wide">
+            <span class="feature-index">10</span>
+            <h3>Deterministic decision contracts</h3>
+            <p>The JVM contract profile rejects ambient effects and binds the exact policy, input, and structured decision with SHA-256 digests.</p>
+            <pre><code>yin --contract-check policy.yin
+yin --contract-run policy.yin --input request.json</code></pre>
           </article>
         </div>
       </section>

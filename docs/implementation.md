@@ -34,6 +34,10 @@ source file
 - `RuntimeContext.java` injects output, complete text input, program arguments,
   UTF-8 resource reads, named tool handlers, authorization policy, and an audit sink
   instead of hiding host effects in language nodes.
+- `DeterministicContractRuntime.java` validates the side-effect-free
+  `deterministic-policy-v1` subset, injects one immutable JSON input, and returns
+  a digest-bound structured decision envelope. It is a reference evaluator, not
+  yet a metered bytecode VM.
 - `ast/ToolDef.java`, `ast/Invoke.java`, `type/ToolType.java`, and
   `value/ToolValue.java` keep declared authority, static contracts, runtime
   handles, and invocation separate. `CapabilityManifest.java` performs
@@ -121,6 +125,9 @@ policy diagnostics.
 `ReferencePolicyRuntimeTest` protects the Yin 0.14 preflight host agreement,
 root confinement, write approval, create-only trace, hash-chain verification,
 and side-effect-free replay boundary.
+`DeterministicContractRuntimeTest` protects the Yin 0.15 portable profile,
+reproducible envelopes, maintained capability decisions, rejected effects, and
+the JSON-result boundary.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy

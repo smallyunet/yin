@@ -15,8 +15,9 @@ agent-review, typed-tool, and Web3 transaction-guard programs. The typed-tool
 demo receives one deterministic, read-only browser-hosted implementation;
 arbitrary network tools remain unavailable. Programs that use `read-all`
 show a labeled JSON input editor and inject that text before evaluation.
-The v0.14 guarded local-tool runtime is documented on the page but remains a
-JVM CLI feature: a static browser page cannot demonstrate filesystem authority
+The guarded local-tool runtime and v0.15 deterministic contract profile are
+documented on the page but remain JVM CLI features: a static browser page cannot
+demonstrate filesystem authority
 or durable trace files without changing that security boundary.
 
 The UI terminates and recreates the worker when a request exceeds 1.5 seconds.

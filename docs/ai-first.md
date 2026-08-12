@@ -48,6 +48,9 @@ where a probabilistic proposal crosses into an external effect.
 - **0.14 policy runtime:** a deny-by-default reference host for root-confined
   local text tools, explicit write approval, hash-chained traces, and replay
   that never repeats a tool invocation.
+- **0.15 deterministic contracts:** a pure executable policy profile,
+  digest-bound decision envelopes, and explicit exclusions ahead of bytecode,
+  metering, and a portable VM.
 - **Next: adoption evidence:** evaluate the complete boundary with non-authors
   and compare the same task against an ordinary host implementation.
 - **Later: durable boundaries:** MCP connectivity, approval suspension, cancellation, recovery,

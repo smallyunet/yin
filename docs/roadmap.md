@@ -143,6 +143,15 @@ The project is being stabilized before new language features are designed.
 - maintained end-to-end demo for automatic reads, denied writes, approved writes,
   policy rejection, trace integrity, and side-effect-free replay
 
+## 0.15 — deterministic contract profile
+
+- executable `deterministic-policy-v1` preflight for pure Agent decisions
+- `--contract-check` validation and `--contract-run` execution over exact JSON input
+- explicit rejection of `Float`, `Any`, mutation, filesystem access, output, and tools
+- result envelopes binding program, input, and structured decision with SHA-256 digests
+- maintained capability-decision fixtures for approval, rejection, and human review
+- architecture and conformance boundaries for a future bytecode compiler and Rust/Wasm VM
+
 ## Later
 
 - non-author usability testing and a TypeScript or Rego boundary comparison
@@ -152,7 +161,7 @@ The project is being stabilized before new language features are designed.
 - persistent dictionaries and sets
 - typed model boundaries
 - durable tasks, checkpoints, approval suspension, and recovery
-- bytecode or native compilation
+- canonical bytecode, verifier, fuel metering, and a portable Rust/Wasm VM
 - hover, completion, definition, and reference navigation
 
 New syntax should not be added until it has a written rule, interpreter tests,
