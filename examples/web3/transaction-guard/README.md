@@ -6,7 +6,7 @@ wallet or transaction executor:
 ```text
 normalized transaction intent JSON
   -> strict TransactionIntent decoding
-  -> deterministic safety policy
+  -> ordered deterministic safety policy
   -> exhaustive TransactionDecision
   -> raw JSON for the wallet host
 ```
@@ -33,6 +33,10 @@ The maintained fixtures cover automatic approval, unlimited approval, a high
 USD value, failed simulation, an unverified contract, an unsupported chain, a
 contract upgrade, an invalid address, and a typed JSON boundary error.
 The invalid-address coverage includes both malformed short and empty values.
+
+The source deliberately mirrors this list with top-to-bottom `when` rules and
+concise fields such as `tx.chainId` and `tx.valueUsd`. The first matching rule
+wins; `otherwise` is the only automatic-approval path.
 
 ## Trust boundary
 

@@ -1,21 +1,39 @@
 # The Yin Programming Language
 
-Yin is an experimental programming language originally developed by Yin Wang
-in 2013–2014. It uses an S-expression-like syntax and explores a small set of
-language-design ideas through a hand-written parser, tree-walking interpreter,
-and an experimental static type checker.
+Yin is a small typed policy language for defining and auditing the boundary
+between AI agents and external tools. Policies read from top to bottom, external
+authority is injected by a deny-by-default host, expected failures are explicit,
+and tool calls carry approval and audit metadata.
 
-The project is suitable for studying language implementation. It is not yet a
-production-ready language. The untouched historical state is preserved by the
-`legacy-2015` Git tag.
+Yin is also an experimental programming-language implementation, originally
+developed by Yin Wang in 2013–2014 and now built around a hand-written parser,
+tree-walking interpreter, and static type checker. It is not yet production
+ready. The untouched historical state is preserved by the `legacy-2015` Git tag.
 
 Try the language in the browser at the
 [Yin Playground](https://smallyunet.github.io/yin/). Evaluation, type checking,
 formatting, and the editable-input Agent and Web3 demos run locally in a Web
 Worker; no source code or JSON input is sent to a server.
 
+```yin
+(policy review
+  ([request ReviewRequest] [-> Decision])
+  (when (= request.risk "blocked")
+    (Reject :reason "risk policy blocked this request"))
+  (when (> request.amount 10000)
+    (NeedsInput :question "manual approval is required"))
+  (otherwise
+    (Approve :reason "within automatic policy")))
+```
+
+`policy` rules are checked like ordinary typed functions and lower to the same
+core AST. The first matching `when` wins, and every policy must end with an
+explicit `otherwise` result.
+
 ## Implemented and tested
 
+- ordered typed policies with explicit fallback and first-match evaluation
+- concise immutable field access such as `request.risk`
 - integers, floats, booleans, strings, and vectors
 - exact and homogeneous immutable vectors with higher-order processing
 - exhaustive pattern matching over primitives, vectors, records, and unions
@@ -38,7 +56,7 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.12 defines these
+boundaries between runtime values and static types. Yin 0.13 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -54,13 +72,13 @@ checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.12.0.jar --version
+java -jar yin-0.13.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.12.0.vsix
+code --install-extension yin-language-support-0.13.0.vsix
 ```
 
 ## Build and test
@@ -69,29 +87,29 @@ code --install-extension yin-language-support-0.12.0.vsix
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.12.0.jar`.
+This produces the executable JAR at `target/yin-0.13.0.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.12.0.jar tests/program-usability.yin
+java -jar target/yin-0.13.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.12.0.jar \
+java -cp target/yin-0.13.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.12.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.12.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.13.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.13.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.12.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.12.0.jar examples/cli/wc.yin README.md
+  java -jar target/yin-0.13.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.13.0.jar examples/cli/wc.yin README.md
 ```
 
 The [typed agent review demo](examples/agents/agent-review/README.md) provides a
@@ -108,7 +126,7 @@ host boundary errors without granting ambient authority.
 Inspect every tool capability without executing the program:
 
 ```bash
-java -jar target/yin-0.12.0.jar --capabilities examples/agents/typed-tool.yin
+java -jar target/yin-0.13.0.jar --capabilities examples/agents/typed-tool.yin
 ```
 
 The manifest is deterministic and includes effect, approval, idempotency, and
@@ -120,7 +138,7 @@ responsibilities; declarations never grant authority by themselves.
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.12.0.jar
+java -jar target/yin-0.13.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -132,7 +150,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.12.0.jar --format tests/function1.yin
+java -jar target/yin-0.13.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.
@@ -167,14 +185,15 @@ docs/            language, architecture, and roadmap notes
 
 See the normative [Language specification](docs/language-specification.md), the
 short [Language reference](docs/language-reference.md), the
+[ordered-policy guide](docs/policies.md), the
 [historical-program classification](docs/historical-programs.md),
 [REPL guide](docs/repl.md), [Formatter guide](docs/formatter.md),
 [Editor integration](docs/lsp.md),
 [Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
 maintained project boundaries.
-The [AI-first direction](docs/ai-first.md) defines the structured-contract,
-capability, tool, model, and durable-agent sequence without binding Yin syntax
-to one provider protocol.
+The [Agent policy direction](docs/ai-first.md) defines the structured-contract,
+capability, policy-runtime, and durable-agent sequence without binding Yin
+syntax to one provider protocol.
 
 ## License
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Constants {
 
-    public static final String VERSION = "0.12.0";
+    public static final String VERSION = "0.13.0";
 
     // delimiters and delimeter pairs
     public static final String LINE_COMMENT = "--";
@@ -48,12 +48,15 @@ public class Constants {
     public static final String JSON_SCHEMA_KEYWORD = "json-schema";
     public static final String TOOL_KEYWORD = "tool";
     public static final String INVOKE_KEYWORD = "invoke";
+    public static final String POLICY_KEYWORD = "policy";
+    public static final String WHEN_KEYWORD = "when";
+    public static final String OTHERWISE_KEYWORD = "otherwise";
     public static final String OK_PATTERN = "Ok";
     public static final String ERR_PATTERN = "Err";
 
     public static List<Character> IDENT_CHARS =
             Arrays.asList('~', '!', '@', '#', '$', '%', '^', '&', '*', '-', '_', '=', '+', '|',
-                    ':', ';', ',', '<', '>', '?', '/');
+                    ':', ';', ',', '<', '>', '?', '/', '.');
 
 
 }

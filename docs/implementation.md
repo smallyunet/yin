@@ -14,7 +14,9 @@ source file
 
 - `parser/Lexer.java` tokenizes source text and tracks source positions.
 - `parser/PreParser.java` constructs balanced tuple and vector forms.
-- `parser/Parser.java` converts those forms into semantic AST nodes.
+- `parser/Parser.java` converts those forms into semantic AST nodes. Readable
+  `policy` rules and dotted fields lower here to the existing function,
+  conditional, and immutable-field core.
 - `ast/` contains evaluation and type-checking behavior for each construct.
 - `ast/FieldAccess.java` implements immutable record field reads and their
   record, union, and `Any` type rules.
@@ -113,6 +115,9 @@ and the maintained result program.
 strict JSON, structured error path, schema, and complete agent-boundary slice.
 `ToolIntegrationTest` protects the Yin 0.12 declaration, manifest, host
 injection, approval, audit, structured-result validation, and MCP adapter slice.
+`PolicyIntegrationTest` protects the Yin 0.13 ordered-rule lowering, mandatory
+fallback, first-match behavior, dotted immutable field access, formatting, and
+policy diagnostics.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy

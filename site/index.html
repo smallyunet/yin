@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Yin is a small experimental language with an interpreter, a static type checker, and an online playground.">
+    <meta name="description" content="Yin is a small typed policy language for defining and auditing Agent-to-tool boundaries.">
     <meta name="theme-color" content="#0f172a">
-    <title>Yin Playground — Explore a Small Language in Your Browser</title>
+    <title>Yin Playground — Readable Policies for Agent Tool Boundaries</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,9 +32,9 @@
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <div class="eyebrow"><span></span> Written in Java. Running in your browser.</div>
-          <h1 id="hero-title">Small enough to learn.<br><em>Complete enough</em> to explore.</h1>
-          <p>Explore S-expressions, static types, immutable collections, closed variants, explicit outcomes, and typed JSON contracts. Your code runs entirely in the browser and is never sent to a server.</p>
+          <div class="eyebrow"><span></span> Typed policies. Deny-by-default tools.</div>
+          <h1 id="hero-title">Make Agent actions<br><em>readable before execution.</em></h1>
+          <p>Write ordered policies over typed inputs, require approval for risky tools, and inspect deterministic outcomes. Your code runs entirely in the browser and is never sent to a server.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#playground">
               Try it now
@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.12</strong><span>Current version</span></div>
-          <div><strong>175</strong><span>Automated tests</span></div>
+          <div><strong>0.13</strong><span>Current version</span></div>
+          <div><strong>182</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -63,7 +63,7 @@
           <div class="example-group">
             <span class="example-group-label">Language</span>
             <div class="example-tabs" role="tablist" aria-label="Language examples">
-              <button class="example-tab is-active" type="button" role="tab" aria-selected="true" data-example="recursion">Recursion</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="recursion">Recursion</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="closures">Closures</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="records">Records</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="vectors">Vectors</button>
@@ -79,9 +79,9 @@
             <div class="example-tabs" role="tablist" aria-label="Runnable project examples">
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="quicksort">Quick sort</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="structuredAgent">Structured agent</button>
-              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="agentReview">Agent review</button>
+              <button class="example-tab example-tab-featured is-active" type="button" role="tab" aria-selected="true" data-example="agentReview">Ordered policy</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="typedTool">Typed tool</button>
-              <button class="example-tab example-tab-featured" type="button" role="tab" aria-selected="false" data-example="web3Guard">Web3 guard</button>
+              <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="web3Guard">Web3 guard</button>
             </div>
           </div>
         </div>

@@ -122,14 +122,27 @@ The project is being stabilized before new language features are designed.
 - transport-neutral MCP `CallToolResult` adapter with strict output-contract validation
 - maintained browser-hosted typed-tool example and JVM integration coverage
 
+## 0.13 — readable policies
+
+- ordered `policy` definitions with first-match `when` rules and a mandatory
+  final `otherwise`
+- concise dot-style immutable record access with chained field support
+- parser lowering to the existing typed function and conditional core
+- flattened agent-review and Web3 transaction-guard policies with unchanged
+  fixtures and JSON boundary behavior
+- formatter, LSP, editor, browser, specification, and diagnostic coverage
+
 ## Later
 
+- reference policy runtime for MCP and local tool boundaries
+- decision trace recording and replay without repeated external writes
 - modules and multi-file type checking
 - persistent dictionaries and sets
 - typed model boundaries
-- durable tasks, checkpoints, approval, and record/replay
+- durable tasks, checkpoints, approval suspension, and recovery
 - bytecode or native compilation
 - hover, completion, definition, and reference navigation
 
 New syntax should not be added until it has a written rule, interpreter tests,
-type-checker tests, and diagnostic tests.
+type-checker tests, diagnostic tests, and a demonstrated improvement in a
+maintained policy or tool-boundary example.

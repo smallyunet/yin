@@ -177,8 +177,11 @@ public final class Formatter {
             Element value = form.elements().get(2);
             return value instanceof Form valueForm && head(valueForm).equals("fun");
         }
+        if (head.equals("otherwise")) {
+            return form.elements().size() > 1;
+        }
         return (head.equals("seq") || head.equals("match") || head.equals("variant")
-                || head.equals("tool"))
+                || head.equals("tool") || head.equals("policy") || head.equals("when"))
                 && form.elements().size() > 2;
     }
 
@@ -195,8 +198,15 @@ public final class Formatter {
             }
             return 2;
         }
-        if (head.equals("variant") || head.equals("match") || head.equals("tool")) {
+        if (head.equals("variant") || head.equals("match") || head.equals("tool")
+                || head.equals("policy")) {
             return head.equals("tool") ? 5 : 2;
+        }
+        if (head.equals("when")) {
+            return 2;
+        }
+        if (head.equals("otherwise")) {
+            return 1;
         }
         return 1;
     }

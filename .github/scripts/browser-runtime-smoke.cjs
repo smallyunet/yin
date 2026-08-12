@@ -13,6 +13,22 @@ assert.equal(evaluation.ok, true);
 assert.equal(evaluation.value, "42");
 assert.equal(evaluation.type, "Int");
 
+const orderedPolicy = JSON.parse(yinEvaluate(`
+  (record Request [risk String] [amount Int])
+  (policy decide
+    ([request Request] [-> String])
+    (when (= request.risk "blocked")
+      "reject")
+    (when (> request.amount 1000)
+      "approval")
+    (otherwise
+      "approve"))
+  (decide (Request :risk "low" :amount 2500))
+`));
+assert.equal(orderedPolicy.ok, true);
+assert.equal(orderedPolicy.value, '"approval"');
+assert.equal(orderedPolicy.type, "String");
+
 const diagnostic = JSON.parse(yinEvaluate("(field 42 :value)"));
 assert.equal(diagnostic.ok, false);
 assert.equal(diagnostic.diagnostic.code, "YIN0001");

@@ -1,11 +1,11 @@
 # Typed agent review demo
 
-This demo exercises the complete Yin 0.11 structured-contract workflow:
+This demo exercises the Yin 0.13 ordered-policy and structured-contract workflow:
 
 ```text
 untrusted stdin JSON
   -> strict ReviewRequest decoding
-  -> typed policy function
+  -> top-to-bottom typed policy
   -> exhaustive Decision variant
   -> deterministic stdout JSON
 ```
@@ -41,6 +41,10 @@ The fixtures demonstrate:
 - strict missing-field diagnostics
 - strict wrong-type diagnostics with `$.amount`
 - strict unknown-field diagnostics with `$.debug`
+
+The decision code uses `request.risk` field access and ordered `when` rules.
+The first match wins and the explicit `otherwise` is the automatic-approval
+fallback, so the complete decision order is visible without nested `if` forms.
 
 `--json` reserves standard output for the final JSON response. Calls to `print`
 are redirected to standard error. A program must finish with `String` or

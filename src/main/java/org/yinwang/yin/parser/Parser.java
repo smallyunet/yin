@@ -34,7 +34,9 @@ public class Parser {
 
     public static Node parseNode(Node prenode) throws ParserException {
 
-        if (!(prenode instanceof Tuple)) {
+        if (prenode instanceof Name name && name.id.contains(".")) {
+            return parseDottedFieldAccess(name);
+        } else if (!(prenode instanceof Tuple)) {
             // Case 1: node is not of form (..) or [..], return the node itself
             return prenode;
         } else {
@@ -86,6 +88,8 @@ public class Parser {
                                 return parseToolDef(tuple);
                             case Constants.INVOKE_KEYWORD:
                                 return parseInvoke(tuple);
+                            case Constants.POLICY_KEYWORD:
+                                return parsePolicy(tuple);
                             default:
                                 return parseCall(tuple);
                         }
@@ -314,6 +318,96 @@ public class Parser {
         }
         return new FieldAccess(parseNode(elements.get(1)), (Keyword) field,
                 tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static Node parseDottedFieldAccess(Name name) throws ParserException {
+        String[] parts = name.id.split("\\.", -1);
+        if (parts.length < 2 || java.util.Arrays.stream(parts).anyMatch(String::isEmpty)) {
+            throw new ParserException("dotted field access requires non-empty names", name);
+        }
+
+        int offset = name.start;
+        Node target = new Name(parts[0], name.file, offset, offset + parts[0].length(),
+                name.line, name.col);
+        offset += parts[0].length() + 1;
+        for (int index = 1; index < parts.length; index++) {
+            String part = parts[index];
+            Keyword field = new Keyword(part, name.file, offset, offset + part.length(),
+                    name.line, name.col + offset - name.start);
+            target = new FieldAccess(target, field, name.file, name.start,
+                    offset + part.length(), name.line, name.col);
+            offset += part.length() + 1;
+        }
+        return target;
+    }
+
+    private static Def parsePolicy(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() < 4 || !(elements.get(1) instanceof Name name)) {
+            throw new ParserException(
+                    "policy requires a name, typed parameters, one or more when rules, and otherwise",
+                    tuple);
+        }
+        Node parameters = elements.get(2);
+        if (!(parameters instanceof Tuple)) {
+            throw new ParserException("policy parameters must use the function descriptor form",
+                    parameters);
+        }
+
+        List<Node> clauses = elements.subList(3, elements.size());
+        Node fallback = null;
+        List<Tuple> rules = new ArrayList<>();
+        for (int index = 0; index < clauses.size(); index++) {
+            Node clauseNode = clauses.get(index);
+            if (!(clauseNode instanceof Tuple clause)
+                    || !delimType(clause.open, Constants.PAREN_BEGIN)
+                    || clause.elements.isEmpty()
+                    || !(clause.elements.get(0) instanceof Name head)) {
+                throw new ParserException(
+                        "policy clauses must be (when condition outcome) or (otherwise outcome)",
+                        clauseNode);
+            }
+            if (head.id.equals(Constants.WHEN_KEYWORD)) {
+                if (fallback != null || clause.elements.size() != 3) {
+                    throw new ParserException(
+                            "when requires a condition and outcome before otherwise", clause);
+                }
+                rules.add(clause);
+            } else if (head.id.equals(Constants.OTHERWISE_KEYWORD)) {
+                if (fallback != null || index != clauses.size() - 1
+                        || clause.elements.size() != 2) {
+                    throw new ParserException(
+                            "otherwise requires one outcome and must be the final policy clause",
+                            clause);
+                }
+                fallback = parseNode(clause.elements.get(1));
+            } else {
+                throw new ParserException("unsupported policy clause: " + head.id, head);
+            }
+        }
+        if (rules.isEmpty() || fallback == null) {
+            throw new ParserException(
+                    "policy requires one or more when rules followed by otherwise", tuple);
+        }
+
+        Node body = fallback;
+        for (int index = rules.size() - 1; index >= 0; index--) {
+            Tuple rule = rules.get(index);
+            body = new If(parseNode(rule.elements.get(1)), parseNode(rule.elements.get(2)), body,
+                    rule.file, rule.start, rule.end, rule.line, rule.col);
+        }
+
+        Name funKeyword = new Name(Constants.FUN_KEYWORD, tuple.file,
+                tuple.start, tuple.start, tuple.line, tuple.col);
+        Tuple funForm = new Tuple(List.of(funKeyword, parameters, body),
+                tuple.open, tuple.close, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+        Fun function = parseFun(funForm);
+        if (function.propertyForm == null
+                || !function.propertyForm.containsKey(Constants.RETURN_ARROW)) {
+            throw new ParserException(
+                    "policy parameters and return type must use typed descriptors", parameters);
+        }
+        return new Def(name, function, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
     }
 
     private static ToolDef parseToolDef(Tuple tuple) throws ParserException {

@@ -14,7 +14,7 @@ const examples = {
 (record NamedPoint (Point) [name String])
 
 (define origin (NamedPoint :name "origin" :x 42))
-(field origin :x)`,
+origin.x`,
   vectors: `(define base [10 20])
 (define extended (append base [30 40]))
 
@@ -96,39 +96,27 @@ const examples = {
   [Approve [requestId String] [reason String]]
   [Reject [requestId String] [reason String]]
   [NeedsInput [requestId String] [question String]])
-(define decide
-  (fun ([request ReviewRequest] [-> Decision])
-    (if (= (field request :risk) "blocked")
-      (Reject
-        :requestId
-        (field request :requestId)
-        :reason
-        "risk policy blocked this request")
-      (if (> (field request :amount) 10000)
-        (NeedsInput
-          :requestId
-          (field request :requestId)
-          :question
-          "manual approval context is required for a high amount")
-        (if (= (field request :action) "transfer")
-          (match (field request :context)
-            [(Some _)
-              (Approve
-                :requestId
-                (field request :requestId)
-                :reason
-                "transfer context accepted")]
-            [(None)
-              (NeedsInput
-                :requestId
-                (field request :requestId)
-                :question
-                "provide transfer approval context")])
-          (Approve
-            :requestId
-            (field request :requestId)
-            :reason
-            "within automatic policy"))))))
+(define approve
+  (fun ([request ReviewRequest] [reason String] [-> Decision])
+    (Approve :requestId request.requestId :reason reason)))
+(define reject
+  (fun ([request ReviewRequest] [reason String] [-> Decision])
+    (Reject :requestId request.requestId :reason reason)))
+(define needs-input
+  (fun ([request ReviewRequest] [question String] [-> Decision])
+    (NeedsInput :requestId request.requestId :question question)))
+(policy decide
+  ([request ReviewRequest] [-> Decision])
+  (when (= request.risk "blocked")
+    (reject request "risk policy blocked this request"))
+  (when (> request.amount 10000)
+    (needs-input request "manual approval context is required for a high amount"))
+  (when (and (= request.action "transfer") (= request.context none))
+    (needs-input request "provide transfer approval context"))
+  (when (= request.action "transfer")
+    (approve request "transfer context accepted"))
+  (otherwise
+    (approve request "within automatic policy")))
 (match (decode-json ReviewRequest (read-all))
   [(Ok request) (encode-json (decide request))]
   [(Err error)
@@ -138,8 +126,8 @@ const examples = {
         "invalid-request"
         :reason
         (concat
-          (concat (field error :code) (concat " at " (field error :path)))
-          (concat ": " (field error :message)))))])`,
+          (concat error.code (concat " at " error.path))
+          (concat ": " error.message))))])`,
   typedTool: `(record RiskRequest [amount Int])
 (record RiskAssessment [score Int] [reason String])
 (variant RiskFailure
@@ -182,37 +170,28 @@ const examples = {
     (if (= (string-length address) 42) (= (substring address 0 2) "0x") false)))
 (define reject
   (fun ([tx TransactionIntent] [code String] [reason String] [-> TransactionDecision])
-    (Reject :requestId (field tx :requestId) :code code :reason reason)))
+    (Reject :requestId tx.requestId :code code :reason reason)))
 (define require-approval
   (fun ([tx TransactionIntent] [risk String] [reason String] [-> TransactionDecision])
-    (NeedsApproval :requestId (field tx :requestId) :risk risk :reason reason)))
-(define review-transaction
-  (fun ([tx TransactionIntent] [-> TransactionDecision])
-    (if (not (valid-address (field tx :to)))
-      (reject tx "invalid-address" "target must be a 20-byte 0x address")
-      (if (not (supported-chain (field tx :chainId)))
-        (reject tx "unsupported-chain" "chain is outside the configured policy")
-        (if (not (field tx :simulationSucceeded))
-          (reject tx "simulation-failed" "transaction simulation did not succeed")
-          (if (not (field tx :verifiedContract))
-            (reject tx "unverified-contract" "target contract is not verified")
-            (if (= (field tx :kind) "contract-upgrade")
-              (require-approval
-                tx
-                "critical"
-                "contract upgrades require human approval")
-              (if (field tx :unlimitedApproval)
-                (require-approval tx "high" "unlimited token approval requested")
-                (if (> (field tx :valueUsd) 1000.0)
-                  (require-approval
-                    tx
-                    "medium"
-                    "transaction exceeds the automatic USD limit")
-                  (Approve
-                    :requestId
-                    (field tx :requestId)
-                    :reason
-                    "simulation and policy checks passed"))))))))))
+    (NeedsApproval :requestId tx.requestId :risk risk :reason reason)))
+(policy review-transaction
+  ([tx TransactionIntent] [-> TransactionDecision])
+  (when (not (valid-address tx.to))
+    (reject tx "invalid-address" "target must be a 20-byte 0x address"))
+  (when (not (supported-chain tx.chainId))
+    (reject tx "unsupported-chain" "chain is outside the configured policy"))
+  (when (not tx.simulationSucceeded)
+    (reject tx "simulation-failed" "transaction simulation did not succeed"))
+  (when (not tx.verifiedContract)
+    (reject tx "unverified-contract" "target contract is not verified"))
+  (when (= tx.kind "contract-upgrade")
+    (require-approval tx "critical" "contract upgrades require human approval"))
+  (when tx.unlimitedApproval
+    (require-approval tx "high" "unlimited token approval requested"))
+  (when (> tx.valueUsd 1000.0)
+    (require-approval tx "medium" "transaction exceeds the automatic USD limit"))
+  (otherwise
+    (Approve :requestId tx.requestId :reason "simulation and policy checks passed")))
 (match (decode-json TransactionIntent (read-all))
   [(Ok transaction) (encode-json (review-transaction transaction))]
   [(Err error)
@@ -221,9 +200,9 @@ const examples = {
         :requestId
         "invalid-request"
         :code
-        (field error :code)
+        error.code
         :reason
-        (concat (concat (field error :path) ": ") (field error :message))))])`
+        (concat (concat error.path ": ") error.message)))])`
 };
 
 const exampleInputs = {
@@ -271,7 +250,7 @@ let workerReady = false;
 let requestId = 0;
 let pendingRequest = null;
 let lastDiagnostic = null;
-let activeExample = "recursion";
+let activeExample = "agentReview";
 
 function createWorker() {
   workerReady = false;
@@ -396,7 +375,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.12";
+    resultType.textContent = "Yin 0.13";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);
@@ -444,7 +423,7 @@ function saveInput() {
 }
 
 function restoreExampleChrome(name) {
-  activeExample = Object.hasOwn(examples, name) ? name : "recursion";
+  activeExample = Object.hasOwn(examples, name) ? name : "agentReview";
   const acceptsInput = Object.hasOwn(exampleInputs, activeExample);
   inputPanel.classList.toggle("is-hidden", !acceptsInput);
   editorPanel.classList.toggle("has-input", acceptsInput);
@@ -510,13 +489,13 @@ editor.addEventListener("keydown", (event) => {
 
 const savedSource = localStorage.getItem("yin-playground-source");
 const savedInput = localStorage.getItem("yin-playground-input");
-const savedExample = localStorage.getItem("yin-playground-example") || "recursion";
+const savedExample = localStorage.getItem("yin-playground-example") || "agentReview";
 if (savedSource) {
   editor.value = savedSource;
   inputEditor.value = savedInput || exampleInputs[savedExample] || "";
   restoreExampleChrome(savedExample);
   updateEditorChrome();
 } else {
-  loadExample("recursion", false);
+  loadExample("agentReview", false);
 }
 createWorker();

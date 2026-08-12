@@ -1,55 +1,56 @@
-# AI-first direction
+# Agent policy direction
 
-Yin's AI-first goal is to make agent programs deterministic where possible and
-explicit where uncertainty or external effects remain. It is not a prompt
-template language and does not embed one provider's API into the grammar.
+Yin's primary goal is to make the boundary between AI agents and external tools
+typed, deterministic, deny-by-default, and auditable. Yin is not a prompt
+template language, a general Agent framework, or syntax for one model provider.
 
 The intended execution model is:
 
 ```text
-typed input
-  -> pure deterministic computation
-  -> typed model or tool request
-  -> explicit Result
-  -> policy or human approval for external writes
-  -> durable checkpoint
-  -> typed output plus an auditable trace
+untrusted typed intent
+  -> ordered deterministic policy
+  -> approve, reject, or request human approval
+  -> deny-by-default host authorization
+  -> typed tool Result
+  -> auditable trace
 ```
+
+Agent orchestration remains in the host application. Yin owns the smaller part
+where a probabilistic proposal crosses into an external effect.
 
 ## Design principles
 
-1. Expected failure is data. Tool, model, and task boundaries return `Result`
-   values instead of hiding domain failure in exceptions or sentinel strings.
-2. External authority is injected. Files, network access, secrets, tools, and
+1. Policy must be readable in decision order. A policy is a sequence of `when`
+   rules followed by an explicit `otherwise`; the first match wins.
+2. Expected failure is data. Policy, tool, model, and task boundaries return
+   typed outcomes instead of hiding domain failure in exceptions or strings.
+3. External authority is injected. Files, network access, secrets, tools, and
    model providers are host capabilities rather than ambient globals.
-3. Structured data is the default. Future integrations use source types and
-   schemas for inputs, outputs, and errors; free-form text remains available but
-   is not treated as validated structure.
-4. External writes are reviewable. Risk, idempotency, parameter previews, and
+4. Structured data is the default. Source types produce strict JSON decoders,
+   encoders, and schemas at the boundary.
+5. External writes are reviewable. Risk, idempotency, parameter previews, and
    approval belong to the execution contract.
-5. Long work is resumable. Tasks have stable identities, cancellation,
-   deadlines, checkpoints, and terminal results.
-6. Runs are reproducible. Model and tool boundaries can be recorded, mocked,
-   and replayed without repeating external effects.
+6. Runs should become reproducible. Boundary calls can be recorded, mocked, and
+   replayed without repeating external effects.
 7. Protocols are adapters. MCP, HTTP, local processes, and agent-to-agent
    transports map to stable Yin abstractions instead of becoming syntax.
 
 ## Version sequence
 
 - **0.10 explicit outcomes:** typed `Result`, `Ok`, `Err`, and exhaustive
-  narrowing. This is the shared failure contract for every later boundary.
-- **0.11 structured contracts:** shipped tagged variants, `Option`, strict
-  type-directed JSON decoding, deterministic encoding, structured boundary
-  errors, and JSON Schema Draft 2020-12 generation.
-- **0.12 capabilities and tools:** shipped declared effects, injected permissions,
-  typed tool contracts, approval metadata, deterministic manifests and audit
-  events, plus a transport-neutral MCP adapter.
-- **0.13 model boundaries:** typed generation, provider-neutral configuration,
-  token/cost budgets, provenance, mocks, and record/replay.
-- **0.14 durable agents:** tasks, structured concurrency, checkpointing,
-  suspension, user input, approval tokens, cancellation, and recovery.
+  narrowing.
+- **0.11 structured contracts:** tagged variants, `Option`, strict typed JSON,
+  deterministic encoding, and JSON Schema generation.
+- **0.12 capabilities and tools:** declared effects, deny-by-default injected
+  permissions, approval metadata, capability manifests, and audit events.
+- **0.13 readable policies:** ordered `policy` rules, mandatory fallback,
+  first-match evaluation, and dot-style immutable field access.
+- **Next: policy runtime:** a reference host that evaluates a policy before an
+  MCP or local tool call and emits a replayable decision trace.
+- **Later: durable boundaries:** approval suspension, cancellation, recovery,
+  and recorded model/tool results when real policy-runtime use requires them.
 
-The static checker now lists every declared tool capability and potential
-external write before execution. Model and durable-task authority will extend
-the same manifest contract in later versions; those services remain host
-integrations rather than ad hoc language primitives until then.
+The static checker lists every declared tool capability and potential external
+write before execution. Declarations never grant authority: installed tool
+calls still pass through host authorization, and the default policy denies all
+calls.

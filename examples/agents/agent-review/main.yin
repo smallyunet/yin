@@ -8,39 +8,27 @@
   [Approve [requestId String] [reason String]]
   [Reject [requestId String] [reason String]]
   [NeedsInput [requestId String] [question String]])
-(define decide
-  (fun ([request ReviewRequest] [-> Decision])
-    (if (= (field request :risk) "blocked")
-      (Reject
-        :requestId
-        (field request :requestId)
-        :reason
-        "risk policy blocked this request")
-      (if (> (field request :amount) 10000)
-        (NeedsInput
-          :requestId
-          (field request :requestId)
-          :question
-          "manual approval context is required for a high amount")
-        (if (= (field request :action) "transfer")
-          (match (field request :context)
-            [(Some _)
-              (Approve
-                :requestId
-                (field request :requestId)
-                :reason
-                "transfer context accepted")]
-            [(None)
-              (NeedsInput
-                :requestId
-                (field request :requestId)
-                :question
-                "provide transfer approval context")])
-          (Approve
-            :requestId
-            (field request :requestId)
-            :reason
-            "within automatic policy"))))))
+(define approve
+  (fun ([request ReviewRequest] [reason String] [-> Decision])
+    (Approve :requestId request.requestId :reason reason)))
+(define reject
+  (fun ([request ReviewRequest] [reason String] [-> Decision])
+    (Reject :requestId request.requestId :reason reason)))
+(define needs-input
+  (fun ([request ReviewRequest] [question String] [-> Decision])
+    (NeedsInput :requestId request.requestId :question question)))
+(policy decide
+  ([request ReviewRequest] [-> Decision])
+  (when (= request.risk "blocked")
+    (reject request "risk policy blocked this request"))
+  (when (> request.amount 10000)
+    (needs-input request "manual approval context is required for a high amount"))
+  (when (and (= request.action "transfer") (= request.context none))
+    (needs-input request "provide transfer approval context"))
+  (when (= request.action "transfer")
+    (approve request "transfer context accepted"))
+  (otherwise
+    (approve request "within automatic policy")))
 (match (decode-json ReviewRequest (read-all))
   [(Ok request) (encode-json (decide request))]
   [(Err error)
@@ -50,5 +38,5 @@
         "invalid-request"
         :reason
         (concat
-          (concat (field error :code) (concat " at " (field error :path)))
-          (concat ": " (field error :message)))))])
+          (concat error.code (concat " at " error.path))
+          (concat ": " error.message))))])

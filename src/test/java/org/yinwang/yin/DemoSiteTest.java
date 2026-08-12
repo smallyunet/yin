@@ -66,7 +66,9 @@ class DemoSiteTest {
         assertTrue(worker.contains("importScripts(\"runtime/yin.js\")"));
         assertTrue(worker.contains("yinEvaluate(source)"));
         assertTrue(app.contains("new Worker(\"worker.js\")"));
-        assertTrue(app.contains("(field origin :x)"));
+        assertTrue(app.contains("origin.x"));
+        assertTrue(app.contains("(policy decide"));
+        assertTrue(app.contains("(otherwise"));
         assertTrue(app.contains("(at extended 3)"));
         assertTrue(app.contains("(match (parse-int text)"));
         assertTrue(app.contains("[-> (Result Int String)]"));

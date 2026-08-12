@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.12 language specification](language-specification.md). Files in
+[Yin 0.13 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -78,6 +78,27 @@ error in both execution modes.
 ```
 
 The condition must have type `Bool`.
+
+## Ordered policies
+
+Use `policy` for a typed decision function that should read in evaluation order:
+
+```yin
+(policy review
+  ([request ReviewRequest] [-> Decision])
+  (when (= request.risk "blocked")
+    (Reject :reason "blocked by policy"))
+  (when (> request.amount 10000)
+    (NeedsApproval :reason "amount requires approval"))
+  (otherwise
+    (Approve :reason "within policy")))
+```
+
+The first matching `when` wins. Every policy requires one or more rules and one
+final `otherwise`; conditions must be `Bool`, and every outcome is checked
+against the declared return type. Policies lower to ordinary typed functions,
+so calls, lexical scope, and evaluation behavior remain unchanged. See the
+[policy guide](policies.md).
 
 ## Functions
 
@@ -162,7 +183,11 @@ Read immutable local or inherited fields with `field`:
 ```yin
 (define point (Point :x 10))
 (field point :x)
+point.x
 ```
+
+`point.x` is concise syntax for the same immutable access. Dotted chains such as
+`request.account.owner` are evaluated from left to right.
 
 The target is evaluated once. The type checker returns the field's precise
 type. A union target is accepted only when every member exposes the field;
@@ -217,7 +242,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.12.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar yin-0.13.0.jar examples/cli/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
@@ -226,7 +251,7 @@ is deliberately unavailable in the browser runtime.
 For structured pipelines, `--json` reserves stdout for the final raw JSON:
 
 ```bash
-java -jar yin-0.12.0.jar --json program.yin < request.json
+java -jar yin-0.13.0.jar --json program.yin < request.json
 ```
 
 The program must return `String` or `(Result String E)`. `Ok String` is
@@ -253,7 +278,7 @@ and contract-invalid output are ordinary `ToolError` values. Destructive tools
 must require approval. Inspect declarations without executing source using:
 
 ```bash
-java -jar yin-0.12.0.jar --capabilities program.yin
+java -jar yin-0.13.0.jar --capabilities program.yin
 ```
 
 ## Known language gaps

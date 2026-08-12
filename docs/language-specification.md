@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.12 language. Behavior not described
+This document defines the normative Yin 0.13 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -16,8 +16,8 @@ otherwise.
 - Integers are decimal, binary with `0b`, or hexadecimal with `0x`, with an
   optional leading sign.
 - Floats use the syntax accepted by Java `Double.parseDouble` after tokenization.
-- `(`, `)`, `[`, and `]` are delimiters. Braces, dots, and `#` subscripts are
-  not part of the language.
+- `(`, `)`, `[`, and `]` are delimiters. Braces and `#` subscripts are not part
+  of the language. A dot joins a name and one or more immutable field names.
 - A keyword token begins with `:`. All other accepted identifier characters
   form names.
 
@@ -37,12 +37,14 @@ expression     = atom
                | definition
                | assignment
                | function
+               | policy-definition
                | record-definition
                | variant-definition
                | tool-definition
                | invocation
                | json-operation
                | field-access
+               | dotted-field-access
                | call ;
 
 atom           = integer | float | string | name ;
@@ -71,6 +73,13 @@ parameter-descriptor
 return-descriptor
                = "[" "->" type-expression "]" ;
 
+policy-definition
+               = "(" "policy" name parameter-list
+                 policy-rule { policy-rule } policy-fallback ")" ;
+policy-rule    = "(" "when" expression expression ")" ;
+policy-fallback
+               = "(" "otherwise" expression ")" ;
+
 record-definition
                = "(" "record" name [ parent-list ] { field-descriptor } ")" ;
 parent-list    = "(" { name } ")" ;
@@ -95,6 +104,8 @@ json-operation = "(" "decode-json" type-expression expression ")"
                | "(" "json-schema" type-expression ")" ;
 
 field-access   = "(" "field" expression keyword ")" ;
+dotted-field-access
+               = name "." name { "." name } ;
 
 type-expression
                = name
@@ -115,6 +126,12 @@ duplicated. The only supported descriptor property is `:default`.
 An empty program evaluates to `void`. A source file containing multiple
 expressions is an implicit `seq`.
 
+`policy` parameter lists must use typed descriptors. A policy requires one or
+more `when` clauses and exactly one final `otherwise` clause. It defines a
+lexical function with the declared name and lowers to nested conditionals in
+source order. Dotted field access lowers left-to-right to the corresponding
+immutable `field` expressions.
+
 ## Evaluation order
 
 Runtime evaluation is deterministic:
@@ -131,6 +148,8 @@ Runtime evaluation is deterministic:
 8. Function bodies evaluate as sequences in a new lexical scope.
 9. `match` evaluates its target once, tests clauses from left to right, and
    evaluates exactly the first matching branch in a fresh lexical scope.
+10. A policy tests `when` conditions from left to right, evaluates only the
+    first matching outcome, and evaluates `otherwise` only when none match.
 
 Function and record default expressions are evaluated once when their
 definition is evaluated, in that definition's lexical environment. Defaults
@@ -138,6 +157,8 @@ may be omitted only by a keyword call; positional calls require exact arity.
 
 The type checker visits both branches of an `if`, in source order, and forms
 their union even though runtime evaluation selects only one branch.
+Policy conditions must have type `Bool`, and every rule outcome must satisfy the
+policy's declared return type through the same function-return check.
 
 ## Bindings and closures
 

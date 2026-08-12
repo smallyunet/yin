@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.13.0 — 2026-08-12
+
+- reposition Yin as a small typed policy language for Agent-to-tool boundaries
+- add ordered `policy` definitions with first-match `when` rules and a required
+  final `otherwise`
+- add concise immutable field access such as `request.risk`, including chains
+- lower policy and dotted-access syntax into the existing typed core AST
+- flatten the maintained agent-review and Web3 transaction-guard decision trees
+  without changing their fixtures or strict JSON boundary behavior
+- update the formatter, LSP, VS Code grammar, browser Playground, specification,
+  roadmap, and policy documentation for the readability reset
+- expand the automated suite from 175 to 182 tests
 
 ## 0.12.0 — 2026-08-09
 

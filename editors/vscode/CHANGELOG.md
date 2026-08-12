@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0
+
+- highlight ordered `policy`, `when`, and `otherwise` forms
+- recognize dot-style immutable field access
+- bundle the Yin 0.13.0 language server
+
 ## 0.12.0
 
 - highlight `tool`, `invoke`, and tool authority metadata

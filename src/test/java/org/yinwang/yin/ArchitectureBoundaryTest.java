@@ -89,14 +89,17 @@ class ArchitectureBoundaryTest {
     }
 
     @Test
-    void removedAttributeSyntaxFailsAtTheLexerBoundary() throws Exception {
-        Path source = program("point.x");
+    void dottedFieldSyntaxUsesTheImmutableFieldAccessCore() throws Exception {
+        Path source = program("""
+                (record Point [x Int])
+                (define point (Point :x 42))
+                point.x
+                """);
 
-        GeneralError error = assertThrows(GeneralError.class,
-                () -> new Interpreter(source.toString()).interp(source.toString()));
-
-        assertEquals(Diagnostic.Code.SYNTAX, error.diagnostic.code());
-        assertTrue(error.getMessage().contains("unrecognized syntax: ."));
+        assertEquals("42", new Interpreter(source.toString())
+                .interp(source.toString()).toString());
+        assertEquals("Int", new TypeChecker(source.toString())
+                .typecheck(source.toString()).toString());
     }
 
     @Test
