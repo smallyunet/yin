@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.0
+
+- bundle the Yin 0.16.0 language server and portable-bytecode compiler CLI
+
 ## 0.15.0
 
 - bundle the Yin 0.15.0 language server and deterministic-contract CLI

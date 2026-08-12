@@ -51,6 +51,8 @@ where a probabilistic proposal crosses into an external effect.
 - **0.15 deterministic contracts:** a pure executable policy profile,
   digest-bound decision envelopes, and explicit exclusions ahead of bytecode,
   metering, and a portable VM.
+- **0.16 portable execution:** canonical `.ybc` artifacts and an independent,
+  fuel-metered Rust VM for bounded capability decisions.
 - **Next: adoption evidence:** evaluate the complete boundary with non-authors
   and compare the same task against an ordinary host implementation.
 - **Later: durable boundaries:** MCP connectivity, approval suspension, cancellation, recovery,

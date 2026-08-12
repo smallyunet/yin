@@ -10,6 +10,13 @@ source file
   -> Interpreter or TypeChecker
 ```
 
+Portable contracts add a second execution pipeline:
+
+```text
+typed deterministic source -> Java YinBytecode compiler -> .ybc
+  -> Rust verifier/parser -> fuel-metered Rust evaluator -> JSON decision
+```
+
 ## Main components
 
 - `parser/Lexer.java` tokenizes source text and tracks source positions.
@@ -37,7 +44,12 @@ source file
 - `DeterministicContractRuntime.java` validates the side-effect-free
   `deterministic-policy-v1` subset, injects one immutable JSON input, and returns
   a digest-bound structured decision envelope. It is a reference evaluator, not
-  yet a metered bytecode VM.
+  and remains the source-level conformance evaluator.
+- `bytecode/YinBytecode.java` emits and verifies canonical `.ybc` containers;
+  `bytecode/YinBytecodeTool.java` exposes compiler-side CLI operations.
+- `vm/` is an independent Rust crate. It validates bytecode without loading the
+  JVM, enforces the portable termination subset, meters execution, and emits a
+  digest-bound result envelope.
 - `ast/ToolDef.java`, `ast/Invoke.java`, `type/ToolType.java`, and
   `value/ToolValue.java` keep declared authority, static contracts, runtime
   handles, and invocation separate. `CapabilityManifest.java` performs
@@ -125,7 +137,8 @@ policy diagnostics.
 `ReferencePolicyRuntimeTest` protects the Yin 0.14 preflight host agreement,
 root confinement, write approval, create-only trace, hash-chain verification,
 and side-effect-free replay boundary.
-`DeterministicContractRuntimeTest` protects the Yin 0.15 portable profile,
+`DeterministicContractRuntimeTest` protects the source contract profile, while
+`YinBytecodeTest` and the Rust crate tests protect the 0.16 portable format,
 reproducible envelopes, maintained capability decisions, rejected effects, and
 the JSON-result boundary.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input

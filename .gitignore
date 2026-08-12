@@ -1,4 +1,5 @@
 target/
+vm/target/
 dependency-reduced-pom.xml
 site/runtime/
 editors/vscode/node_modules/

@@ -28,6 +28,10 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: editors/vscode/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: vm
       - name: Validate tag version
         run: |
           version="${GITHUB_REF_NAME#v}"
@@ -35,6 +39,13 @@ jobs:
           test "$version" = "$pom_version"
       - name: Verify JVM release
         run: ./mvnw --batch-mode verify
+      - name: Verify Rust VM release
+        run: |
+          cargo fmt --manifest-path vm/Cargo.toml -- --check
+          cargo clippy --manifest-path vm/Cargo.toml --all-targets -- -D warnings
+          cargo test --manifest-path vm/Cargo.toml
+          cargo build --release --manifest-path vm/Cargo.toml
+          .github/scripts/verify-rust-vm.sh "${GITHUB_REF_NAME#v}"
       - name: Verify browser release
         run: |
           ./mvnw --batch-mode -Pbrowser -DskipTests package
@@ -58,13 +69,16 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           jar="yin-${version}.jar"
           vsix="yin-language-support-${version}.vsix"
+          yinvm="yinvm-${version}-linux-x86_64"
           test "$(java -jar target/${jar} --version)" = "Yin ${version}"
           mkdir release
           cp "target/${jar}" "release/${jar}"
           cp "editors/vscode/${vsix}" "release/${vsix}"
+          cp "vm/target/release/yinvm" "release/${yinvm}"
           cd release
           sha256sum "${jar}" > "${jar}.sha256"
           sha256sum "${vsix}" > "${vsix}.sha256"
+          sha256sum "${yinvm}" > "${yinvm}.sha256"
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

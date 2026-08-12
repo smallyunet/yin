@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.16.0 — 2026-08-12
+
+- add a canonical, versioned `.ybc` token-bytecode format with compiler-side
+  type checking, profile admission, SHA-256 binding, and tamper verification
+- add the independent Rust `yinvm` runtime for bytecode verification and
+  deterministic execution without loading the JVM or reparsing Yin source
+- meter VM parsing, declarations, input, evaluation, and encoded output with a
+  caller-supplied fuel limit
+- bound the first portable profile by rejecting explicit functions, `range`,
+  and policy-to-policy calls; keep filesystem, output, tools, and ambient host
+  authority unavailable
+- add Java compiler/verifier tests, Rust parser/fuel tests, and cross-runtime
+  capability-decision fixtures, bringing the suite to 201 JVM and 3 Rust tests
+- teach CI and release packaging to validate and publish the Rust VM alongside
+  the Yin JAR and VS Code extension
+
 ## 0.15.0 — 2026-08-12
 
 - define `deterministic-policy-v1` as the executable, side-effect-free Agent

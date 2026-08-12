@@ -19,8 +19,23 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: vm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
       - name: Verify
         run: ./mvnw --batch-mode verify
+      - name: Verify Rust VM
+        run: |
+          cargo fmt --manifest-path vm/Cargo.toml -- --check
+          cargo clippy --manifest-path vm/Cargo.toml --all-targets -- -D warnings
+          cargo test --manifest-path vm/Cargo.toml
+          cargo build --release --manifest-path vm/Cargo.toml
+          version="$(./mvnw --batch-mode help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          .github/scripts/verify-rust-vm.sh "${version}"
 
   editor:
     runs-on: ubuntu-latest

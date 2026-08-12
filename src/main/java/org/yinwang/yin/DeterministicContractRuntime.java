@@ -38,9 +38,13 @@ public final class DeterministicContractRuntime {
 
     public static String check(String file) {
         String source = read(file, "source");
-        Node program = parse(file, source);
+        return checkSource(file, source);
+    }
+
+    public static String checkSource(String sourceName, String source) {
+        Node program = parse(sourceName, source);
         validate(program);
-        new TypeChecker(file).typecheckSource(file, source);
+        new TypeChecker(sourceName).typecheckSource(sourceName, source);
         return "{\"contractVersion\":" + CONTRACT_VERSION
                 + ",\"profile\":\"deterministic-policy-v1\""
                 + ",\"programHash\":" + quote(digest(source))
@@ -49,9 +53,13 @@ public final class DeterministicContractRuntime {
 
     public static String evaluate(String file, String input) {
         String source = read(file, "source");
-        Node program = parse(file, source);
+        return evaluateSource(file, source, input);
+    }
+
+    public static String evaluateSource(String sourceName, String source, String input) {
+        Node program = parse(sourceName, source);
         validate(program);
-        new TypeChecker(file).typecheckSource(file, source);
+        new TypeChecker(sourceName).typecheckSource(sourceName, source);
 
         RuntimeContext context = new RuntimeContext(
                 ignored -> { throw new GeneralError("print is unavailable in deterministic contracts"); },

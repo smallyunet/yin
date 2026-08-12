@@ -1,67 +1,65 @@
 # Yin contract architecture
 
-Yin separates the human-facing language from a future portable execution
-machine. Yin 0.15 establishes the first executable boundary without claiming
-that the current tree-walking interpreter is already a VM.
+Yin 0.16 separates the human-facing language, portable artifact, execution
+machine, and authority-bearing host:
 
 ```text
-Yin source language
-  -> parser and type checker
-  -> deterministic contract profile
-  -> current Java reference evaluator
-  -> decision envelope
+Yin source
+  -> Java parser, profile validator, and type checker
+  -> canonical .ybc artifact
+  -> independent Rust verifier and fuel-metered VM
+  -> deterministic decision envelope
   -> host authorization and side effects
 ```
 
-The language defines syntax, types, and evaluation meaning. A future compiler
-will lower the accepted profile to canonical bytecode. A future Yin VM will
-verify and meter that bytecode. The host remains separate: it supplies trusted
-context, issues enforceable capabilities, obtains approval, invokes tools, and
-stores audit evidence.
+The language defines syntax, types, and source semantics. The compiler admits
+only `portable-bytecode-v1`, removes comments and formatting, emits versioned
+token instructions, and binds the normalized program with SHA-256. The Rust VM
+does not load the JVM or the original source. It verifies the container,
+reconstructs structured bytecode expressions, meters evaluation, and returns a
+digest-bound JSON decision.
 
-## Version 0.15 boundary
+The host remains outside the VM. It supplies normalized input, chooses a fuel
+limit, interprets `Approve | Reject | NeedsApproval`, issues enforceable
+capabilities, invokes tools, and stores audit evidence. Neither Yin source nor
+the VM holds credentials or grants authority by itself.
 
-`--contract-check` parses and type-checks a source file and rejects constructs
-outside `deterministic-policy-v1`. `--contract-run` additionally injects one
-fixed JSON input, evaluates with no arguments, filesystem, tools, authorization,
-audit sink, or output channel, and requires the program to return JSON text from
-`encode-json`.
+## Version 0.16 boundary
 
-The result envelope contains:
+The Java commands are compiler-side operations:
 
-- `contractVersion`, currently `1`;
-- the named execution profile;
-- `programHash`, over the exact UTF-8 source bytes;
-- `inputHash`, over the exact UTF-8 input bytes;
-- the structured JSON `result`; and
-- `resultHash`, over its compact JSON representation.
+- `--contract-check` validates the source-level `deterministic-policy-v1`;
+- `--contract-run` remains the Java reference evaluator used for conformance;
+- `--contract-compile ... --output ...` emits canonical `.ybc`;
+- `--bytecode-check` revalidates an artifact using the compiler implementation.
 
-This makes reproducibility observable but does not yet provide bytecode,
-instruction metering, a memory bound, isolation from hostile source, a signed
-decision, or consensus compatibility. Only trusted, prevalidated programs
-should run through the 0.15 evaluator.
+The Rust `yinvm` commands are execution-side operations:
+
+- `yinvm check program.ybc` performs independent container and digest checks;
+- `yinvm run program.ybc --input input.json --fuel N` evaluates it with no
+  filesystem, network, clock, randomness, output, tools, or ambient arguments.
+
+The VM envelope contains its version and profile, bytecode/program/input/result
+digests, the structured result, and `fuelLimit`/`fuelUsed`.
 
 ## Intended use
 
-The first use is a pure decision point between an Agent and a high-impact tool:
-
 ```text
 Agent tool request
-  -> trusted host assembles normalized request and context
-  -> Yin deterministic decision
+  -> trusted host normalizes request and context
+  -> Rust Yin VM evaluates verified policy bytecode
   -> Approve | Reject | NeedsApproval
   -> host optionally issues a constrained, expiring, one-use capability
   -> executor validates the capability and performs the real action
 ```
 
-The VM does not make the model smarter and must not hold secrets. Its purpose is
-to make the action boundary typed, deterministic, deny-by-default, and
-auditable.
+The VM makes the action boundary typed, deterministic, deny-by-default, and
+auditable. It does not make an Agent smarter, execute arbitrary Agent plans, or
+replace OS/container isolation.
 
 ## Repository boundary
 
-The language front end, reference interpreter, executable specification, and
-contract prototype remain in one repository while the protocol is changing.
-A separate VM repository becomes useful only after bytecode is versioned, the
-compiler and VM communicate only through that format, and the VM has an
-independent security or release lifecycle.
+The Java compiler and Rust VM remain in this repository while bytecode v1 is
+young, so every format change can be tested atomically across both runtimes. A
+separate VM repository becomes useful when the bytecode protocol is stable and
+the VM needs an independent security review or release lifecycle.

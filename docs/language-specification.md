@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.15 language. Behavior not described
+This document defines the normative Yin 0.16 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -366,7 +366,7 @@ the browser supports controlled text input but rejects filesystem reads.
 
 ## Deterministic contract profile
 
-`deterministic-policy-v1` is an execution profile over the normative Yin 0.15
+`deterministic-policy-v1` is an execution profile over the normative Yin 0.16
 language. It accepts one immutable UTF-8 input through `read-all`, requires the
 program to return JSON text through `encode-json`, and rejects `Float`, `Any`,
 `set!`, `args`, `print`, `read-text`, tool declarations, and `invoke` before
@@ -378,10 +378,12 @@ exact source bytes. `--contract-run` additionally returns digests over the exact
 input bytes and compact structured result. Equal source and input bytes under
 the same Yin release therefore produce an equal completed envelope.
 
-The profile does not alter the general language semantics and does not claim
-bytecode portability, fuel metering, memory isolation, or safe execution of
-hostile source. Those are requirements for a future Yin VM rather than behavior
-of the 0.15 reference evaluator. See `docs/vm/deterministic-profile.md`.
+The profile does not alter general language semantics. `portable-bytecode-v1`
+is the stricter compiled subset: it rejects explicit functions, `range`, and
+policy calls, then executes in the independent Rust VM with fuel metering. This
+provides portable bounded decision execution, but not precise memory isolation,
+process sandboxing, or consensus semantics. See `docs/vm/deterministic-profile.md`
+and `docs/vm/bytecode.md`.
 
 Annotated arguments and return values are checked by subtyping. Unannotated
 function result types are inferred from the body at each checked call. A

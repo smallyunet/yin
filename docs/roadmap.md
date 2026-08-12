@@ -152,6 +152,15 @@ The project is being stabilized before new language features are designed.
 - maintained capability-decision fixtures for approval, rejection, and human review
 - architecture and conformance boundaries for a future bytecode compiler and Rust/Wasm VM
 
+## 0.16 — portable bytecode and Rust VM
+
+- canonical `.ybc` token bytecode with explicit format and contract versions
+- Java compiler admission, normalization, type checking, and artifact hashing
+- independent Rust verifier and decision evaluator with no JVM dependency
+- fuel accounting across input, declarations, evaluation, and encoded output
+- deliberate rejection of functions, ranges, and policy calls for bounded v1 execution
+- cross-runtime capability-decision conformance for approve, reject, and review
+
 ## Later
 
 - non-author usability testing and a TypeScript or Rego boundary comparison
@@ -161,7 +170,7 @@ The project is being stabilized before new language features are designed.
 - persistent dictionaries and sets
 - typed model boundaries
 - durable tasks, checkpoints, approval suspension, and recovery
-- canonical bytecode, verifier, fuel metering, and a portable Rust/Wasm VM
+- semantic opcodes, precise memory accounting, and a Wasm build of the Rust VM
 - hover, completion, definition, and reference navigation
 
 New syntax should not be added until it has a written rule, interpreter tests,

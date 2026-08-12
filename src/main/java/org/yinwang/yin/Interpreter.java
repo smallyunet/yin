@@ -2,6 +2,7 @@ package org.yinwang.yin;
 
 
 import org.yinwang.yin.ast.Node;
+import org.yinwang.yin.bytecode.YinBytecodeTool;
 import org.yinwang.yin.lsp.YinLanguageServer;
 import org.yinwang.yin.parser.Parser;
 import org.yinwang.yin.parser.ParserException;
@@ -74,6 +75,18 @@ public class Interpreter {
         }
         if (args.length > 0 && args[0].equals("--contract-run")) {
             int status = DeterministicContractRuntime.runCommand(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--contract-compile")) {
+            int status = YinBytecodeTool.compileCommand(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--bytecode-check")) {
+            int status = YinBytecodeTool.checkCommand(
                     Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
             if (status != 0) System.exit(status);
             return;
