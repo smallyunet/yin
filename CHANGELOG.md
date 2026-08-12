@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.14.0 — 2026-08-12
+
+- add `--guard` as a deny-by-default reference host for typed local-tool calls
+- preflight source declarations against an explicit, closed host configuration
+- provide root-confined `read-text` and approval-required `write-text` tools
+- record source, input, host, authorization, tool result, and final outcome in
+  create-only JSONL traces with a SHA-256 hash chain
+- add `--replay` to verify a trace and reproduce its final result without
+  invoking tools or repeating writes
+- add a complete guarded note-workspace demo with read, approved-write, policy
+  rejection, and replay workflows
+- document the runtime configuration, security boundary, trace schema, and
+  production limitations
+- expand the automated suite from 182 to 191 tests
+
 ## 0.13.0 — 2026-08-12
 
 - reposition Yin as a small typed policy language for Agent-to-tool boundaries

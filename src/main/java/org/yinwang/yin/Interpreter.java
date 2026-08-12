@@ -73,6 +73,18 @@ public class Interpreter {
             if (status != 0) System.exit(status);
             return;
         }
+        if (args.length > 0 && args[0].equals("--guard")) {
+            int status = ReferencePolicyRuntime.run(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--replay")) {
+            int status = ReferencePolicyRuntime.replay(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
         if (args.length > 0 && args[0].equals("--format")) {
             int status = Formatter.run(
                     Arrays.copyOfRange(args, 1, args.length),

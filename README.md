@@ -42,6 +42,8 @@ explicit `otherwise` result.
 - strict typed JSON decoding, deterministic encoding, and Draft 2020-12 schemas
 - source-declared capabilities and typed host tools with explicit `Result` outcomes
 - deterministic capability manifests, approval enforcement, and tool-call audit events
+- a deny-by-default local reference host with explicit write approval
+- hash-chained decision traces and side-effect-free result replay
 - string transformation, parsing, program arguments, and controlled text input
 - arithmetic, comparison, and boolean primitives
 - lexical scopes and first-class closures
@@ -56,7 +58,7 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.13 defines these
+boundaries between runtime values and static types. Yin 0.14 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -72,13 +74,13 @@ checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.13.0.jar --version
+java -jar yin-0.14.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.13.0.vsix
+code --install-extension yin-language-support-0.14.0.vsix
 ```
 
 ## Build and test
@@ -87,29 +89,29 @@ code --install-extension yin-language-support-0.13.0.vsix
 ./mvnw verify
 ```
 
-This produces the executable JAR at `target/yin-0.13.0.jar`.
+This produces the executable JAR at `target/yin-0.14.0.jar`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.13.0.jar tests/program-usability.yin
+java -jar target/yin-0.14.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.13.0.jar \
+java -cp target/yin-0.14.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.13.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.13.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.14.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.14.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.13.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.13.0.jar examples/cli/wc.yin README.md
+  java -jar target/yin-0.14.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.14.0.jar examples/cli/wc.yin README.md
 ```
 
 The [typed agent review demo](examples/agents/agent-review/README.md) provides a
@@ -126,19 +128,46 @@ host boundary errors without granting ambient authority.
 Inspect every tool capability without executing the program:
 
 ```bash
-java -jar target/yin-0.13.0.jar --capabilities examples/agents/typed-tool.yin
+java -jar target/yin-0.14.0.jar --capabilities examples/agents/typed-tool.yin
 ```
 
 The manifest is deterministic and includes effect, approval, idempotency, and
 open-world metadata. Tool implementations and approval decisions remain host
 responsibilities; declarations never grant authority by themselves.
 
+## Run a guarded tool boundary
+
+Yin 0.14 includes a narrow reference host that connects a typed policy to
+root-confined local text tools. It checks the program and host manifest before
+execution, allows installed reads, requires explicit approval for writes, and
+creates a new hash-chained trace for every run:
+
+```bash
+mkdir -p examples/agents/tool-boundary/runtime/notes
+cp examples/agents/tool-boundary/fixtures/welcome.txt \
+  examples/agents/tool-boundary/runtime/notes/welcome.txt
+java -jar target/yin-0.14.0.jar --guard \
+  examples/agents/tool-boundary/main.yin \
+  --input examples/agents/tool-boundary/inputs/read.json \
+  --host examples/agents/tool-boundary/host.json \
+  --trace examples/agents/tool-boundary/runtime/read.jsonl
+java -jar target/yin-0.14.0.jar --replay \
+  examples/agents/tool-boundary/runtime/read.jsonl
+```
+
+Add `--approve notes.write` when running the write fixture. Replay validates the
+trace hash chain and prints the recorded final outcome without evaluating Yin or
+invoking a tool. The reference host is an auditable demonstration, not a general
+sandbox or production authorization service. See the
+[policy runtime guide](docs/policy-runtime.md) and the
+[complete demo](examples/agents/tool-boundary/README.md).
+
 ## Interactive REPL
 
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.13.0.jar
+java -jar target/yin-0.14.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -150,7 +179,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.13.0.jar --format tests/function1.yin
+java -jar target/yin-0.14.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.

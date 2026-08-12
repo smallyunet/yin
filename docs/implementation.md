@@ -118,6 +118,9 @@ injection, approval, audit, structured-result validation, and MCP adapter slice.
 `PolicyIntegrationTest` protects the Yin 0.13 ordered-rule lowering, mandatory
 fallback, first-match behavior, dotted immutable field access, formatting, and
 policy diagnostics.
+`ReferencePolicyRuntimeTest` protects the Yin 0.14 preflight host agreement,
+root confinement, write approval, create-only trace, hash-chain verification,
+and side-effect-free replay boundary.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy

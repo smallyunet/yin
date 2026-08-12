@@ -132,10 +132,22 @@ The project is being stabilized before new language features are designed.
   fixtures and JSON boundary behavior
 - formatter, LSP, editor, browser, specification, and diagnostic coverage
 
+## 0.14 — reference policy runtime
+
+- `--guard` execution with preflight type checking and a closed host manifest
+- explicit source/host name, capability, effect, and approval agreement
+- root-confined local text reads and approval-required writes
+- create-only JSONL decision traces with source, input, host, authorization,
+  tool-result, final-outcome digests, and a SHA-256 hash chain
+- `--replay` verification and final-result reproduction without tool execution
+- maintained end-to-end demo for automatic reads, denied writes, approved writes,
+  policy rejection, trace integrity, and side-effect-free replay
+
 ## Later
 
-- reference policy runtime for MCP and local tool boundaries
-- decision trace recording and replay without repeated external writes
+- non-author usability testing and a TypeScript or Rego boundary comparison
+- MCP connection and approval identity without trusting remote annotations
+- trace redaction, signing, retention, and production storage policy
 - modules and multi-file type checking
 - persistent dictionaries and sets
 - typed model boundaries

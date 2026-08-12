@@ -59,7 +59,7 @@ class InterpreterIntegrationTest {
             System.setOut(original);
         }
 
-        assertEquals("Yin 0.13.0\n", output.toString(StandardCharsets.UTF_8));
+        assertEquals("Yin 0.14.0\n", output.toString(StandardCharsets.UTF_8));
     }
 
     @Test

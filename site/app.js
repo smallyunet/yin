@@ -375,7 +375,7 @@ function handleFormatResult(payload) {
     statusChip.className = "status-chip status-success";
     statusChip.innerHTML = "<i></i>Formatted";
     resultValue.textContent = "Canonical source";
-    resultType.textContent = "Yin 0.13";
+    resultType.textContent = "Yin 0.14";
     diagnostic.classList.add("is-hidden");
   } else {
     showResult(payload, 0);

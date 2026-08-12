@@ -1,6 +1,6 @@
 # Ordered policies
 
-Yin 0.13 adds a human-facing form for typed decision policy. It keeps the
+Yin 0.13 added a human-facing form for typed decision policy. It keeps the
 existing S-expression core and changes how decision trees are written, not how
 their conditions or outcomes are evaluated.
 

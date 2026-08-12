@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.13</strong><span>Current version</span></div>
-          <div><strong>182</strong><span>Automated tests</span></div>
+          <div><strong>0.14</strong><span>Current version</span></div>
+          <div><strong>191</strong><span>Automated tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -234,6 +234,13 @@
             <pre><code>(match (decode-json Request text)
   [(Ok request) (handle request)]
   [(Err error) (field error :path)])</code></pre>
+          </article>
+          <article class="feature-card feature-wide">
+            <span class="feature-index">09</span>
+            <h3>Guarded tool runtime</h3>
+            <p>The JVM reference host checks installed capabilities, requires explicit write approval, and records a hash-chained trace that can be replayed without repeating effects.</p>
+            <pre><code>yin --guard policy.yin --host host.json --trace run.jsonl
+yin --replay run.jsonl</code></pre>
           </article>
         </div>
       </section>

@@ -45,9 +45,12 @@ where a probabilistic proposal crosses into an external effect.
   permissions, approval metadata, capability manifests, and audit events.
 - **0.13 readable policies:** ordered `policy` rules, mandatory fallback,
   first-match evaluation, and dot-style immutable field access.
-- **Next: policy runtime:** a reference host that evaluates a policy before an
-  MCP or local tool call and emits a replayable decision trace.
-- **Later: durable boundaries:** approval suspension, cancellation, recovery,
+- **0.14 policy runtime:** a deny-by-default reference host for root-confined
+  local text tools, explicit write approval, hash-chained traces, and replay
+  that never repeats a tool invocation.
+- **Next: adoption evidence:** evaluate the complete boundary with non-authors
+  and compare the same task against an ordinary host implementation.
+- **Later: durable boundaries:** MCP connectivity, approval suspension, cancellation, recovery,
   and recorded model/tool results when real policy-runtime use requires them.
 
 The static checker lists every declared tool capability and potential external

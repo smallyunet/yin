@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.0
+
+- bundle the Yin 0.14.0 language server and reference-runtime CLI
+
 ## 0.13.0
 
 - highlight ordered `policy`, `when`, and `otherwise` forms

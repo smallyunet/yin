@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "root": "runtime",
+  "tools": [
+    {
+      "name": "read-note",
+      "kind": "read-text",
+      "capability": "notes.read"
+    },
+    {
+      "name": "write-note",
+      "kind": "write-text",
+      "capability": "notes.write"
+    }
+  ]
+}

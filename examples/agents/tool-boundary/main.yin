@@ -1,0 +1,76 @@
+(record BoundaryRequest [action String] [path String] [content String])
+(record ReadRequest [path String])
+(record WriteRequest [path String] [content String])
+(record FileContent [path String] [content String])
+(record WriteReceipt [path String] [bytes Int])
+(variant FileFailure
+  [InvalidPath [message String]]
+  [NotFound [message String]]
+  [IoError [message String]])
+(variant BoundaryDecision
+  [Permit [reason String]]
+  [Block [reason String]])
+(variant BoundaryResult
+  [CompletedRead [path String] [content String]]
+  [CompletedWrite [path String] [bytes Int]]
+  [BoundaryError [code String] [message String]])
+(tool read-note ReadRequest FileContent FileFailure
+  :capability "notes.read"
+  :effect :read
+  :approval false
+  :idempotent true
+  :open-world false)
+(tool write-note WriteRequest WriteReceipt FileFailure
+  :capability "notes.write"
+  :effect :write
+  :approval true
+  :idempotent false
+  :open-world false)
+(policy authorize-boundary
+  ([request BoundaryRequest] [-> BoundaryDecision])
+  (when (and (not (= request.action "read")) (not (= request.action "write")))
+    (Block :reason "action must be read or write"))
+  (when (< (string-length request.path) 6)
+    (Block :reason "path must stay under notes/"))
+  (when (not (= (substring request.path 0 6) "notes/"))
+    (Block :reason "path must stay under notes/"))
+  (otherwise
+    (Permit :reason "path is inside the policy namespace")))
+(define file-error
+  (fun ([error (U FileFailure ToolError)] [-> (Result String EncodeError)])
+    (match error
+      [(InvalidPath message)
+        (encode-json (BoundaryError :code "invalid-path" :message message))]
+      [(NotFound message)
+        (encode-json (BoundaryError :code "not-found" :message message))]
+      [(IoError message)
+        (encode-json (BoundaryError :code "io-error" :message message))]
+      [(ToolError code _ message)
+        (encode-json (BoundaryError :code code :message message))])))
+(define read-boundary
+  (fun ([request BoundaryRequest] [-> (Result String EncodeError)])
+    (match (invoke read-note (ReadRequest :path request.path))
+      [(Ok result)
+        (encode-json (CompletedRead :path result.path :content result.content))]
+      [(Err error) (file-error error)])))
+(define write-boundary
+  (fun ([request BoundaryRequest] [-> (Result String EncodeError)])
+    (match (invoke write-note (WriteRequest :path request.path :content request.content))
+      [(Ok result) (encode-json (CompletedWrite :path result.path :bytes result.bytes))]
+      [(Err error) (file-error error)])))
+(define execute
+  (fun ([request BoundaryRequest] [-> (Result String EncodeError)])
+    (match (authorize-boundary request)
+      [(Block reason)
+        (encode-json (BoundaryError :code "policy-denied" :message reason))]
+      [(Permit _)
+        (if (= request.action "read") (read-boundary request) (write-boundary request))])))
+(match (decode-json BoundaryRequest (read-all))
+  [(Ok request) (execute request)]
+  [(Err error)
+    (encode-json
+      (BoundaryError
+        :code
+        error.code
+        :message
+        (concat (concat error.path ": ") error.message)))])

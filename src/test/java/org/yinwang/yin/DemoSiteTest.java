@@ -43,6 +43,8 @@ class DemoSiteTest {
         assertTrue(html.contains("data-example=\"agentReview\""));
         assertTrue(html.contains("data-example=\"typedTool\""));
         assertTrue(html.contains("data-example=\"web3Guard\""));
+        assertTrue(html.contains("Guarded tool runtime"));
+        assertTrue(html.contains("yin --replay run.jsonl"));
         assertTrue(html.contains("<label for=\"input-editor\">JSON input</label>"));
         assertTrue(html.contains("id=\"input-editor\""));
         assertTrue(html.contains("aria-live=\"polite\""));

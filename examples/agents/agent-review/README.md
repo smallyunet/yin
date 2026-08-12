@@ -1,6 +1,7 @@
 # Typed agent review demo
 
-This demo exercises the Yin 0.13 ordered-policy and structured-contract workflow:
+This demo exercises the ordered-policy and structured-contract workflow first
+shipped in Yin 0.13:
 
 ```text
 untrusted stdin JSON

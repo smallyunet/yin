@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.13 language. Behavior not described
+This document defines the normative Yin 0.14 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
