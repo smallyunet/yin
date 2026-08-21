@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.17.0 — 2026-08-21
+
+- add `--gateway` as a generic deny-by-default bridge from source-declared
+  typed Yin tools to real newline-delimited MCP stdio subprocesses
+- implement MCP initialization and version negotiation, `initialized`,
+  paginated `tools/list`, bounded `tools/call`, cancellation, server pings, and
+  graceful subprocess shutdown against protocol revision 2025-11-25
+- add a closed `ActionIntent` boundary and require exact agreement among the
+  source declaration, host mapping, remote tool, capability, effect, resource,
+  and canonical typed arguments
+- add `--approval-request` evidence bound to the program, host, full intent,
+  arguments, actor, agent, expiry, and nonce, with locked durable single-use
+  nonce consumption before external execution
+- extend hash-chained traces across gateway authorization and MCP results while
+  retaining side-effect-free `--replay`
+- add a maintained ticket MCP server and one-command end-to-end example, plus
+  approval tampering, expiry, replay, and nonce-reuse integration coverage
+- update all maintained commands and release metadata to 0.17.0, bringing the
+  JVM suite to 207 tests while retaining 3 Rust VM tests
+
 ## 0.16.0 — 2026-08-12
 
 - add a canonical, versioned `.ybc` token-bytecode format with compiler-side

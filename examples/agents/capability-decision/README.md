@@ -7,13 +7,13 @@ approval requirement. It never performs the swap and holds no wallet key.
 Validate that the source uses only `deterministic-policy-v1`:
 
 ```bash
-java -jar target/yin-0.15.0.jar --contract-check main.yin
+java -jar target/yin-0.17.0.jar --contract-check main.yin
 ```
 
 Evaluate one request:
 
 ```bash
-java -jar target/yin-0.15.0.jar --contract-run main.yin \
+java -jar target/yin-0.17.0.jar --contract-run main.yin \
   --input inputs/approve.json
 ```
 

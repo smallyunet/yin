@@ -42,6 +42,22 @@ public class Interpreter {
             throw new GeneralError(new Diagnostic(
                     Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
         }
+        return interpProgram(program, context);
+    }
+
+    /** Evaluates one immutable source snapshot under a caller-supplied diagnostic name. */
+    public Value interpSource(String sourceName, String source, RuntimeContext context) {
+        Node program;
+        try {
+            program = Parser.parseSource(sourceName, source);
+        } catch (ParserException e) {
+            throw new GeneralError(new Diagnostic(
+                    Diagnostic.Code.SYNTAX, "parsing error: " + e.getMessage(), e.span));
+        }
+        return interpProgram(program, context);
+    }
+
+    private Value interpProgram(Node program, RuntimeContext context) {
         Scope<Value> scope = Scope.buildInitScope(context);
         return program.interp(scope);
     }
@@ -100,6 +116,18 @@ public class Interpreter {
         }
         if (args.length > 0 && args[0].equals("--guard")) {
             int status = ReferencePolicyRuntime.run(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--gateway")) {
+            int status = ActionGatewayRuntime.run(
+                    Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
+            if (status != 0) System.exit(status);
+            return;
+        }
+        if (args.length > 0 && args[0].equals("--approval-request")) {
+            int status = ActionGatewayRuntime.approvalRequest(
                     Arrays.copyOfRange(args, 1, args.length), System.out, System.err);
             if (status != 0) System.exit(status);
             return;

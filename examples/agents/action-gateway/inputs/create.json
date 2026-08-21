@@ -1,0 +1,15 @@
+{
+  "requestId": "ticket-demo-001",
+  "actor": "local-human",
+  "agent": "demo-agent",
+  "server": "ticket-demo",
+  "tool": "create_ticket",
+  "capability": "tickets.write",
+  "effect": "write",
+  "resource": "repo:smallyunet/yin",
+  "arguments": {
+    "repository": "smallyunet/yin",
+    "title": "Verify the Yin action gateway",
+    "body": "Created through a request-bound MCP stdio tool call."
+  }
+}

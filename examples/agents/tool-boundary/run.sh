@@ -2,7 +2,7 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-jar=${YIN_JAR:-"$root/../../../target/yin-0.15.0.jar"}
+jar=${YIN_JAR:-"$root/../../../target/yin-0.17.0.jar"}
 trace_dir=${TRACE_DIR:-"$root/runtime/traces"}
 
 mkdir -p "$root/runtime/notes" "$trace_dir"

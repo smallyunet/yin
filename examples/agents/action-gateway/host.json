@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "timeoutMillis": 10000,
+  "servers": [
+    {
+      "name": "ticket-demo",
+      "command": ["node", "server.mjs", "runtime/tickets.jsonl"],
+      "cwd": ".",
+      "tools": [
+        {
+          "name": "create-ticket",
+          "remoteName": "create_ticket",
+          "capability": "tickets.write",
+          "effect": "write",
+          "approvalRequired": true
+        }
+      ]
+    }
+  ]
+}

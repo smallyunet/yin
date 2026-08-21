@@ -46,6 +46,8 @@ explicit `otherwise` result.
 - a side-effect-free deterministic contract profile with digest-bound decisions
 - canonical `.ybc` artifacts and a fuel-metered Rust VM for the portable subset
 - a deny-by-default local reference host with explicit write approval
+- a generic MCP stdio gateway with lifecycle negotiation and tool discovery
+- request-bound, expiring, single-use approval evidence for external actions
 - hash-chained decision traces and side-effect-free result replay
 - string transformation, parsing, program arguments, and controlled text input
 - arithmetic, comparison, and boolean primitives
@@ -61,13 +63,14 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.16 defines these
+boundaries between runtime values and static types. Yin 0.17 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
 
 - JDK 17 or newer
 - Rust 1.85 or newer to build `yinvm`
+- Node.js 18 or newer only for the MCP ticket demo and editor packaging
 - no system Maven installation is required
 
 ## Releases
@@ -78,13 +81,13 @@ extension packages, and SHA-256 checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.16.0.jar --version
+java -jar yin-0.17.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.16.0.vsix
+code --install-extension yin-language-support-0.17.0.vsix
 ```
 
 ## Build and test
@@ -94,31 +97,31 @@ code --install-extension yin-language-support-0.16.0.vsix
 cargo test --manifest-path vm/Cargo.toml
 ```
 
-This produces the executable JAR at `target/yin-0.16.0.jar`. Build the Rust VM
+This produces the executable JAR at `target/yin-0.17.0.jar`. Build the Rust VM
 with `cargo build --release --manifest-path vm/Cargo.toml`; the binary is
 `vm/target/release/yinvm`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.16.0.jar tests/program-usability.yin
+java -jar target/yin-0.17.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.16.0.jar \
+java -cp target/yin-0.17.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.16.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.16.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.17.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.17.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.16.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.16.0.jar examples/cli/wc.yin README.md
+  java -jar target/yin-0.17.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.17.0.jar examples/cli/wc.yin README.md
 ```
 
 The [typed agent review demo](examples/agents/agent-review/README.md) provides a
@@ -135,7 +138,7 @@ host boundary errors without granting ambient authority.
 Inspect every tool capability without executing the program:
 
 ```bash
-java -jar target/yin-0.16.0.jar --capabilities examples/agents/typed-tool.yin
+java -jar target/yin-0.17.0.jar --capabilities examples/agents/typed-tool.yin
 ```
 
 The manifest is deterministic and includes effect, approval, idempotency, and
@@ -148,14 +151,14 @@ Yin 0.15 introduced `deterministic-policy-v1`, an executable pure-policy profile
 for portable Agent capability decisions. Validate a contract without running it:
 
 ```bash
-java -jar target/yin-0.16.0.jar --contract-check \
+java -jar target/yin-0.17.0.jar --contract-check \
   examples/agents/capability-decision/main.yin
 ```
 
 Evaluate it against one exact JSON input:
 
 ```bash
-java -jar target/yin-0.16.0.jar --contract-run \
+java -jar target/yin-0.17.0.jar --contract-run \
   examples/agents/capability-decision/main.yin \
   --input examples/agents/capability-decision/inputs/approve.json
 ```
@@ -166,7 +169,7 @@ access, output, and tool authority. It remains the source-level reference
 evaluator. Yin 0.16 adds a separate portable execution path:
 
 ```bash
-java -jar target/yin-0.16.0.jar --contract-compile \
+java -jar target/yin-0.17.0.jar --contract-compile \
   examples/agents/capability-decision/main.yin \
   --output capability.ybc
 cargo run --quiet --manifest-path vm/Cargo.toml -- check capability.ybc
@@ -184,6 +187,27 @@ a bounded policy runtime, not a process/memory sandbox or a consensus VM. See th
 [deterministic profile](docs/vm/deterministic-profile.md), plus the exact
 [portable bytecode format](docs/vm/bytecode.md).
 
+## Run an MCP action gateway
+
+Yin 0.17 connects source-declared typed tools to newline-delimited MCP stdio
+servers. `--gateway` validates the source and closed host configuration, runs
+the policy, discovers the remote tool through `tools/list`, and calls it only
+after authorization. Non-read actions require approval evidence bound to the
+exact program, host, canonical action intent, canonical arguments, actor,
+agent, resource, expiry, and single-use nonce.
+
+Build the release JAR and run the maintained ticket-server flow:
+
+```bash
+./mvnw verify
+examples/agents/action-gateway/run.sh
+```
+
+The example performs the complete MCP lifecycle and writes one external ticket
+fixture. Its trace can be replayed without starting the server or repeating the
+action. See the [gateway security and configuration guide](docs/action-gateway.md)
+and [complete example](examples/agents/action-gateway/README.md).
+
 ## Run a guarded tool boundary
 
 Yin 0.14 includes a narrow reference host that connects a typed policy to
@@ -195,12 +219,12 @@ creates a new hash-chained trace for every run:
 mkdir -p examples/agents/tool-boundary/runtime/notes
 cp examples/agents/tool-boundary/fixtures/welcome.txt \
   examples/agents/tool-boundary/runtime/notes/welcome.txt
-java -jar target/yin-0.16.0.jar --guard \
+java -jar target/yin-0.17.0.jar --guard \
   examples/agents/tool-boundary/main.yin \
   --input examples/agents/tool-boundary/inputs/read.json \
   --host examples/agents/tool-boundary/host.json \
   --trace examples/agents/tool-boundary/runtime/read.jsonl
-java -jar target/yin-0.16.0.jar --replay \
+java -jar target/yin-0.17.0.jar --replay \
   examples/agents/tool-boundary/runtime/read.jsonl
 ```
 
@@ -216,7 +240,7 @@ sandbox or production authorization service. See the
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.16.0.jar
+java -jar target/yin-0.17.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -228,7 +252,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.16.0.jar --format tests/function1.yin
+java -jar target/yin-0.17.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.

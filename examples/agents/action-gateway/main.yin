@@ -1,0 +1,61 @@
+(record TicketArguments [repository String] [title String] [body String])
+(record ActionIntent
+  [requestId String]
+  [actor String]
+  [agent String]
+  [server String]
+  [tool String]
+  [capability String]
+  [effect String]
+  [resource String]
+  [arguments TicketArguments])
+(record TicketReceipt [ticketId String] [repository String])
+(variant TicketFailure
+  [RemoteFailure [message String]])
+(variant Decision
+  [Permit [reason String]]
+  [Block [reason String]])
+(variant GatewayResult
+  [Completed [ticketId String] [repository String]]
+  [GatewayFailure [code String] [message String]])
+(tool create-ticket TicketArguments TicketReceipt TicketFailure
+  :capability "tickets.write"
+  :effect :write
+  :approval true
+  :idempotent false
+  :open-world false)
+(policy authorize
+  ([intent ActionIntent] [-> Decision])
+  (when (not (= intent.server "ticket-demo"))
+    (Block :reason "server is not allowed"))
+  (when (not (= intent.tool "create_ticket"))
+    (Block :reason "tool is not allowed"))
+  (when (not (= intent.capability "tickets.write"))
+    (Block :reason "capability is not allowed"))
+  (when (not (= intent.effect "write"))
+    (Block :reason "effect is not allowed"))
+  (when (< (string-length intent.resource) 5)
+    (Block :reason "resource must use the repo: namespace"))
+  (when (not (= (substring intent.resource 0 5) "repo:"))
+    (Block :reason "resource must use the repo: namespace"))
+  (otherwise
+    (Permit :reason "ticket request accepted")))
+(define execute
+  (fun ([intent ActionIntent] [-> (Result String EncodeError)])
+    (match (authorize intent)
+      [(Block reason)
+        (encode-json (GatewayFailure :code "policy-denied" :message reason))]
+      [(Permit _)
+        (match (invoke create-ticket intent.arguments)
+          [(Ok receipt)
+            (encode-json
+              (Completed :ticketId receipt.ticketId :repository receipt.repository))]
+          [(Err error)
+            (match error
+              [(RemoteFailure message)
+                (encode-json (GatewayFailure :code "remote-failure" :message message))]
+              [(ToolError code _ message)
+                (encode-json (GatewayFailure :code code :message message))])])])))
+(match (decode-json ActionIntent (read-all))
+  [(Ok intent) (execute intent)]
+  [(Err error) (encode-json (GatewayFailure :code error.code :message error.message))])

@@ -53,10 +53,13 @@ where a probabilistic proposal crosses into an external effect.
   metering, and a portable VM.
 - **0.16 portable execution:** canonical `.ybc` artifacts and an independent,
   fuel-metered Rust VM for bounded capability decisions.
+- **0.17 action gateway:** a real MCP stdio connection, typed tool execution,
+  exact intent/argument binding, expiring single-use approvals, and replayable
+  action traces.
 - **Next: adoption evidence:** evaluate the complete boundary with non-authors
   and compare the same task against an ordinary host implementation.
-- **Later: durable boundaries:** MCP connectivity, approval suspension, cancellation, recovery,
-  and recorded model/tool results when real policy-runtime use requires them.
+- **Later: durable boundaries:** authenticated approval services, suspension,
+  recovery, and recorded model/tool results when real use requires them.
 
 The static checker lists every declared tool capability and potential external
 write before execution. Declarations never grant authority: installed tool

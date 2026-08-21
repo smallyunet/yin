@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.16 language. Behavior not described
+This document defines the normative Yin 0.17 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -366,7 +366,7 @@ the browser supports controlled text input but rejects filesystem reads.
 
 ## Deterministic contract profile
 
-`deterministic-policy-v1` is an execution profile over the normative Yin 0.16
+`deterministic-policy-v1` is an execution profile over the normative Yin 0.17
 language. It accepts one immutable UTF-8 input through `read-all`, requires the
 program to return JSON text through `encode-json`, and rejects `Float`, `Any`,
 `set!`, `args`, `print`, `read-text`, tool declarations, and `invoke` before

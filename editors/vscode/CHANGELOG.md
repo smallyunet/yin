@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.0
+
+- bundle the Yin 0.17.0 language server and Agent Action Gateway CLI
+
 ## 0.16.0
 
 - bundle the Yin 0.16.0 language server and portable-bytecode compiler CLI

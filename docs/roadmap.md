@@ -161,10 +161,24 @@ The project is being stabilized before new language features are designed.
 - deliberate rejection of functions, ranges, and policy calls for bounded v1 execution
 - cross-runtime capability-decision conformance for approve, reject, and review
 
+## 0.17 — Agent Action Gateway
+
+- generic `ActionIntent` envelope over source-typed tool arguments
+- newline-delimited MCP stdio client with initialization, version negotiation,
+  paginated discovery, bounded requests, cancellation, and graceful shutdown
+- closed source/host/intent agreement for server, tool, capability, effect, and
+  approval requirements without trusting remote annotations
+- approval evidence bound to program, host, canonical intent and arguments,
+  actor, agent, resource, expiry, and nonce
+- locked durable nonce consumption before non-read execution
+- hash-chained authorization, tool-result, and final-outcome traces compatible
+  with side-effect-free `--replay`
+- maintained external ticket action demonstrating the complete subprocess flow
+
 ## Later
 
 - non-author usability testing and a TypeScript or Rego boundary comparison
-- MCP connection and approval identity without trusting remote annotations
+- authenticated approval identity and signed approval evidence
 - trace redaction, signing, retention, and production storage policy
 - modules and multi-file type checking
 - persistent dictionaries and sets

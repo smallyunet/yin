@@ -32,7 +32,7 @@ class LanguageServerIntegrationTest {
         JsonObject capabilities = initialize.getAsJsonObject("capabilities");
         assertEquals(1, capabilities.getAsJsonObject("textDocumentSync").get("change").getAsInt());
         assertTrue(capabilities.get("documentFormattingProvider").getAsBoolean());
-        assertEquals("0.16.0", initialize.getAsJsonObject("serverInfo").get("version").getAsString());
+        assertEquals("0.17.0", initialize.getAsJsonObject("serverInfo").get("version").getAsString());
         assertTrue(output.get(1).has("result"), output.get(1)::toString);
         assertTrue(output.get(1).get("result").isJsonNull());
     }

@@ -141,6 +141,9 @@ and side-effect-free replay boundary.
 `YinBytecodeTest` and the Rust crate tests protect the 0.16 portable format,
 reproducible envelopes, maintained capability decisions, rejected effects, and
 the JSON-result boundary.
+`ActionGatewayRuntimeTest` protects the 0.17 immutable source snapshot, closed
+intent/host agreement, actual MCP stdio lifecycle, request-bound approval,
+single-use nonce consumption, external execution, and replay boundary.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy
