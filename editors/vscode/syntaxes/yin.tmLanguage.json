@@ -56,7 +56,7 @@
       "patterns": [
         {
           "name": "support.type.yin",
-          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Fn|Result|Option|Tool|ToolError|Ok|Err|Some|None)(?![\\w])"
+          "match": "(?<![\\w])(?:Int|Float|Bool|String|Any|U|Vector|Dict|Set|Fn|Result|Option|Tool|ToolError|Ok|Err|Some|None)(?![\\w])"
         }
       ]
     },
@@ -72,7 +72,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.yin",
-          "match": "(?<![\\w])(?:length|at|append|map|filter|fold|range|slice|reverse|contains|ok|err|some|none|string-length|concat|substring|split|join|trim|to-string|parse-int|parse-float|read-all|read-text|print|and|or|not|<=|>=|[+*/<>=-])(?![\\w])"
+          "match": "(?<![\\w])(?:dict/(?:get|put|remove|keys|values|contains-key|size)|set/(?:add|remove|contains|values|size|union|intersection|difference)|dict|set|length|at|append|map|filter|fold|range|slice|reverse|contains|ok|err|some|none|string-length|concat|substring|split|join|trim|to-string|parse-int|parse-float|read-all|read-text|print|and|or|not|<=|>=|[+*/<>=-])(?![\\w])"
         }
       ]
     },

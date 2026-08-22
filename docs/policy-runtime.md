@@ -7,7 +7,7 @@ deny-by-default authorization, and a create-only decision trace.
 ## Command
 
 ```bash
-java -jar yin-0.18.0.jar --guard program.yin \
+java -jar yin-0.19.0.jar --guard program.yin \
   --input request.json \
   --host host.json \
   --trace trace.jsonl \
@@ -88,7 +88,7 @@ hash. Replay verifies the chain's internal consistency and requires exactly one
 final `run-completed` event:
 
 ```bash
-java -jar yin-0.18.0.jar --replay trace.jsonl
+java -jar yin-0.19.0.jar --replay trace.jsonl
 ```
 
 Replay prints the recorded final output. It does not parse the original source,

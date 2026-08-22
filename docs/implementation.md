@@ -33,6 +33,13 @@ typed deterministic source -> Java YinBytecode compiler -> .ybc
   constructors; `ast/JsonOperation.java` preserves type-directed boundaries.
 - `json/JsonCodec.java` owns strict parsing, deterministic value encoding, and
   deterministic Draft 2020-12 schema generation.
+- `value/DictValue.java` and `value/SetValue.java` store immutable ordered
+  snapshots and use language-level structural equality rather than host hash
+  identity. `value/primitives/CollectionPrimitives.java` implements persistent
+  transformations and safe optional dictionary lookup.
+- `type/DictType.java`, `type/SetType.java`, and
+  `type/CollectionPrimitiveTypes.java` define collection covariance,
+  constructor inference, operand compatibility, and precise result types.
 - `Scope.java` implements generic lexical environment chains. Runtime scopes
   contain `Value`; type-checking scopes contain `YinType`.
 - `Interpreter.java` evaluates an AST against the runtime initial scope.
@@ -43,8 +50,8 @@ typed deterministic source -> Java YinBytecode compiler -> .ybc
   instead of hiding host effects in language nodes.
 - `DeterministicContractRuntime.java` validates the side-effect-free
   `deterministic-policy-v1` subset, injects one immutable JSON input, and returns
-  a digest-bound structured decision envelope. It is a reference evaluator, not
-  and remains the source-level conformance evaluator.
+  a digest-bound structured decision envelope. It is a reference evaluator and
+  remains the source-level conformance evaluator.
 - `bytecode/YinBytecode.java` emits and verifies canonical `.ybc` containers;
   `bytecode/YinBytecodeTool.java` exposes compiler-side CLI operations.
 - `vm/` is an independent Rust crate. It validates bytecode without loading the
@@ -148,6 +155,12 @@ single-use nonce consumption, external execution, and replay boundary.
 exports, selective and transitive imports, one-time initialization, canonical
 paths, cycles, nominal type identity, security-profile rejection, and file-URI
 editor analysis.
+`ImmutableCollectionsIntegrationTest` protects Yin 0.19 dictionary and Set
+construction, persistence, safe access, bottom-type widening, ordering,
+structural equality, static operand checks, JSON interop, and schemas.
+`ConfigValidatorDemoTest` executes the maintained non-Agent multi-file CLI
+through stdin, strict JSON, modules, collections, variants, and the raw JSON
+process boundary.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy
@@ -165,3 +178,7 @@ Run all checks with:
   supported grammar and AST
 - descriptor forms remain stored in a generic property table before evaluation
 - the type system remains experimental and is not a soundness proof
+- the JVM interpreter and TeaVM build implement the full 0.19 language; the
+  Rust VM intentionally remains limited to `portable-bytecode-v1`
+- Agent policy and gateway components are optional embedding profiles rather
+  than dependencies of the general language core

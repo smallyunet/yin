@@ -25,7 +25,9 @@ public final class UnionType extends YinType {
     }
 
     private void add(YinType type) {
-        if (type instanceof UnionType union) {
+        if (type instanceof NeverType) {
+            if (members.isEmpty()) members.add(type);
+        } else if (type instanceof UnionType union) {
             union.members.forEach(this::add);
         } else if (type instanceof AnyType) {
             members.clear();
@@ -33,6 +35,7 @@ public final class UnionType extends YinType {
         } else if (members.stream().anyMatch(AnyType.class::isInstance)) {
             return;
         } else if (members.stream().noneMatch(member -> Types.equivalent(member, type))) {
+            members.removeIf(NeverType.class::isInstance);
             members.add(type);
         }
     }

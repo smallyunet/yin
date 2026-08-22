@@ -1,0 +1,20 @@
+(module validation [Validation Valid Invalid validate-config]
+  (variant Validation
+    [Valid [config (Dict String String)]]
+    [Invalid [missing (Vector String)] [message (Option String)]])
+  (define required-keys (set "host" "port"))
+  (define normalize-mode
+    (fun ([config (Dict String String)] [-> (Dict String String)])
+      (match (dict/get config "mode")
+        [(Some _) config]
+        [(None) (dict/put config "mode" "development")])))
+  (define validate-config
+    (fun ([config (Dict String String)] [-> Validation])
+      (define missing
+        (filter
+          (set/values required-keys)
+          (fun ([key String] [-> Bool])
+            (not (dict/contains-key config key)))))
+      (if (= (length missing) 0)
+        (Valid :config (normalize-mode config))
+        (Invalid :missing missing :message none)))))

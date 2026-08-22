@@ -1,67 +1,58 @@
-# Agent policy direction
+# Automation profiles, not the language identity
 
-Yin's primary goal is to make the boundary between AI agents and external tools
-typed, deterministic, deny-by-default, and auditable. Yin is not a prompt
-template language, a general Agent framework, or syntax for one model provider.
+Yin is a small typed general programming language. It is intended for reliable
+CLI tools, data/configuration programs, and embeddable automation. The Agent
+policy, typed-tool, guarded-host, deterministic-contract, and MCP gateway
+features are optional execution profiles over that language core.
 
-The intended execution model is:
+This distinction is deliberate. A local coding interface can already display
+tool calls and ask a human for approval; Yin should not claim that reproducing
+that UI is sufficient reason for a new language. Nor should Yin compete with a
+full organizational policy engine merely by adding more approval syntax.
 
-```text
-untrusted typed intent
-  -> ordered deterministic policy
-  -> approve, reject, or request human approval
-  -> deny-by-default host authorization
-  -> typed tool Result
-  -> auditable trace
-```
+The profiles are useful only when a host needs language-level properties that
+survive outside one interface: typed input/output contracts, deterministic
+decisions, explicit authority injection, portable evaluation, or replayable
+execution evidence. Applications that do not need those properties should use
+the ordinary language without the profiles.
 
-Agent orchestration remains in the host application. Yin owns the smaller part
-where a probabilistic proposal crosses into an external effect.
+## Shared language principles
 
-## Design principles
+1. Programs are statically checked before execution.
+2. Immutable values and stable iteration make results reproducible.
+3. Expected absence is `Option`; expected domain failure is `Result`; malformed
+   programs and violated language invariants are diagnostics.
+4. JSON is a strict typed boundary rather than an unvalidated dynamic object.
+5. Modules expose a closed public surface and the complete dependency graph is
+   checked.
+6. Host authority is injected explicitly. Source declarations never grant an
+   external capability by themselves.
 
-1. Policy must be readable in decision order. A policy is a sequence of `when`
-   rules followed by an explicit `otherwise`; the first match wins.
-2. Expected failure is data. Policy, tool, model, and task boundaries return
-   typed outcomes instead of hiding domain failure in exceptions or strings.
-3. External authority is injected. Files, network access, secrets, tools, and
-   model providers are host capabilities rather than ambient globals.
-4. Structured data is the default. Source types produce strict JSON decoders,
-   encoders, and schemas at the boundary.
-5. External writes are reviewable. Risk, idempotency, parameter previews, and
-   approval belong to the execution contract.
-6. Runs should become reproducible. Boundary calls can be recorded, mocked, and
-   replayed without repeating external effects.
-7. Protocols are adapters. MCP, HTTP, local processes, and agent-to-agent
-   transports map to stable Yin abstractions instead of becoming syntax.
+These principles apply equally to a configuration validator, a log-processing
+CLI, or an Agent decision program.
 
-## Version sequence
+## Optional profiles
 
-- **0.10 explicit outcomes:** typed `Result`, `Ok`, `Err`, and exhaustive
-  narrowing.
-- **0.11 structured contracts:** tagged variants, `Option`, strict typed JSON,
-  deterministic encoding, and JSON Schema generation.
-- **0.12 capabilities and tools:** declared effects, deny-by-default injected
-  permissions, approval metadata, capability manifests, and audit events.
-- **0.13 readable policies:** ordered `policy` rules, mandatory fallback,
-  first-match evaluation, and dot-style immutable field access.
-- **0.14 policy runtime:** a deny-by-default reference host for root-confined
-  local text tools, explicit write approval, hash-chained traces, and replay
-  that never repeats a tool invocation.
-- **0.15 deterministic contracts:** a pure executable policy profile,
-  digest-bound decision envelopes, and explicit exclusions ahead of bytecode,
-  metering, and a portable VM.
-- **0.16 portable execution:** canonical `.ybc` artifacts and an independent,
-  fuel-metered Rust VM for bounded capability decisions.
-- **0.17 action gateway:** a real MCP stdio connection, typed tool execution,
-  exact intent/argument binding, expiring single-use approvals, and replayable
-  action traces.
-- **Next: adoption evidence:** evaluate the complete boundary with non-authors
-  and compare the same task against an ordinary host implementation.
-- **Later: durable boundaries:** authenticated approval services, suspension,
-  recovery, and recorded model/tool results when real use requires them.
+- `policy` is readable first-match syntax that lowers to ordinary typed
+  functions and conditionals.
+- typed `tool` declarations describe host contracts and authority metadata;
+  `invoke` returns explicit outcomes.
+- `--guard` is a narrow reference host for demonstrating installed local tools,
+  authorization, traces, and replay.
+- `deterministic-policy-v1` rejects ambient effects and binds source, input, and
+  result digests. The Rust VM executes an even smaller portable subset.
+- `--gateway` demonstrates a generic MCP stdio host with closed configuration
+  and request-bound evidence.
 
-The static checker lists every declared tool capability and potential external
-write before execution. Declarations never grant authority: installed tool
-calls still pass through host authorization, and the default policy denies all
-calls.
+These are maintained capabilities, not promises of authentication, secure
+sandboxing, durable workflow execution, or production policy administration.
+Those concerns remain host responsibilities.
+
+## Product and roadmap boundary
+
+Language completeness takes priority over profile expansion. Near-term work is
+module namespaces and projects, coherent failure semantics, user-defined
+generics, fuller bytecode parity, and semantic editor tooling. New Agent,
+approval, or protocol-specific work should enter the roadmap only when a real
+program demonstrates a language-level gap that cannot be handled more clearly
+by the host or an established policy system.

@@ -35,6 +35,7 @@ class DemoSiteTest {
         assertTrue(html.contains("id=\"features\""));
         assertTrue(html.contains("data-example=\"records\""));
         assertTrue(html.contains("data-example=\"vectors\""));
+        assertTrue(html.contains("data-example=\"dictionaries\""));
         assertTrue(html.contains("data-example=\"programs\""));
         assertTrue(html.contains("data-example=\"results\""));
         assertTrue(html.contains("data-example=\"contracts\""));
@@ -43,8 +44,8 @@ class DemoSiteTest {
         assertTrue(html.contains("data-example=\"agentReview\""));
         assertTrue(html.contains("data-example=\"typedTool\""));
         assertTrue(html.contains("data-example=\"web3Guard\""));
-        assertTrue(html.contains("Guarded tool runtime"));
-        assertTrue(html.contains("yin --replay run.jsonl"));
+        assertTrue(html.contains("Multi-file programs"));
+        assertTrue(html.contains("Optional automation profiles"));
         assertTrue(html.contains("<label for=\"input-editor\">JSON input</label>"));
         assertTrue(html.contains("id=\"input-editor\""));
         assertTrue(html.contains("aria-live=\"polite\""));
@@ -72,6 +73,8 @@ class DemoSiteTest {
         assertTrue(app.contains("(policy decide"));
         assertTrue(app.contains("(otherwise"));
         assertTrue(app.contains("(at extended 3)"));
+        assertTrue(app.contains("(dict/get config \"mode\")"));
+        assertTrue(app.contains("(set/difference required"));
         assertTrue(app.contains("(match (parse-int text)"));
         assertTrue(app.contains("[-> (Result Int String)]"));
         assertTrue(app.contains("[(Err message)"));

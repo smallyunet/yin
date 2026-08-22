@@ -727,6 +727,14 @@ public class Parser {
             return call.args.positional.size() == 1
                     && isTypeExpression(call.args.positional.get(0));
         }
+        if (operator.id.equals(Constants.DICT_TYPE_KEYWORD)) {
+            return call.args.positional.size() == 2
+                    && call.args.positional.stream().allMatch(Parser::isTypeExpression);
+        }
+        if (operator.id.equals(Constants.SET_TYPE_KEYWORD)) {
+            return call.args.positional.size() == 1
+                    && isTypeExpression(call.args.positional.get(0));
+        }
         if (operator.id.equals(Constants.FUNCTION_TYPE_KEYWORD)
                 && call.args.positional.size() == 2
                 && call.args.positional.get(0) instanceof VectorLiteral parameters

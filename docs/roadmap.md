@@ -1,6 +1,11 @@
 # Roadmap
 
-The project is being stabilized before new language features are designed.
+Yin is developed as a small, typed, deterministic general programming language
+for CLI tools, data/configuration work, and embeddable automation. Agent policy
+and capability runtimes are optional profiles, not the roadmap's organizing
+identity. Each language release must be demonstrated by a non-Agent program and
+must keep interpreter, type checker, browser runtime, documentation, and editor
+artifacts aligned.
 
 ## 0.1 — reproducible baseline
 
@@ -186,17 +191,37 @@ The project is being stabilized before new language features are designed.
 - file-aware LSP analysis and maintained multi-file example
 - explicit rejection from digest-bound security profiles until dependency hashes are bound
 
+## 0.19 — immutable dictionaries, sets, and safe access
+
+- covariant `(Dict K V)` and `(Set T)` types with an inferred `Never` bottom
+  type for empty collections
+- immutable insertion-ordered constructors and transformations
+- total `dict/get` lookup through `(Option V)` rather than a missing-key error
+- dictionary traversal, membership, size, update, and removal operations
+- set membership, traversal, size, update, removal, union, intersection, and difference
+- structural equality that ignores collection insertion order while preserving
+  deterministic traversal and rendering order
+- strict JSON object interoperability for String-key dictionaries and array
+  interoperability for sets, including deterministic schema generation
+- maintained multi-file JSON configuration validator as a non-Agent end-to-end program
+- JVM, TeaVM browser, formatter, LSP, specification, and regression coverage
+
 ## Later
 
-- non-author usability testing and a TypeScript or Rego boundary comparison
-- authenticated approval identity and signed approval evidence
-- trace redaction, signing, retention, and production storage policy
-- persistent dictionaries and sets
-- typed model boundaries
-- durable tasks, checkpoints, approval suspension, and recovery
-- semantic opcodes, precise memory accounting, and a Wasm build of the Rust VM
-- hover, completion, definition, and reference navigation
+- 0.20: module namespaces and aliases, a project manifest, source roots, graph
+  diagnostics, and cross-file editor navigation
+- 0.21: one coherent failure model for parsing, indexing, and host I/O using
+  `Option`, `Result`, and diagnostics for distinct responsibilities
+- 0.22: user-defined generic types, recursive aliases, and inference hardening
+- 0.23: semantic bytecode parity for closures, modules, variants, results, and
+  collections, followed by precise fuel/memory accounting and Wasm
+- 0.24: completion, hover, definition, references, project formatting,
+  built-in test declarations, and generated API documentation
+
+Held unless a concrete general-language program requires them: authenticated
+approval services, durable Agent tasks, additional MCP-specific syntax, web
+frameworks, async/concurrency, an online package registry, and a native compiler.
 
 New syntax should not be added until it has a written rule, interpreter tests,
 type-checker tests, diagnostic tests, and a demonstrated improvement in a
-maintained policy or tool-boundary example.
+maintained non-Agent CLI, data, configuration, or automation program.

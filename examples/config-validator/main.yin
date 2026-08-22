@@ -1,0 +1,4 @@
+(import "./validation.yin" [Validation Invalid validate-config])
+(match (decode-json (Dict String String) (read-all))
+  [(Ok config) (encode-json (validate-config config))]
+  [(Err error) (encode-json (Invalid :missing [] :message (some error.message)))])

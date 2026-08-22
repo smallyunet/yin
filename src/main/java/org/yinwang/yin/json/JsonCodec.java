@@ -68,10 +68,12 @@ public final class JsonCodec {
         public String path() { return path; }
     }
 
-    private sealed interface Schema permits Primitive, VectorSchema, OptionSchema,
-            ResultSchema, RecordSchema, VariantSchema, UnionSchema { }
+    private sealed interface Schema permits Primitive, VectorSchema, DictSchema, SetSchema,
+            OptionSchema, ResultSchema, RecordSchema, VariantSchema, UnionSchema { }
     private record Primitive(String name) implements Schema { }
     private record VectorSchema(Schema element) implements Schema { }
+    private record DictSchema(Schema key, Schema value) implements Schema { }
+    private record SetSchema(Schema element) implements Schema { }
     private record OptionSchema(Schema value) implements Schema { }
     private record ResultSchema(Schema ok, Schema error) implements Schema { }
     private record Field(Schema schema, Value defaultValue) { }
@@ -100,6 +102,8 @@ public final class JsonCodec {
             List<Node> args = call.args.positional;
             return switch (operator.id) {
                 case "Vector" -> new VectorSchema(resolve(args.get(0), scope));
+                case "Dict" -> new DictSchema(resolve(args.get(0), scope), resolve(args.get(1), scope));
+                case "Set" -> new SetSchema(resolve(args.get(0), scope));
                 case "Option" -> new OptionSchema(resolve(args.get(0), scope));
                 case "Result" -> new ResultSchema(resolve(args.get(0), scope), resolve(args.get(1), scope));
                 case "U" -> new UnionSchema(args.stream().map(arg -> resolve(arg, scope)).toList());
@@ -208,6 +212,25 @@ public final class JsonCodec {
                 values.add(decode(vector.element, array.values.get(i), path + "[" + i + "]", scope));
             }
             return new Vector(values);
+        }
+        if (schema instanceof DictSchema dictionary) {
+            JObject object = object(json, path);
+            List<DictValue.Entry> entries = new ArrayList<>();
+            for (Map.Entry<String, JValue> entry : object.values.entrySet()) {
+                String entryPath = child(path, entry.getKey());
+                Value key = decode(dictionary.key, new JString(entry.getKey()), entryPath, scope);
+                Value value = decode(dictionary.value, entry.getValue(), entryPath, scope);
+                entries.add(new DictValue.Entry(key, value));
+            }
+            return new DictValue(entries);
+        }
+        if (schema instanceof SetSchema set) {
+            if (!(json instanceof JArray array)) throw type(path, "array", json);
+            List<Value> values = new ArrayList<>();
+            for (int i = 0; i < array.values.size(); i++) {
+                values.add(decode(set.element, array.values.get(i), path + "[" + i + "]", scope));
+            }
+            return new SetValue(values);
         }
         if (schema instanceof OptionSchema option) {
             return json == JNull.INSTANCE ? OptionValue.none()
@@ -339,6 +362,30 @@ public final class JsonCodec {
             for (int i = 0; i < vector.size(); i++) { if (i > 0) out.append(','); write(vector.get(i), out, path + "[" + i + "]"); }
             out.append(']'); return;
         }
+        if (value instanceof DictValue dictionary) {
+            out.append('{');
+            boolean first = true;
+            for (DictValue.Entry entry : dictionary.entries()) {
+                if (!(entry.key() instanceof StringValue key)) {
+                    throw new Failure("non-string-key", path,
+                            "JSON objects require String dictionary keys, got: " + entry.key());
+                }
+                if (!first) out.append(',');
+                first = false;
+                quote(key.value, out);
+                out.append(':');
+                write(entry.value(), out, child(path, key.value));
+            }
+            out.append('}'); return;
+        }
+        if (value instanceof SetValue set) {
+            out.append('[');
+            for (int i = 0; i < set.size(); i++) {
+                if (i > 0) out.append(',');
+                write(set.values().get(i), out, path + "[" + i + "]");
+            }
+            out.append(']'); return;
+        }
         if (value instanceof ResultValue result) {
             out.append("{\"tag\":"); quote(result.tag() == ResultValue.Tag.OK ? "Ok" : "Err", out);
             String key = result.tag() == ResultValue.Tag.OK ? "value" : "error";
@@ -367,6 +414,20 @@ public final class JsonCodec {
             return;
         }
         if (schema instanceof VectorSchema vector) { out.append("\"type\":\"array\",\"items\":{"); writeSchema(vector.element, out); out.append('}'); return; }
+        if (schema instanceof DictSchema dictionary) {
+            if (!acceptsObjectKey(dictionary.key)) {
+                throw new Failure("non-string-key", "$",
+                        "JSON object schemas require Dict String keys");
+            }
+            out.append("\"type\":\"object\",\"additionalProperties\":{");
+            writeSchema(dictionary.value, out);
+            out.append('}'); return;
+        }
+        if (schema instanceof SetSchema set) {
+            out.append("\"type\":\"array\",\"uniqueItems\":true,\"items\":{");
+            writeSchema(set.element, out);
+            out.append('}'); return;
+        }
         if (schema instanceof OptionSchema option) { out.append("\"anyOf\":[{\"type\":\"null\"},{"); writeSchema(option.value, out); out.append("}]"); return; }
         if (schema instanceof UnionSchema union) { writeAlternatives("anyOf", union.alternatives, out); return; }
         if (schema instanceof VariantSchema variant) { writeAlternatives("oneOf", new ArrayList<>(variant.cases.values()), out); return; }
@@ -375,6 +436,14 @@ public final class JsonCodec {
             writeAlternatives("oneOf", cases, out); return;
         }
         writeRecordSchema((RecordSchema) schema, out);
+    }
+
+    private static boolean acceptsObjectKey(Schema schema) {
+        if (schema instanceof Primitive primitive) {
+            return primitive.name.equals("String") || primitive.name.equals("Any");
+        }
+        return schema instanceof UnionSchema union
+                && union.alternatives.stream().anyMatch(JsonCodec::acceptsObjectKey);
     }
 
     private static RecordSchema taggedPayload(String tag, String field, Schema payload) {

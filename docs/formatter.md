@@ -9,20 +9,20 @@ and string tokens, uses two-space indentation, and targets an 88-column line.
 Print one formatted file to standard output without changing it:
 
 ```bash
-java -jar target/yin-0.18.0.jar --format program.yin
+java -jar target/yin-0.19.0.jar --format program.yin
 ```
 
 Check one or more files. The command exits with status 1 and lists files that
 would change:
 
 ```bash
-java -jar target/yin-0.18.0.jar --format --check tests/*.yin
+java -jar target/yin-0.19.0.jar --format --check tests/*.yin
 ```
 
 Rewrite one or more files in place:
 
 ```bash
-java -jar target/yin-0.18.0.jar --format --write program.yin
+java -jar target/yin-0.19.0.jar --format --write program.yin
 ```
 
 Invalid Yin is never rewritten. I/O and syntax diagnostics also produce a

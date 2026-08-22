@@ -2,7 +2,7 @@
 
 This is a concise guide to the behavior covered by the current automated test
 suite. The normative definition is the
-[Yin 0.18 language specification](language-specification.md). Files in
+[Yin 0.19 language specification](language-specification.md). Files in
 `experiments/` may use older syntax and are not normative; see the
 [historical-program classification](historical-programs.md).
 
@@ -42,9 +42,52 @@ true
 false
 "hello"
 [1 2 3]
+(dict "name" "yin" "version" "0.19")
+(set "cli" "data" "automation")
 ```
 
-The maintained built-in types are `Int`, `Float`, `Bool`, `String`, and `Any`.
+The maintained scalar types are `Int`, `Float`, `Bool`, `String`, and `Any`.
+Collection annotations use `(Vector T)`, `(Dict K V)`, and `(Set T)`. Empty
+`dict` and `set` values infer the internal bottom type `Never`, allowing them to
+flow into any compatible declared collection type.
+
+## Immutable dictionaries and sets
+
+`dict` takes alternating key/value arguments. `set` takes any number of values
+and removes structural duplicates. Both preserve the first insertion order.
+Updating an existing dictionary key preserves its position; removing and then
+re-adding a value appends it at the end. Every operation returns a new value.
+
+```yin
+(define scores (dict "alice" 8 "bob" 13))
+(define updated (dict/put scores "alice" 9))
+
+[(dict/get scores "alice")  -- (some 8)
+ (dict/get scores "carol")  -- none
+ (dict/keys updated)         -- ["alice" "bob"]
+ scores]                     -- unchanged
+```
+
+`dict/get` is the only dictionary lookup operation and always returns
+`(Option V)`. Missing keys are ordinary `none` values, never language errors or
+sentinels. Keys passed to lookup, removal, and membership checks must be
+statically compatible with `K`. Dictionary keys and Set members must have total
+structural equality; functions, tools, constructors, and other host handles are
+rejected, including at runtime when they cross an `Any` boundary.
+
+Dictionary operations are `dict/get`, `dict/put`, `dict/remove`, `dict/keys`,
+`dict/values`, `dict/contains-key`, and `dict/size`. Set operations are
+`set/add`, `set/remove`, `set/contains`, `set/values`, `set/size`, `set/union`,
+`set/intersection`, and `set/difference`.
+
+Structural equality for dictionaries ignores insertion order but compares
+keys and values; set equality ignores order and duplicates. Traversal and
+printing still use stable insertion order.
+
+JSON objects decode into `(Dict String V)` and String-key dictionaries encode
+as objects in insertion order. Other dictionary key types produce a structured
+`non-string-key` encoding error or a `json-schema` diagnostic. Sets decode from and encode to arrays;
+their generated schema includes `uniqueItems: true`.
 
 ## Explicit results
 
@@ -156,7 +199,9 @@ Annotations may name a built-in or record type, or use a non-empty union such
 as `(U Int Float)`. `(Vector Int)` describes an arbitrary-length immutable
 vector of integers, while `(Fn [Int] String)` describes a positional function
 from `Int` to `String`. `(Result Int String)` describes an explicit success or
-failure, and `(Option String)` describes present or absent text. `Any` is the top type. A return descriptor, when
+failure, `(Option String)` describes present or absent text, `(Dict String Int)`
+describes a typed immutable dictionary, and `(Set String)` a typed immutable
+set. `Any` is the top type. A return descriptor, when
 present, must be the final descriptor in the parameter list.
 
 ## Pattern matching
@@ -224,6 +269,10 @@ access through `Any` remains `Any` and is checked at runtime.
 - optional values: `some`, `none`
 - structured JSON: `decode-json`, `encode-json`, `json-schema`
 - immutable vectors: `length`, `at`, `append`
+- immutable dictionaries: `dict`, `dict/get`, `dict/put`, `dict/remove`,
+  `dict/keys`, `dict/values`, `dict/contains-key`, `dict/size`
+- immutable sets: `set`, `set/add`, `set/remove`, `set/contains`, `set/values`,
+  `set/size`, `set/union`, `set/intersection`, `set/difference`
 - vector processing: `map`, `filter`, `fold`, `range`, `slice`, `reverse`,
   `contains`
 - strings: `string-length`, `concat`, `substring`, `split`, `join`, `trim`,
@@ -264,7 +313,7 @@ or `false`, making failure explicit through a union and `match`.
 The CLI exposes arguments after the source filename through `args`:
 
 ```bash
-java -jar yin-0.18.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar yin-0.19.0.jar examples/cli/parse-values.yin 10 bad 32
 ```
 
 `read-all` reads standard input. `read-text` reads a UTF-8 file in the CLI but
@@ -273,7 +322,7 @@ is deliberately unavailable in the browser runtime.
 For structured pipelines, `--json` reserves stdout for the final raw JSON:
 
 ```bash
-java -jar yin-0.18.0.jar --json program.yin < request.json
+java -jar yin-0.19.0.jar --json program.yin < request.json
 ```
 
 The program must return `String` or `(Result String E)`. `Ok String` is
@@ -300,7 +349,7 @@ and contract-invalid output are ordinary `ToolError` values. Destructive tools
 must require approval. Inspect declarations without executing source using:
 
 ```bash
-java -jar yin-0.18.0.jar --capabilities program.yin
+java -jar yin-0.19.0.jar --capabilities program.yin
 ```
 
 Run a program against the root-confined reference host and record a trace with

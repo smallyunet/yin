@@ -20,6 +20,18 @@ origin.x`,
 
 (print (length extended))
 (at extended 3)`,
+  dictionaries: `(define config
+  (dict "host" "localhost" "port" "8080"))
+(define required (set "host" "port" "mode"))
+(define normalized
+  (match (dict/get config "mode")
+    [(Some _) config]
+    [(None) (dict/put config "mode" "development")]))
+
+[(dict/get config "mode")
+ (dict/get normalized "mode")
+ (set/difference required (set "host" "port"))
+ (dict/keys normalized)]`,
   programs: `(define values
   (map (split "10 bad 32" " ")
     (fun ([text String] [-> Int])
@@ -250,7 +262,7 @@ let workerReady = false;
 let requestId = 0;
 let pendingRequest = null;
 let lastDiagnostic = null;
-let activeExample = "agentReview";
+let activeExample = "dictionaries";
 
 function createWorker() {
   workerReady = false;
@@ -423,7 +435,7 @@ function saveInput() {
 }
 
 function restoreExampleChrome(name) {
-  activeExample = Object.hasOwn(examples, name) ? name : "agentReview";
+  activeExample = Object.hasOwn(examples, name) ? name : "dictionaries";
   const acceptsInput = Object.hasOwn(exampleInputs, activeExample);
   inputPanel.classList.toggle("is-hidden", !acceptsInput);
   editorPanel.classList.toggle("has-input", acceptsInput);

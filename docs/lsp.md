@@ -1,6 +1,6 @@
 # Yin editor integration
 
-Yin 0.18 includes a minimal Language Server Protocol implementation and a Visual
+Yin 0.19 includes a minimal Language Server Protocol implementation and a Visual
 Studio Code extension. The extension reports syntax and type errors while a
 document is being edited and formats the entire document with Yin's canonical
 formatter.
@@ -27,7 +27,7 @@ imported files use their saved filesystem contents.
 Any LSP client can start the executable JAR in server mode:
 
 ```bash
-java -jar yin-0.18.0.jar --lsp
+java -jar yin-0.19.0.jar --lsp
 ```
 
 The process reserves standard output for framed JSON-RPC messages. Diagnostics

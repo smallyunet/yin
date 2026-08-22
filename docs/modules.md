@@ -1,6 +1,6 @@
 # Yin modules
 
-Yin 0.18 adds file-backed modules with explicit exports, selective imports, and
+Yin 0.18 added file-backed modules with explicit exports, selective imports, and
 whole-dependency-graph type checking.
 
 ## Declaring a module
@@ -54,7 +54,7 @@ when values cross module boundaries.
 Running the normal type checker on an entry file checks every reachable module:
 
 ```bash
-java -cp target/yin-0.18.0.jar \
+java -cp target/yin-0.19.0.jar \
   org.yinwang.yin.TypeChecker examples/modules/main.yin
 ```
 

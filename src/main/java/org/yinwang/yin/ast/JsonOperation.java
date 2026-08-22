@@ -34,7 +34,12 @@ public final class JsonOperation extends Node {
 
     @Override public Value interp(Scope<Value> scope) {
         if (kind == Kind.SCHEMA) {
-            return new StringValue(JsonCodec.schema(type, scope));
+            try {
+                return new StringValue(JsonCodec.schema(type, scope));
+            } catch (JsonCodec.Failure failure) {
+                Util.abort(this, "json-schema " + failure.code() + ": " + failure.getMessage());
+                return Value.VOID;
+            }
         }
         if (kind == Kind.ENCODE) {
             try {
@@ -64,7 +69,14 @@ public final class JsonOperation extends Node {
             return new ResultType(Types.STRING, JsonSupport.errorValueType("EncodeError"));
         }
         YinType target = type.typecheck(scope);
-        if (kind == Kind.SCHEMA) return Types.STRING;
+        if (kind == Kind.SCHEMA) {
+            if (target instanceof org.yinwang.yin.type.DictType dictionary
+                    && !Types.subtype(Types.STRING, dictionary.key())) {
+                Util.abort(type, "json-schema requires a dictionary key type that accepts String, got: "
+                        + dictionary.key());
+            }
+            return Types.STRING;
+        }
         YinType source = value.typecheck(scope);
         if (!org.yinwang.yin.type.Types.subtype(source, Types.STRING)) {
             Util.abort(value, "decode-json input must be String, got: " + source);

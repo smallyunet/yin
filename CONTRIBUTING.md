@@ -17,6 +17,8 @@ Use JDK 17 or newer and run:
 - Preserve the behavior of programs under `tests/` unless the change explicitly
   updates the documented language semantics.
 - Add interpreter, type-checker, and diagnostic coverage for language changes.
+- Demonstrate new general-language capabilities in a maintained non-Agent CLI,
+  data, configuration, or automation program.
 - Keep historical material intact or move it under `archive/` with context.
 - Do not add new syntax without updating `docs/language-reference.md`.
 - Avoid unrelated formatting or file moves in semantic changes.

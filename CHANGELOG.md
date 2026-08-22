@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.19.0 — 2026-08-22
+
+- reposition Yin as a small typed deterministic general language for CLI tools,
+  data/configuration programs, and embeddable automation; retain Agent policy
+  and approval capabilities as optional profiles rather than the product identity
+- add covariant `(Dict K V)` and `(Set T)` types with an inferred `Never`
+  bottom type for empty collections
+- add immutable insertion-ordered dictionary construction, safe `Option` lookup,
+  persistent update/removal, traversal, membership, and size operations
+- add immutable ordered sets with deduplication, membership, persistent update,
+  traversal, union, intersection, and difference
+- define structural dictionary and Set equality independently of insertion order
+  while retaining deterministic printing and traversal
+- extend strict JSON decoding, deterministic encoding, and Draft 2020-12 schema
+  generation for String-key dictionaries and sets
+- add a maintained multi-file configuration-validator CLI using modules, Dict,
+  Set, Option, Result, variants, stdin, and raw JSON stdout
+- update the Playground, language specification/reference, roadmap, examples,
+  implementation notes, editor syntax, extension, and all release metadata
+- expand the JVM suite from 218 to 234 tests while retaining 3 Rust VM tests
+
 ## 0.18.0 — 2026-08-22
 
 - add isolated `module` declarations with explicit, closed export lists and

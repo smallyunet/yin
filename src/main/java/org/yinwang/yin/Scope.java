@@ -5,6 +5,7 @@ import org.yinwang.yin.value.BoolValue;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.value.primitives.*;
 import org.yinwang.yin.type.PrimitiveFunctionType;
+import org.yinwang.yin.type.CollectionPrimitiveTypes;
 import org.yinwang.yin.type.Types;
 import org.yinwang.yin.type.YinType;
 
@@ -209,6 +210,23 @@ public class Scope<T> {
         init.putValue("slice", new VectorPrimitives.Slice());
         init.putValue("reverse", new VectorPrimitives.Reverse());
         init.putValue("contains", new VectorPrimitives.Contains());
+        init.putValue("dict", new CollectionPrimitives.Dict());
+        init.putValue("dict/get", new CollectionPrimitives.DictGet());
+        init.putValue("dict/put", new CollectionPrimitives.DictPut());
+        init.putValue("dict/remove", new CollectionPrimitives.DictRemove());
+        init.putValue("dict/keys", new CollectionPrimitives.DictKeys());
+        init.putValue("dict/values", new CollectionPrimitives.DictValues());
+        init.putValue("dict/contains-key", new CollectionPrimitives.DictContainsKey());
+        init.putValue("dict/size", new CollectionPrimitives.DictSize());
+        init.putValue("set", new CollectionPrimitives.Set());
+        init.putValue("set/add", new CollectionPrimitives.SetAdd());
+        init.putValue("set/remove", new CollectionPrimitives.SetRemove());
+        init.putValue("set/contains", new CollectionPrimitives.SetContains());
+        init.putValue("set/values", new CollectionPrimitives.SetValues());
+        init.putValue("set/size", new CollectionPrimitives.SetSize());
+        init.putValue("set/union", new CollectionPrimitives.SetUnion());
+        init.putValue("set/intersection", new CollectionPrimitives.SetIntersection());
+        init.putValue("set/difference", new CollectionPrimitives.SetDifference());
         init.putValue("ok", new ResultPrimitives.Ok());
         init.putValue("err", new ResultPrimitives.Err());
         init.putValue("some", new OptionPrimitives.Some());
@@ -251,6 +269,23 @@ public class Scope<T> {
         init.putValue("slice", PrimitiveFunctionType.vectorSlice());
         init.putValue("reverse", PrimitiveFunctionType.vectorReverse());
         init.putValue("contains", PrimitiveFunctionType.vectorContains());
+        init.putValue("dict", CollectionPrimitiveTypes.dict());
+        init.putValue("dict/get", CollectionPrimitiveTypes.dictGet());
+        init.putValue("dict/put", CollectionPrimitiveTypes.dictPut());
+        init.putValue("dict/remove", CollectionPrimitiveTypes.dictRemove());
+        init.putValue("dict/keys", CollectionPrimitiveTypes.dictKeys());
+        init.putValue("dict/values", CollectionPrimitiveTypes.dictValues());
+        init.putValue("dict/contains-key", CollectionPrimitiveTypes.dictContainsKey());
+        init.putValue("dict/size", CollectionPrimitiveTypes.dictSize());
+        init.putValue("set", CollectionPrimitiveTypes.set());
+        init.putValue("set/add", CollectionPrimitiveTypes.setAdd());
+        init.putValue("set/remove", CollectionPrimitiveTypes.setRemove());
+        init.putValue("set/contains", CollectionPrimitiveTypes.setContains());
+        init.putValue("set/values", CollectionPrimitiveTypes.setValues());
+        init.putValue("set/size", CollectionPrimitiveTypes.setSize());
+        init.putValue("set/union", CollectionPrimitiveTypes.setUnion());
+        init.putValue("set/intersection", CollectionPrimitiveTypes.setIntersection());
+        init.putValue("set/difference", CollectionPrimitiveTypes.setDifference());
         init.putValue("ok", PrimitiveFunctionType.resultOk());
         init.putValue("err", PrimitiveFunctionType.resultErr());
         init.putValue("some", PrimitiveFunctionType.optionSome());
@@ -272,6 +307,11 @@ public class Scope<T> {
         init.putValue("Fn", PrimitiveFunctionType.functionType());
         init.putValue("Result", PrimitiveFunctionType.resultType());
         init.putValue("Option", PrimitiveFunctionType.optionType());
+        init.putValue("Dict", new PrimitiveFunctionType("Dict", 2,
+                (arguments, location) -> new org.yinwang.yin.type.DictType(
+                        arguments.get(0), arguments.get(1))));
+        init.putValue("Set", new PrimitiveFunctionType("Set", 1,
+                (arguments, location) -> new org.yinwang.yin.type.SetType(arguments.get(0))));
     }
 
 

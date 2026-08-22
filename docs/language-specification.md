@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.18 language. Behavior not described
+This document defines the normative Yin 0.19 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -119,6 +119,8 @@ type-expression
                = name
                | "(" "U" type-expression { type-expression } ")"
                | "(" "Vector" type-expression ")"
+               | "(" "Dict" type-expression type-expression ")"
+               | "(" "Set" type-expression ")"
                | "(" "Fn" "[" { type-expression } "]" type-expression ")"
                | "(" "Result" type-expression type-expression ")"
                | "(" "Option" type-expression ")" ;
@@ -175,6 +177,8 @@ Runtime evaluation is deterministic:
    evaluates exactly the first matching branch in a fresh lexical scope.
 10. A policy tests `when` conditions from left to right, evaluates only the
     first matching outcome, and evaluates `otherwise` only when none match.
+11. `dict`, `set`, and collection transformations evaluate operands from left
+    to right and return immutable snapshots with stable insertion order.
 
 Function and record default expressions are evaluated once when their
 definition is evaluated, in that definition's lexical environment. Defaults
@@ -239,11 +243,24 @@ errors with `code`, `path`, and `message`. Defaults fill missing record fields.
 contract.
 
 `(encode-json value)` returns `(Result String EncodeError)` and uses stable
-field order. Records map to objects, vectors to arrays, `none` to `null`,
-`some` to its payload, Results to tagged objects, and variant cases to objects
+field order. Records and String-key dictionaries map to objects, vectors and
+sets to arrays, `none` to `null`, `some` to its payload, Results to tagged objects, and variant cases to objects
 with a `tag` field. `(json-schema Type)` returns a deterministic JSON Schema
 Draft 2020-12 document with closed objects, required fields, and `oneOf` for
 closed variants and Results.
+
+Dictionary decoding consumes JSON objects. Object field names decode as keys,
+so a JSON-facing dictionary contract must accept `String`; values decode
+against `V` in source object order. Encoding a dictionary with a non-String key
+returns an `EncodeError` with code `non-string-key`. A `(Dict String V)` schema
+uses `additionalProperties` for `V`. Sets map to JSON arrays and generated Set
+schemas declare `uniqueItems: true`; duplicate decoded elements collapse by Yin
+structural equality while retaining their first position.
+
+Generating a dictionary schema requires a key type that accepts `String`.
+Violation is a language diagnostic because `json-schema` returns `String`, not
+`Result`; runtime evaluation without prior type checking reports the same
+`non-string-key` condition as a language diagnostic.
 
 The CLI `--json` execution mode is a host boundary rather than language syntax.
 It accepts a final `String` or `(Result String E)`, writes successful string
@@ -262,7 +279,7 @@ Result values print as `(ok value)` and `(err error)`. Equality compares the tag
 and then the immutable payload. A success and a failure are comparable but never
 equal. Results do not catch language diagnostics; they represent expected
 domain failures explicitly. Tool integrations use the same result control flow;
-model and task integrations are expected to follow it in later AI-first versions.
+other integrations should use the same distinction between domain failure and diagnostics.
 
 ## Capabilities and typed tools
 
@@ -326,12 +343,15 @@ syntax are not in the grammar.
 
 The built-in types are `Int`, `Float`, `Bool`, `String`, `Any`, and `void`.
 `void` is produced by effects and is not a source-level annotation name.
+`Never` is an inferred internal bottom type for empty `dict` and `set` values;
+it is not a source-level annotation name.
 
 Type rules:
 
 - Literal types are their corresponding built-in types.
 - `Any` is the top type: every type is a subtype of `Any`, including in return
   positions.
+- `Never` is the bottom type and is a subtype of every type.
 - A vector has a fixed structural type containing one type per element.
 - `(Vector T)` describes an immutable vector of any length whose elements are
   subtypes of `T`. A compatible fixed vector is a subtype of `(Vector T)`;
@@ -343,6 +363,17 @@ Type rules:
   `err` retain precise `(Ok T)` and `(Err E)` variant types until widened by an
   annotation.
 - `(Option T)` describes a present `some` payload or `none`, and is covariant.
+- `(Dict K V)` describes an immutable insertion-ordered dictionary and is
+  covariant in both `K` and `V`. `(dict)` has type `(Dict Never Never)`;
+  non-empty construction unions all key types and all value types.
+- `(Set T)` describes an immutable insertion-ordered set and is covariant in
+  `T`. `(set)` has type `(Set Never)`; non-empty construction unions element
+  types.
+- Dictionary keys and Set elements require total structural equality. Scalars,
+  vectors, Options, Results, records, dictionaries, and sets are comparable
+  when their contained types are comparable. Functions, primitive functions,
+  constructors, tool handles, and variant descriptors are not. `Any` is
+  admitted statically and checked at runtime.
 - A declared variant is a closed nominal supertype of exactly its case values.
 - Two vector types are equivalent when they have the same length and equivalent
   element types.
@@ -366,8 +397,12 @@ Type rules:
   field types. Access through `Any` has type `Any` and remains runtime-checked.
 - Primitive arithmetic accepts `Int` and `Float`; a mixed arithmetic result is
   `Float`.
-- Equality is structural for immutable primitive, vector, and nominal record
-  values; numeric equality continues to compare mixed `Int` and `Float` values.
+- `dict/get` returns `(Option V)` and never raises a missing-key diagnostic.
+  `dict/put`, `dict/remove`, set transformations, and set algebra return new
+  values without modifying inputs. Key/value traversals use insertion order.
+- Equality is structural for immutable primitive, vector, dictionary, set,
+  Option, Result, and nominal record values. Dictionary and Set equality ignore
+  insertion order; numeric equality compares mixed `Int` and `Float` values.
 - An `if` expression has the union of its branch types.
 - A `match` expression has the normalized union of its branch result types.
 
@@ -391,7 +426,7 @@ the browser supports controlled text input but rejects filesystem reads.
 
 ## Deterministic contract profile
 
-`deterministic-policy-v1` is an execution profile over the normative Yin 0.18
+`deterministic-policy-v1` is an execution profile over the normative Yin 0.19
 language. It accepts one immutable UTF-8 input through `read-all`, requires the
 program to return JSON text through `encode-json`, and rejects `Float`, `Any`,
 `set!`, `args`, `print`, `read-text`, tool declarations, and `invoke` before

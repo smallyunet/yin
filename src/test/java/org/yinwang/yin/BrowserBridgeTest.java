@@ -61,6 +61,21 @@ class BrowserBridgeTest {
     }
 
     @Test
+    void evaluatesImmutableCollectionsAndSafeLookupInTheBrowserSession() {
+        String result = BrowserBridge.yinEvaluate("""
+                (define original (dict "name" "yin"))
+                (define updated (dict/put original "version" "0.19"))
+                [(dict/get original "version")
+                 (dict/get updated "version")
+                 (set/values (set "cli" "data" "cli"))]
+                """);
+
+        assertTrue(result.contains("\"value\":\"[none (some \\\"0.19\\\") "
+                + "[\\\"cli\\\" \\\"data\\\"]]\""), result);
+        assertTrue(result.contains("(Option String)"), result);
+    }
+
+    @Test
     void evaluatesMatchCollectionsAndInjectedInputInTheBrowserSession() {
         BrowserBridge.yinSetInput("  20 22  ");
 

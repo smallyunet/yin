@@ -1,316 +1,226 @@
 # The Yin Programming Language
 
-Yin is a small typed, deterministic policy language for defining and auditing
-the boundary between AI agents and external tools. Policies read from top to
-bottom, external authority is injected by a deny-by-default host, expected
-failures are explicit, and tool calls carry approval and audit metadata.
+Yin is a small, typed, deterministic programming language for reliable CLI
+tools, data and configuration transformation, and embeddable automation. It
+combines immutable data, explicit failures, exhaustive pattern matching,
+isolated modules, strict JSON boundaries, and predictable evaluation in a
+compact implementation.
 
-Yin is also an experimental programming-language implementation, originally
-developed by Yin Wang in 2013–2014 and now built around a hand-written parser,
-tree-walking interpreter, static type checker, bytecode compiler, and a small
-independent Rust VM. It is not yet production
-ready. The untouched historical state is preserved by the `legacy-2015` Git tag.
+Yin is a general programming language, not an approval system or an Agent-only
+DSL. Agent policies, capability-safe tools, and deterministic decision
+contracts remain supported as optional libraries and runtime profiles built on
+the same language core.
 
-Try the language in the browser at the
-[Yin Playground](https://smallyunet.github.io/yin/). Evaluation, type checking,
-formatting, and the editable-input Agent and Web3 demos run locally in a Web
-Worker; no source code or JSON input is sent to a server.
+The implementation descends from Yin Wang's 2013–2014 experiment and now
+includes a hand-written parser, tree-walking interpreter, static type checker,
+formatter, language server, browser runtime, bytecode compiler, and an
+independent Rust VM for a portable deterministic subset. Yin is experimental
+and not yet production ready. The untouched historical state is preserved by
+the `legacy-2015` Git tag.
+
+Try it in the [Yin Playground](https://smallyunet.github.io/yin/). Evaluation,
+type checking, and formatting run locally in a Web Worker; source and input are
+not sent to a server.
 
 ```yin
-(policy review
-  ([request ReviewRequest] [-> Decision])
-  (when (= request.risk "blocked")
-    (Reject :reason "risk policy blocked this request"))
-  (when (> request.amount 10000)
-    (NeedsInput :question "manual approval is required"))
-  (otherwise
-    (Approve :reason "within automatic policy")))
+(define config
+  (dict "host" "localhost" "port" "8080"))
+
+(define normalized
+  (match (dict/get config "mode")
+    [(Some _) config]
+    [(None) (dict/put config "mode" "development")]))
+
+(encode-json normalized)
 ```
 
-`policy` rules are checked like ordinary typed functions and lower to the same
-core AST. The first matching `when` wins, and every policy must end with an
-explicit `otherwise` result.
+`dict/get` returns `Option` for both present and missing keys. `dict/put`
+returns a new insertion-ordered dictionary; `config` remains unchanged.
 
-## Implemented and tested
+## What works today
 
-- ordered typed policies with explicit fallback and first-match evaluation
-- concise immutable field access such as `request.risk`
-- integers, floats, booleans, strings, and vectors
-- exact and homogeneous immutable vectors with higher-order processing
-- exhaustive pattern matching over primitives, vectors, records, and unions
-- typed `Result` outcomes with exhaustive `Ok` and `Err` handling
-- closed tagged variants and first-class `Option` values
+- `Int`, `Float`, `Bool`, `String`, `Any`, union and function types, plus an inferred bottom type
+- immutable exact and homogeneous vectors with higher-order operations
+- immutable insertion-ordered `Dict` and `Set` values with structural equality
+- safe dictionary lookup through `Option`, with no missing-key exception
+- typed `Result` outcomes and exhaustive `Ok` / `Err` handling
+- closed variants, nominal records, inheritance, and immutable field access
+- lexical closures, keyword arguments, recursion, assignment, and pattern matching
+- isolated file modules, explicit exports, selective imports, and graph-wide type checking
 - strict typed JSON decoding, deterministic encoding, and Draft 2020-12 schemas
-- source-declared capabilities and typed host tools with explicit `Result` outcomes
-- deterministic capability manifests, approval enforcement, and tool-call audit events
-- a side-effect-free deterministic contract profile with digest-bound decisions
-- canonical `.ybc` artifacts and a fuel-metered Rust VM for the portable subset
-- a deny-by-default local reference host with explicit write approval
-- a generic MCP stdio gateway with lifecycle negotiation and tool discovery
-- request-bound, expiring, single-use approval evidence for external actions
-- hash-chained decision traces and side-effect-free result replay
-- string transformation, parsing, program arguments, and controlled text input
-- arithmetic, comparison, and boolean primitives
-- lexical scopes and first-class closures
-- positional and keyword function arguments
-- direct and mutual recursion
-- isolated file modules with explicit exports and selective relative imports
-- dependency-graph type checking, circular-import diagnostics, and single initialization
-- records with typed fields and default values
-- immutable record field access, including inherited fields
-- an experimental type checker
-- editor diagnostics and whole-document formatting through LSP
+- command-line arguments, standard input, controlled UTF-8 file input, and output
+- REPL, deterministic formatter, LSP diagnostics, VS Code support, and browser execution
+- optional typed tools, ordered policies, capability manifests, guarded hosts,
+  deterministic contracts, portable bytecode, and an MCP stdio gateway
 
-The JUnit integration suite runs every maintained program under `tests/` through
-both the interpreter and type checker. The automated suite also covers parser
-boundaries, lexical scoping, assignment, Float handling, function calls, record
-inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.18 defines these
-behaviors normatively rather than relying on historical implementation details.
+The maintained test suite checks interpreter and type-checker agreement,
+source diagnostics, modules, JSON contracts, tooling, browser behavior, and
+the independent portable VM. Yin 0.19 defines the collection and safe-access
+semantics in the language specification rather than leaving them as host
+library conventions.
 
 ## Requirements
 
 - JDK 17 or newer
-- Rust 1.85 or newer to build `yinvm`
-- Node.js 18 or newer only for the MCP ticket demo and editor packaging
+- Rust 1.85 or newer only to build `yinvm`
+- Node.js 18 or newer only for the MCP demo and editor packaging
 - no system Maven installation is required
 
-## Releases
+## Install or build
 
 Versioned executable JARs, Linux x86-64 `yinvm` binaries, Visual Studio Code
-extension packages, and SHA-256 checksum files are published on the
-[GitHub Releases page](https://github.com/smallyunet/yin/releases). Confirm a
-downloaded JAR before running it:
+extension packages, and SHA-256 checksums are on the
+[GitHub Releases page](https://github.com/smallyunet/yin/releases).
 
 ```bash
-java -jar yin-0.18.0.jar --version
+java -jar yin-0.19.0.jar --version
+code --install-extension yin-language-support-0.19.0.vsix
 ```
 
-Install the matching editor extension from the downloaded VSIX:
-
-```bash
-code --install-extension yin-language-support-0.18.0.vsix
-```
-
-## Build and test
+Build and test from source:
 
 ```bash
 ./mvnw verify
 cargo test --manifest-path vm/Cargo.toml
 ```
 
-This produces the executable JAR at `target/yin-0.18.0.jar`. Build the Rust VM
-with `cargo build --release --manifest-path vm/Cargo.toml`; the binary is
-`vm/target/release/yinvm`.
+The executable JAR is `target/yin-0.19.0.jar`. Build the Rust VM with
+`cargo build --release --manifest-path vm/Cargo.toml`.
 
-## Run a program
+## Run real programs
+
+The multi-file configuration validator reads a JSON object from stdin,
+validates required keys, supplies a default, and emits a closed JSON result:
 
 ```bash
-java -jar target/yin-0.18.0.jar tests/program-usability.yin
+printf '%s' '{"host":"localhost","port":"8080"}' | \
+  java -jar target/yin-0.19.0.jar --json examples/config-validator/main.yin
+```
+
+```json
+{"tag":"Valid","config":{"host":"localhost","port":"8080","mode":"development"}}
+```
+
+Other maintained programs:
+
+```bash
+java -jar target/yin-0.19.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.19.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.19.0.jar examples/cli/wc.yin README.md
+java -jar target/yin-0.19.0.jar examples/modules/main.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.18.0.jar \
-  org.yinwang.yin.TypeChecker tests/program-usability.yin
+java -cp target/yin-0.19.0.jar \
+  org.yinwang.yin.TypeChecker examples/config-validator/main.yin
 ```
 
-Run complete example programs:
+See [examples/README.md](examples/README.md) for the maintained program catalog.
+
+## Collections and safe access
+
+Dictionary constructors take alternating key/value arguments. Set constructors
+deduplicate by structural equality. Both collections preserve first-insertion
+order so printed values, traversal, and JSON output are deterministic.
+
+```yin
+(define scores (dict "alice" 8 "bob" 13))
+(define active (set "alice" "bob" "alice"))
+
+[(dict/get scores "alice")       -- (some 8)
+ (dict/get scores "carol")       -- none
+ (dict/keys scores)               -- ["alice" "bob"]
+ (set/values active)]             -- ["alice" "bob"]
+```
+
+The complete operation table and JSON rules are in the
+[language reference](docs/language-reference.md).
+
+## Modules
+
+Modules declare their complete public surface and callers import selected
+names. Relative imports resolve from the importing file; every reachable file
+is type-checked; modules initialize once; cycles and binding conflicts are
+diagnosed; nominal types from different files remain distinct.
+
+```yin
+(module math [double]
+  (define double (fun ([value Int] [-> Int]) (* value 2))))
+```
+
+```yin
+(import "./math.yin" [double])
+(double 21)
+```
+
+See the [module guide](docs/modules.md).
+
+## Interactive and editor tooling
+
+Launch the persistent multiline REPL:
 
 ```bash
-java -jar target/yin-0.18.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.18.0.jar examples/cli/parse-values.yin 10 bad 32
-printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.18.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.18.0.jar examples/cli/wc.yin README.md
+java -jar target/yin-0.19.0.jar
 ```
 
-Run a multi-file program:
+Format or verify source:
 
 ```bash
-java -jar target/yin-0.18.0.jar examples/modules/main.yin
+java -jar target/yin-0.19.0.jar --format program.yin
+java -jar target/yin-0.19.0.jar --format --check tests/*.yin
 ```
 
-Modules declare their complete public surface and callers import selected names.
-Every reachable module is type-checked, relative paths resolve from the importing
-file, modules initialize once per execution, and same-named nominal types in
-different files remain distinct. See the [module guide](docs/modules.md).
+The bundled language server provides syntax/type diagnostics and whole-document
+formatting. See the [REPL](docs/repl.md), [formatter](docs/formatter.md), and
+[editor integration](docs/lsp.md) guides.
 
-The [typed agent review demo](examples/agents/agent-review/README.md) provides a
-complete strict-JSON request, exhaustive decision, and raw-JSON response flow
-with maintained fixtures for approval, rejection, user input, and boundary
-errors.
-The [Web3 transaction guard](examples/web3/transaction-guard/README.md) applies
-the same boundary to normalized wallet intents, including simulation,
-verification, unlimited-approval, value-limit, chain, and address policies.
-The [typed-tool example](examples/agents/typed-tool.yin) declares a host-injected
-risk tool, invokes it through a checked contract, and handles both business and
-host boundary errors without granting ambient authority.
+## Optional automation profiles
 
-Inspect every tool capability without executing the program:
+Yin's Agent and policy features are retained, but they are not the language's
+identity. They demonstrate how a typed deterministic core can be embedded into
+hosts with explicit authority:
 
-```bash
-java -jar target/yin-0.18.0.jar --capabilities examples/agents/typed-tool.yin
-```
+- [ordered policy syntax](docs/policies.md)
+- [typed capabilities and guarded reference host](docs/policy-runtime.md)
+- [deterministic contract profile and portable VM](docs/vm/architecture.md)
+- [MCP action gateway](docs/action-gateway.md)
+- [automation-profile design boundary](docs/ai-first.md)
 
-The manifest is deterministic and includes effect, approval, idempotency, and
-open-world metadata. Tool implementations and approval decisions remain host
-responsibilities; declarations never grant authority by themselves.
+These profiles do not replace UI approval, authentication, process isolation,
+or an organizational policy engine. Host implementations own authority and
+side effects; Yin source declarations do not grant permission by themselves.
 
-## Run a deterministic decision contract
-
-Yin 0.15 introduced `deterministic-policy-v1`, an executable pure-policy profile
-for portable Agent capability decisions. Validate a contract without running it:
-
-```bash
-java -jar target/yin-0.18.0.jar --contract-check \
-  examples/agents/capability-decision/main.yin
-```
-
-Evaluate it against one exact JSON input:
-
-```bash
-java -jar target/yin-0.18.0.jar --contract-run \
-  examples/agents/capability-decision/main.yin \
-  --input examples/agents/capability-decision/inputs/approve.json
-```
-
-The execution envelope binds the exact program, input, and structured result
-with SHA-256 digests. The v1 profile rejects `Float`, `Any`, mutation, filesystem
-access, output, and tool authority. It remains the source-level reference
-evaluator. Yin 0.16 adds a separate portable execution path:
-
-```bash
-java -jar target/yin-0.18.0.jar --contract-compile \
-  examples/agents/capability-decision/main.yin \
-  --output capability.ybc
-cargo run --quiet --manifest-path vm/Cargo.toml -- check capability.ybc
-cargo run --quiet --manifest-path vm/Cargo.toml -- run capability.ybc \
-  --input examples/agents/capability-decision/inputs/approve.json \
-  --fuel 100000
-```
-
-The compiler emits binary token bytecode without the original comments or
-formatting after parsing, profile validation, and type checking. The Rust VM
-independently validates the format, profile version, structure, and program
-digest, then meters execution. This is
-a bounded policy runtime, not a process/memory sandbox or a consensus VM. See the
-[contract architecture](docs/vm/architecture.md) and
-[deterministic profile](docs/vm/deterministic-profile.md), plus the exact
-[portable bytecode format](docs/vm/bytecode.md).
-
-## Run an MCP action gateway
-
-Yin 0.17 connects source-declared typed tools to newline-delimited MCP stdio
-servers. `--gateway` validates the source and closed host configuration, runs
-the policy, discovers the remote tool through `tools/list`, and calls it only
-after authorization. Non-read actions require approval evidence bound to the
-exact program, host, canonical action intent, canonical arguments, actor,
-agent, resource, expiry, and single-use nonce.
-
-Build the release JAR and run the maintained ticket-server flow:
-
-```bash
-./mvnw verify
-examples/agents/action-gateway/run.sh
-```
-
-The example performs the complete MCP lifecycle and writes one external ticket
-fixture. Its trace can be replayed without starting the server or repeating the
-action. See the [gateway security and configuration guide](docs/action-gateway.md)
-and [complete example](examples/agents/action-gateway/README.md).
-
-## Run a guarded tool boundary
-
-Yin 0.14 includes a narrow reference host that connects a typed policy to
-root-confined local text tools. It checks the program and host manifest before
-execution, allows installed reads, requires explicit approval for writes, and
-creates a new hash-chained trace for every run:
-
-```bash
-mkdir -p examples/agents/tool-boundary/runtime/notes
-cp examples/agents/tool-boundary/fixtures/welcome.txt \
-  examples/agents/tool-boundary/runtime/notes/welcome.txt
-java -jar target/yin-0.18.0.jar --guard \
-  examples/agents/tool-boundary/main.yin \
-  --input examples/agents/tool-boundary/inputs/read.json \
-  --host examples/agents/tool-boundary/host.json \
-  --trace examples/agents/tool-boundary/runtime/read.jsonl
-java -jar target/yin-0.18.0.jar --replay \
-  examples/agents/tool-boundary/runtime/read.jsonl
-```
-
-Add `--approve notes.write` when running the write fixture. Replay validates the
-trace hash chain and prints the recorded final outcome without evaluating Yin or
-invoking a tool. The reference host is an auditable demonstration, not a general
-sandbox or production authorization service. See the
-[policy runtime guide](docs/policy-runtime.md) and the
-[complete demo](examples/agents/tool-boundary/README.md).
-
-## Interactive REPL
-
-Launch the REPL by running the JAR without a program path:
-
-```bash
-java -jar target/yin-0.18.0.jar
-```
-
-Definitions persist across inputs, balanced multiline forms are supported, and
-language errors do not terminate the session. Use `:quit` or `:q` to exit. See
-the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
-
-## Format source
-
-Print canonical formatting without changing the file:
-
-```bash
-java -jar target/yin-0.18.0.jar --format tests/function1.yin
-```
-
-Use `--format --check` in CI or `--format --write` to update one or more files.
-The formatter validates supported Yin syntax before changing output and retains
-all line comments. See the [Formatter guide](docs/formatter.md).
-
-## Build the browser demo
+## Browser runtime
 
 ```bash
 ./mvnw -Pbrowser -DskipTests package
 ```
 
-TeaVM writes the generated JavaScript runtime to `site/runtime/`. Serve `site/`
-over HTTP for local development. Pushes to `main` build and deploy the same
-static directory to GitHub Pages.
+TeaVM writes the JavaScript runtime to `site/runtime/`. Serve `site/` over HTTP
+for local development. Pushes to `main` deploy the same static directory to
+GitHub Pages.
 
 ## Repository layout
 
 ```text
-src/main/java/   language implementation
-  .../type/      static type representations and primitive signatures
-  .../value/     runtime values, closures, constructors, and primitives
-src/test/java/   automated integration and regression tests
-vm/              independent Rust verifier and fuel-metered bytecode runtime
-tests/           maintained runnable Yin programs
-examples/        categorized algorithm, CLI, agent, and Web3 examples
-experiments/     historical, potentially outdated language experiments
+src/main/java/   parser, interpreter, type checker, runtime, LSP, and compiler
+src/test/java/   integration, specification, tooling, and regression tests
+vm/              independent Rust verifier and fuel-metered portable runtime
+tests/           normative runnable language corpus
+examples/        CLI, data/config, algorithm, module, Agent, and Web3 programs
+site/            browser playground
+experiments/     historical, potentially outdated programs
 prototype1/      original Racket prototype
-emacs/           historical Emacs modes
 archive/         inactive implementation fragments
-docs/            language, architecture, and roadmap notes
+docs/            specification, guides, implementation notes, and roadmap
 ```
 
-See the normative [Language specification](docs/language-specification.md), the
-short [Language reference](docs/language-reference.md), the
-[ordered-policy guide](docs/policies.md), the
-[historical-program classification](docs/historical-programs.md),
-[module guide](docs/modules.md), [REPL guide](docs/repl.md),
-[Formatter guide](docs/formatter.md),
-[Editor integration](docs/lsp.md),
-[Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
-maintained project boundaries.
-The [Agent policy direction](docs/ai-first.md) defines the structured-contract,
-capability, policy-runtime, and durable-agent sequence without binding Yin
-syntax to one provider protocol.
+Start with the normative [language specification](docs/language-specification.md),
+the concise [language reference](docs/language-reference.md), the
+[implementation overview](docs/implementation.md), and the
+[roadmap](docs/roadmap.md).
 
 ## License
 

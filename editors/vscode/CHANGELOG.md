@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.19.0
+
+- highlight `(Dict K V)`, `(Set T)`, and their immutable collection operations
+- diagnose collection constructors, safe dictionary access, and JSON contracts
+- bundle the Yin 0.19.0 language server
+
 ## 0.18.0
 
 - highlight `module` and `import` forms

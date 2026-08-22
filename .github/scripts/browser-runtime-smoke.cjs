@@ -63,6 +63,17 @@ assert.equal(explicitOutcome.ok, true);
 assert.equal(explicitOutcome.value, "0");
 assert.equal(explicitOutcome.type, "Int");
 
+const immutableCollections = JSON.parse(yinEvaluate(`
+  (define original (dict "name" "yin"))
+  (define updated (dict/put original "version" "0.19"))
+  [(dict/get original "version")
+   (dict/get updated "version")
+   (set/values (set "cli" "data" "cli"))]
+`));
+assert.equal(immutableCollections.ok, true);
+assert.equal(immutableCollections.value,
+  '[none (some "0.19") ["cli" "data"]]');
+
 const structuredContract = JSON.parse(yinEvaluate(`
   (record Request [task String] [note (Option String)])
   (variant Decision [Approve [reason String]] [NeedsInput [question String]])

@@ -94,7 +94,7 @@ tool must actually be advertised.
 Create an approval request out of band:
 
 ```bash
-java -jar yin-0.18.0.jar --approval-request policy.yin \
+java -jar yin-0.19.0.jar --approval-request policy.yin \
   --intent intent.json \
   --host host.json \
   --out approval.json \
@@ -105,7 +105,7 @@ java -jar yin-0.18.0.jar --approval-request policy.yin \
 Then execute it once:
 
 ```bash
-java -jar yin-0.18.0.jar --gateway policy.yin \
+java -jar yin-0.19.0.jar --gateway policy.yin \
   --intent intent.json \
   --host host.json \
   --trace trace.jsonl \

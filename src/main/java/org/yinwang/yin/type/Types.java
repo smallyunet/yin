@@ -8,6 +8,7 @@ public final class Types {
     public static final YinType STRING = new StringType();
     public static final YinType VOID = new VoidType();
     public static final YinType NONE = new NoneType();
+    public static final YinType NEVER = new NeverType();
 
     private Types() {
     }
@@ -28,6 +29,9 @@ public final class Types {
             return false;
         }
         if (expected instanceof AnyType) {
+            return true;
+        }
+        if (actual instanceof NeverType) {
             return true;
         }
         if (actual instanceof UnionType union) {
@@ -66,6 +70,13 @@ public final class Types {
         }
         if (actual instanceof OptionType leftOption && expected instanceof OptionType rightOption) {
             return subtype(leftOption.value(), rightOption.value());
+        }
+        if (actual instanceof DictType leftDict && expected instanceof DictType rightDict) {
+            return subtype(leftDict.key(), rightDict.key())
+                    && subtype(leftDict.value(), rightDict.value());
+        }
+        if (actual instanceof SetType leftSet && expected instanceof SetType rightSet) {
+            return subtype(leftSet.element(), rightSet.element());
         }
         if (actual instanceof RecordValueType record && expected instanceof VariantType variant) {
             return variant.cases().containsKey(record.name)
@@ -175,6 +186,13 @@ public final class Types {
         if (left instanceof SomeType leftSome && right instanceof SomeType rightSome) {
             return equivalent(leftSome.value(), rightSome.value());
         }
+        if (left instanceof DictType leftDict && right instanceof DictType rightDict) {
+            return equivalent(leftDict.key(), rightDict.key())
+                    && equivalent(leftDict.value(), rightDict.value());
+        }
+        if (left instanceof SetType leftSet && right instanceof SetType rightSet) {
+            return equivalent(leftSet.element(), rightSet.element());
+        }
         if (left instanceof NoneType && right instanceof NoneType) return true;
         if (left instanceof ToolType leftTool && right instanceof ToolType rightTool) {
             return equivalent(leftTool.input(), rightTool.input())
@@ -205,7 +223,8 @@ public final class Types {
                 || left instanceof FloatType
                 || left instanceof IntType
                 || left instanceof StringType
-                || left instanceof VoidType;
+                || left instanceof VoidType
+                || left instanceof NeverType;
     }
 
     public static boolean overlaps(YinType left, YinType right) {
@@ -286,6 +305,43 @@ public final class Types {
                     : UnionType.union(elements);
         }
         return null;
+    }
+
+    /** Types whose runtime values have total structural equality. Any is checked at runtime. */
+    public static boolean structurallyComparable(YinType type) {
+        if (type instanceof AnyType || type instanceof NeverType || type instanceof BoolType
+                || type instanceof FloatType || type instanceof IntType || type instanceof StringType
+                || type instanceof VoidType || type instanceof NoneType) return true;
+        if (type instanceof VectorType vector) {
+            return vector.elements().stream().allMatch(Types::structurallyComparable);
+        }
+        if (type instanceof HomogeneousVectorType vector) return structurallyComparable(vector.element());
+        if (type instanceof DictType dictionary) {
+            return structurallyComparable(dictionary.key()) && structurallyComparable(dictionary.value());
+        }
+        if (type instanceof SetType set) return structurallyComparable(set.element());
+        if (type instanceof OptionType option) return structurallyComparable(option.value());
+        if (type instanceof SomeType some) return structurallyComparable(some.value());
+        if (type instanceof ResultType result) {
+            return structurallyComparable(result.ok()) && structurallyComparable(result.error());
+        }
+        if (type instanceof OkType ok) return structurallyComparable(ok.value());
+        if (type instanceof ErrType error) return structurallyComparable(error.error());
+        if (type instanceof UnionType union) {
+            return union.members().stream().allMatch(Types::structurallyComparable);
+        }
+        if (type instanceof RecordValueType record) {
+            return record.fields.keySet().stream()
+                    .allMatch(field -> structurallyComparable(record.fields.lookupLocal(field)));
+        }
+        if (type instanceof RecordType record) {
+            return record.properties.keySet().stream()
+                    .allMatch(field -> structurallyComparable(record.properties.lookupLocalType(field)));
+        }
+        if (type instanceof VariantType variant) {
+            return variant.cases().values().stream().allMatch(Types::structurallyComparable);
+        }
+        return false;
     }
 
     private static boolean functionSubtype(

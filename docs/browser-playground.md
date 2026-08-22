@@ -10,12 +10,13 @@ TeaVM compiles `BrowserBridge` and the reachable Yin implementation to a
 minified JavaScript runtime. The page sends source text to a dedicated Web
 Worker, which calls the exported bridge methods and returns JSON containing the
 runtime value, inferred type, captured `print` output, or structured diagnostic.
-The runnable-demo group mirrors the maintained quicksort, structured-agent,
-agent-review, typed-tool, and Web3 transaction-guard programs. The typed-tool
+The runnable-demo group leads with language and data-processing examples,
+including immutable dictionaries and sets, and also retains the maintained
+quicksort, structured-agent, agent-review, typed-tool, and Web3 programs. The typed-tool
 demo receives one deterministic, read-only browser-hosted implementation;
 arbitrary network tools remain unavailable. Programs that use `read-all`
 show a labeled JSON input editor and inject that text before evaluation.
-The guarded local-tool runtime and v0.15 deterministic contract profile are
+The guarded local-tool runtime and deterministic contract profile are
 documented on the page but remain JVM CLI features: a static browser page cannot
 demonstrate filesystem authority
 or durable trace files without changing that security boundary.
