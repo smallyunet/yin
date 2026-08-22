@@ -2,7 +2,7 @@
   "name": "yin-language-support",
   "displayName": "Yin Programming Language",
   "description": "Diagnostics, formatting, and syntax highlighting for the Yin programming language.",
-  "version": "0.19.0",
+    "version": "0.20.0",
   "publisher": "smallyu",
   "license": "AGPL-3.0-only",
   "homepage": "https://github.com/smallyunet/yin",
@@ -65,11 +65,11 @@
     "configuration": {
       "title": "Yin",
       "properties": {
-        "yin.java.path": {
+        "yin.path": {
           "type": "string",
-          "default": "java",
+          "default": "yin",
           "scope": "machine-overridable",
-          "description": "Path to a Java 17 or newer executable used to run the bundled Yin language server."
+          "description": "Path to the Yin 0.20 or newer executable used as the Rust language server."
         }
       }
     }

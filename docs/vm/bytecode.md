@@ -1,6 +1,6 @@
 # Portable bytecode v1
 
-`.ybc` is Yin 0.16's canonical transport between the Java language front end
+`.ybc` is Yin 0.16's canonical transport between the Rust language front end
 and the Rust VM. It is a compact token instruction stream, not UTF-8 Yin source
 and not JVM bytecode.
 
@@ -42,7 +42,7 @@ token content. The full artifact hash is SHA-256 over all `.ybc` bytes.
 
 Both implementations reject invalid magic, unknown versions/opcodes, invalid
 counts or lengths, truncation, unbalanced structure, hash mismatches, and
-trailing data. The Java compiler additionally parses and type-checks before
+trailing data. The Rust compiler additionally parses and type-checks before
 emission. The Rust verifier rejects explicit `fun`, `range`, and any
 policy-to-policy call, including recursion.
 

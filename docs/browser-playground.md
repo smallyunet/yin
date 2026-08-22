@@ -1,60 +1,26 @@
 # Browser playground
 
-The [Yin Playground](https://smallyunet.github.io/yin/) runs the real Java
-language implementation entirely inside the browser. GitHub Pages only serves
-static HTML, CSS, JavaScript, and source-map files.
+The [Yin Playground](https://smallyunet.github.io/yin/) runs the same Rust
+parser, checker, interpreter, and formatter as the native CLI. `wasm-bindgen`
+packages the library for `wasm32-unknown-unknown`; a dedicated Web Worker keeps
+evaluation off the UI thread and the page resets the worker after its timeout.
 
-## Architecture
+Source and input remain in the browser. Filesystem tools, MCP subprocesses,
+approval stores, and native gateway operations are deliberately unavailable in
+Wasm. Their source forms still parse and type-check, and an attempted tool call
+returns a structured `ToolError` through the normal Yin boundary.
 
-TeaVM compiles `BrowserBridge` and the reachable Yin implementation to a
-minified JavaScript runtime. The page sends source text to a dedicated Web
-Worker, which calls the exported bridge methods and returns JSON containing the
-runtime value, inferred type, captured `print` output, or structured diagnostic.
-The runnable-demo group leads with language and data-processing examples,
-including immutable dictionaries and sets, and also retains the maintained
-quicksort, structured-agent, agent-review, typed-tool, and Web3 programs. The typed-tool
-demo receives one deterministic, read-only browser-hosted implementation;
-arbitrary network tools remain unavailable. Programs that use `read-all`
-show a labeled JSON input editor and inject that text before evaluation.
-The guarded local-tool runtime and deterministic contract profile are
-documented on the page but remain JVM CLI features: a static browser page cannot
-demonstrate filesystem authority
-or durable trace files without changing that security boundary.
-
-The UI terminates and recreates the worker when a request exceeds 1.5 seconds.
-This prevents an infinite Yin computation from freezing the page. Termination
-also resets the interactive session.
-
-## Build locally
+Build the runtime:
 
 ```bash
-./mvnw -Pbrowser -DskipTests package
-python3 -m http.server 8080 --directory site
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --version 0.2.127 --locked
+cargo build --release --target wasm32-unknown-unknown --lib
+wasm-bindgen target/wasm32-unknown-unknown/release/yin.wasm \
+  --out-dir site/runtime --out-name yin --target no-modules --no-typescript
+node .github/scripts/browser-runtime-smoke.cjs
 ```
 
-Open `http://localhost:8080`. The generated `site/runtime/` directory is ignored
-by Git because GitHub Actions recreates it for every deployment.
-
-## Browser API
-
-TeaVM exports four functions:
-
-- `yinEvaluate(source)` evaluates a submission in a persistent session
-- `yinFormat(source)` returns canonical source formatting
-- `yinReset()` discards the current runtime and type environments
-- `yinSetInput(text)` replaces the controlled text returned by `read-all` and
-  starts a fresh session
-
-The browser deliberately rejects `read-text`, because static pages do not have
-an ambient filesystem capability. Pure collection, string, and match semantics
-are identical to the JVM runtime.
-
-Each string-returning function returns JSON. Diagnostics include the stable Yin
-error code and, when available, one-based line and column plus source offsets.
-
-## Deployment
-
-`.github/workflows/pages.yml` compiles the JavaScript runtime, validates the
-static JavaScript files, executes an evaluate/diagnostic/format smoke test
-against the generated TeaVM artifact, uploads `site/` as a Pages artifact, and
-deploys it to the `github-pages` environment after every push to `main`.
+The generated JavaScript loader and `.wasm` file live in `site/runtime/` and are
+not committed. GitHub Pages builds them from source for every `main` deployment.
+`site/worker.js` exposes run, format, and reset messages to the static UI.

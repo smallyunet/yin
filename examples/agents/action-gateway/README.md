@@ -8,7 +8,7 @@ replays the final result without invoking the tool again.
 Build Yin and run the complete flow:
 
 ```bash
-./mvnw verify
+cargo test --workspace --all-targets
 examples/agents/action-gateway/run.sh
 ```
 

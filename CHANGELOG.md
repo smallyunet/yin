@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.20.0 — 2026-08-22
+
+- freeze the complete Java 0.19 implementation and normative protocol on
+  `codex/java-v0.19.0-archive` and the existing `v0.19.0` tag
+- replace the JVM, Maven, JUnit, and TeaVM implementation with one Rust workspace
+- preserve the language core across parser, checker, interpreter, modules,
+  immutable collections, structured JSON, formatter, REPL, and LSP
+- migrate deterministic contracts and canonical `.ybc` compilation to Rust while
+  retaining the independent fuel-metered `yinvm`
+- migrate the Agent Action Gateway, approval binding, durable nonce consumption,
+  MCP stdio lifecycle, trace, and replay to Rust
+- replace the browser runtime with Rust/Wasm and the Java VS Code server with
+  `yin --lsp`
+- publish native Linux, macOS, and Windows binaries plus the universal VSIX
+
 ## 0.19.0 — 2026-08-22
 
 - reposition Yin as a small typed deterministic general language for CLI tools,

@@ -31,9 +31,9 @@ The Rust VM rejects explicit `fun`, `range`, and all policy-to-policy calls.
 That excludes direct and mutual recursion and unbounded source-level iteration.
 The admitted evaluator is finite, and runtime work is charged against fuel.
 These restrictions apply only to compiled contracts; the general Yin language
-and Java reference evaluator retain their existing function and recursion rules.
+and Rust reference evaluator retain their existing function and recursion rules.
 
 Portable integer operands are signed 64-bit values in the Rust VM. The current
-compiler only emits Java `Int` values, so its accepted range is narrower. Exact
+compiler only emits Rust `Int` values, so its accepted range is narrower. Exact
 cross-runtime overflow semantics and a byte-accurate memory limit remain future
 work; 0.16 does not claim consensus compatibility or hostile-process isolation.

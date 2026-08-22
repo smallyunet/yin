@@ -1,18 +1,16 @@
 # Yin editor integration
 
-Yin 0.19 includes a minimal Language Server Protocol implementation and a Visual
+Yin 0.20 includes a Rust Language Server Protocol implementation and a Visual
 Studio Code extension. The extension reports syntax and type errors while a
 document is being edited and formats the entire document with Yin's canonical
 formatter.
 
 ## Visual Studio Code
 
-The extension bundles the executable Yin server, so a separate Yin installation
-is not required. Download the versioned VSIX from the
+Install both the platform-specific `yin` executable and the versioned VSIX from the
 [GitHub Releases page](https://github.com/smallyunet/yin/releases) and install it
-with **Extensions: Install from VSIX...** in Visual Studio Code. A Java 17 or
-newer runtime must be available on `PATH`. If it is installed elsewhere, set
-`yin.java.path` in Visual Studio Code settings to the Java executable.
+with **Extensions: Install from VSIX...** in Visual Studio Code. Put `yin` on
+`PATH`, or set `yin.path` in Visual Studio Code settings to the executable.
 
 The first release intentionally supports only full-document synchronization,
 diagnostics, and formatting. Hover, completion, definitions, and references are
@@ -24,10 +22,10 @@ imported files use their saved filesystem contents.
 
 ## Other editors
 
-Any LSP client can start the executable JAR in server mode:
+Any LSP client can start the native executable in server mode:
 
 ```bash
-java -jar yin-0.19.0.jar --lsp
+yin --lsp
 ```
 
 The process reserves standard output for framed JSON-RPC messages. Diagnostics
@@ -44,7 +42,5 @@ npm install
 npm run package
 ```
 
-Packaging rebuilds the root Maven project, copies the version-matched executable
-JAR into the extension, validates TypeScript, bundles the client, and creates a
-VSIX suitable for local installation. CI performs the same packaging path and
-checks that the VSIX contains a runnable, version-matched Yin server.
+Packaging validates TypeScript, bundles the client, and creates a universal
+VSIX. Platform-specific Yin executables are separate release assets.

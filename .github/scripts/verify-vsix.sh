@@ -9,8 +9,6 @@ verify_dir="$(mktemp -d)"
 trap 'rm -rf "$verify_dir"' EXIT
 unzip -Z1 "$vsix" > "$verify_dir/entries"
 grep -Fxq "extension/dist/extension.js" "$verify_dir/entries"
-grep -Fxq "extension/server/yin.jar" "$verify_dir/entries"
 grep -Fxq "extension/syntaxes/yin.tmLanguage.json" "$verify_dir/entries"
-
-unzip -p "$vsix" extension/server/yin.jar > "$verify_dir/yin.jar"
-test "$(java -jar "$verify_dir/yin.jar" --version)" = "Yin ${version}"
+manifest_version="$(unzip -p "$vsix" extension/package.json | node -e 'let value=""; process.stdin.on("data", chunk => value += chunk).on("end", () => console.log(JSON.parse(value).version))')"
+test "$manifest_version" = "$version"

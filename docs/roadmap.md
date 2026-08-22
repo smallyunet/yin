@@ -206,6 +206,14 @@ artifacts aligned.
 - maintained multi-file JSON configuration validator as a non-Agent end-to-end program
 - JVM, TeaVM browser, formatter, LSP, specification, and regression coverage
 
+## 0.20 — complete Rust implementation
+
+- freeze the 0.19 protocol and Java implementation on a permanent archive branch
+- replace the JVM interpreter, checker, formatter, LSP, gateway, and compiler with Rust
+- replace TeaVM with a shared Rust/Wasm browser runtime
+- preserve canonical `.ybc` compatibility and the independent fuel-metered VM
+- ship native Linux, macOS, and Windows executables and a universal VSIX client
+
 ## Later
 
 - 0.20: module namespaces and aliases, a project manifest, source roots, graph

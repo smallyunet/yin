@@ -10,56 +10,46 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  rust:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: vm
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Verify
-        run: ./mvnw --batch-mode verify
-      - name: Verify Rust VM
+      - name: Verify native runtime
         run: |
-          cargo fmt --manifest-path vm/Cargo.toml -- --check
-          cargo clippy --manifest-path vm/Cargo.toml --all-targets -- -D warnings
-          cargo test --manifest-path vm/Cargo.toml
-          cargo build --release --manifest-path vm/Cargo.toml
-          version="$(./mvnw --batch-mode help:evaluate -Dexpression=project.version -q -DforceStdout)"
-          .github/scripts/verify-rust-vm.sh "${version}"
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets -- -D warnings
+          cargo test --workspace --all-targets
+          cargo build --release --workspace
+          .github/scripts/verify-rust-runtime.sh
+          .github/scripts/verify-rust-vm.sh 0.20.0
+      - name: Verify Rust/Wasm runtime
+        run: |
+          cargo install wasm-bindgen-cli --version 0.2.127 --locked
+          cargo build --release --target wasm32-unknown-unknown --lib
+          wasm-bindgen target/wasm32-unknown-unknown/release/yin.wasm \
+            --out-dir site/runtime --out-name yin --target no-modules --no-typescript
+          node --check site/app.js
+          node --check site/worker.js
+          node .github/scripts/browser-runtime-smoke.cjs
 
   editor:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: maven
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
           cache: npm
           cache-dependency-path: editors/vscode/package-lock.json
-      - name: Install editor dependencies
+      - run: npm ci
         working-directory: editors/vscode
-        run: npm ci
-      - name: Package editor extension
+      - run: npm run package
         working-directory: editors/vscode
-        run: npm run package
-      - name: Verify editor package
-        run: |
-          version="$(node -p "require('./editors/vscode/package.json').version")"
-          .github/scripts/verify-vsix.sh \
-            "$version" \
-            "editors/vscode/yin-language-support-${version}.vsix"
+      - run: .github/scripts/verify-vsix.sh 0.20.0 editors/vscode/yin-language-support-0.20.0.vsix

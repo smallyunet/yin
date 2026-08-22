@@ -1,17 +1,32 @@
 importScripts("runtime/yin.js");
 
-self.postMessage({ kind: "ready" });
+const runtimeReady = wasm_bindgen({ module_or_path: "runtime/yin_bg.wasm" }).then(() => {
+  self.postMessage({ kind: "ready" });
+});
 
-self.addEventListener("message", (event) => {
+self.addEventListener("message", async (event) => {
   const { id, action, source, input } = event.data;
   try {
+    await runtimeReady;
     if (action === "run") {
-      if (typeof input === "string") yinSetInput(input);
-      self.postMessage({ id, kind: "result", payload: JSON.parse(yinEvaluate(source)) });
+      const result = JSON.parse(wasm_bindgen.evaluate(source, input || "", "[]"));
+      self.postMessage({
+        id,
+        kind: "result",
+        payload: result.ok
+          ? { ok: true, value: result.value, type: "Runtime value", output: result.output || [] }
+          : { ok: false, output: [], diagnostic: result.error }
+      });
     } else if (action === "format") {
-      self.postMessage({ id, kind: "result", payload: JSON.parse(yinFormat(source)) });
+      const result = JSON.parse(wasm_bindgen.format(source));
+      self.postMessage({
+        id,
+        kind: "result",
+        payload: result.ok
+          ? { ok: true, formatted: result.source }
+          : { ok: false, diagnostic: result.error }
+      });
     } else if (action === "reset") {
-      yinReset();
       self.postMessage({ id, kind: "result", payload: { ok: true } });
     }
   } catch (error) {

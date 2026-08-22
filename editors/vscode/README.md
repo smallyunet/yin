@@ -5,17 +5,17 @@ Official editor support for the [Yin programming language](https://github.com/sm
 ## Features
 
 - syntax highlighting for `.yin` files
-- live parser and type-checker diagnostics for unsaved documents
+- live parser diagnostics for unsaved documents
 - canonical whole-document formatting
 - exact diagnostic ranges and stable Yin diagnostic codes
 
-The extension includes the Yin 0.19.0 language server and communicates with it
-locally over stdio. Source code is never sent to a remote service.
+The extension starts the Yin 0.20.0 Rust language server locally over stdio.
+Source code is never sent to a remote service.
 
 ## Requirement
 
-Install Java 17 or newer. If `java` is not on `PATH`, set `yin.java.path` to the
-full path of a compatible Java executable, then reload the VS Code window.
+Install the `yin` executable from the matching GitHub Release. If it is not on
+`PATH`, set `yin.path` to its full path, then reload the VS Code window.
 
 ## Formatting
 
@@ -30,5 +30,5 @@ formatter for the language, add:
 
 ## Current scope
 
-Yin 0.19.0 provides diagnostics and formatting. Hover, completion, and go to
+Yin 0.20.0 provides diagnostics and formatting. Hover, completion, and go to
 definition are planned for later editor-service releases.

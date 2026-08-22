@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.20.0
+
+- replace the JVM language server with the native Rust `yin --lsp` server
+- replace `yin.java.path` with the platform-neutral `yin.path` setting
+- distribute platform executables separately from the universal VSIX
+
 ## 0.19.0
 
 - highlight `(Dict K V)`, `(Set T)`, and their immutable collection operations

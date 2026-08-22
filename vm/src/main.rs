@@ -1,4 +1,4 @@
-use serde_json::{json, Map, Value as Json};
+use serde_json::{Map, Value as Json, json};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -626,10 +626,10 @@ fn validate_termination(tokens: &[Token]) -> Result<()> {
     for token in tokens {
         match token {
             Token::Name(name) if name == "fun" => {
-                return Err("explicit fun is outside portable-bytecode-v1".into())
+                return Err("explicit fun is outside portable-bytecode-v1".into());
             }
             Token::Name(name) if name == "range" => {
-                return Err("range is outside portable-bytecode-v1".into())
+                return Err("range is outside portable-bytecode-v1".into());
             }
             Token::Name(name)
                 if matches!(
@@ -645,7 +645,7 @@ fn validate_termination(tokens: &[Token]) -> Result<()> {
                         | "invoke"
                 ) =>
             {
-                return Err(format!("{name} is outside portable-bytecode-v1"))
+                return Err(format!("{name} is outside portable-bytecode-v1"));
             }
             _ => {}
         }
@@ -832,7 +832,7 @@ fn parse_sequence(tokens: &[Token], index: &mut usize, vector: bool) -> Result<E
                 return Ok(Expr::List(items));
             }
             Some(Token::CloseVector | Token::CloseParen) => {
-                return Err("mismatched closing delimiter".into())
+                return Err("mismatched closing delimiter".into());
             }
             None => return Err("unclosed delimiter".into()),
             _ => items.push(parse_one(tokens, index)?),
@@ -1011,10 +1011,11 @@ mod tests {
     #[test]
     fn fuel_is_enforced_before_execution() {
         let mut vm = Vm::new("{}".into(), 1);
-        assert!(vm
-            .execute(vec![Expr::String("{}".into())])
-            .unwrap_err()
-            .contains("fuel exhausted"));
+        assert!(
+            vm.execute(vec![Expr::String("{}".into())])
+                .unwrap_err()
+                .contains("fuel exhausted")
+        );
     }
 
     #[test]
@@ -1036,9 +1037,10 @@ mod tests {
                 ],
             },
         );
-        assert!(vm
-            .validate_json("Request", &json!({"amount": 3, "approved": true}), "$")
-            .is_ok());
+        assert!(
+            vm.validate_json("Request", &json!({"amount": 3, "approved": true}), "$")
+                .is_ok()
+        );
         assert_eq!(
             "unknown-field",
             vm.validate_json(

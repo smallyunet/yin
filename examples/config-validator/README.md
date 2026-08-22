@@ -9,7 +9,7 @@ Build Yin and run a valid configuration:
 
 ```bash
 printf '%s' '{"host":"localhost","port":"8080"}' | \
-  java -jar target/yin-0.19.0.jar --json examples/config-validator/main.yin
+  target/release/yin --json examples/config-validator/main.yin
 ```
 
 Expected output:
@@ -23,7 +23,7 @@ ordering:
 
 ```bash
 printf '%s' '{"host":"localhost"}' | \
-  java -jar target/yin-0.19.0.jar --json examples/config-validator/main.yin
+  target/release/yin --json examples/config-validator/main.yin
 ```
 
 ```json
@@ -32,4 +32,4 @@ printf '%s' '{"host":"localhost"}' | \
 
 The program exercises isolated modules, multi-file type checking, immutable
 `Dict` and `Set` values, safe optional lookup, `Result` handling, variants, and
-strict JSON boundaries without adding any Java host code.
+strict JSON boundaries without adding custom host code.

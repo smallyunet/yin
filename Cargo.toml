@@ -1,0 +1,44 @@
+[package]
+name = "yin-language"
+version = "0.20.0"
+edition = "2024"
+rust-version = "1.88"
+description = "The Yin programming language"
+license = "AGPL-3.0-only"
+repository = "https://github.com/smallyunet/yin"
+default-run = "yin"
+
+[lib]
+name = "yin"
+path = "rust/lib.rs"
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "yin"
+path = "rust/main.rs"
+
+[dependencies]
+indexmap = { version = "2.11", features = ["serde"] }
+num-bigint = "0.4"
+num-traits = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+sha2 = "0.10"
+thiserror = "2.0"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+fs2 = "0.4"
+
+[dev-dependencies]
+tempfile = "3.20"
+
+[profile.release]
+lto = "thin"
+strip = true
+
+[workspace]
+members = ["vm"]
+resolver = "3"

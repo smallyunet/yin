@@ -14,7 +14,7 @@ normalized transaction intent JSON
 Build and run it locally:
 
 ```bash
-./mvnw package
+cargo build --release --workspace
 ./examples/web3/transaction-guard/run.sh \
   examples/web3/transaction-guard/inputs/approve.json | jq
 ```

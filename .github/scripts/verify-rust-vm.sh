@@ -2,8 +2,8 @@
 set -euo pipefail
 
 version="${1:?usage: verify-rust-vm.sh <version>}"
-jar="target/yin-${version}.jar"
-yinvm="vm/target/release/yinvm"
+yin="target/release/yin"
+yinvm="target/release/yinvm"
 temp_dir="$(mktemp -d)"
 trap 'rm -rf "${temp_dir}"' EXIT
 
@@ -11,11 +11,11 @@ program="examples/agents/capability-decision/main.yin"
 inputs="examples/agents/capability-decision/inputs"
 bytecode="${temp_dir}/capability.ybc"
 
-java -jar "${jar}" --contract-compile "${program}" --output "${bytecode}"
+"${yin}" --contract-compile "${program}" --output "${bytecode}"
 "${yinvm}" check "${bytecode}"
 
 for fixture in approve.json needs-approval.json reject.json; do
-  source_result="$(java -jar "${jar}" --contract-run "${program}" --input "${inputs}/${fixture}")"
+  source_result="$("${yin}" --contract-run "${program}" --input "${inputs}/${fixture}")"
   vm_result="$("${yinvm}" run "${bytecode}" --input "${inputs}/${fixture}" --fuel 100000)"
   node -e '
     const source = JSON.parse(process.argv[1]);

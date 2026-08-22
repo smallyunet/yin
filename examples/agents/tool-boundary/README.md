@@ -8,7 +8,7 @@ is recorded in a hash-chained JSONL trace.
 Build Yin and run the read path:
 
 ```bash
-./mvnw package
+cargo build --release --workspace
 ./examples/agents/tool-boundary/run.sh
 ```
 
@@ -19,7 +19,7 @@ Writes additionally require explicit approval:
 mkdir -p examples/agents/tool-boundary/runtime/notes
 cp examples/agents/tool-boundary/fixtures/welcome.txt \
   examples/agents/tool-boundary/runtime/notes/welcome.txt
-java -jar target/yin-0.17.0.jar --guard \
+target/release/yin --guard \
   examples/agents/tool-boundary/main.yin \
   --input examples/agents/tool-boundary/inputs/write.json \
   --host examples/agents/tool-boundary/host.json \
@@ -36,7 +36,7 @@ access.
 Replay a completed result without invoking any tool:
 
 ```bash
-java -jar target/yin-0.17.0.jar --replay \
+target/release/yin --replay \
   examples/agents/tool-boundary/runtime/write.jsonl
 ```
 

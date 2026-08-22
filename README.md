@@ -11,15 +11,15 @@ DSL. Agent policies, capability-safe tools, and deterministic decision
 contracts remain supported as optional libraries and runtime profiles built on
 the same language core.
 
-The implementation descends from Yin Wang's 2013–2014 experiment and now
-includes a hand-written parser, tree-walking interpreter, static type checker,
-formatter, language server, browser runtime, bytecode compiler, and an
-independent Rust VM for a portable deterministic subset. Yin is experimental
+The implementation descends from Yin Wang's 2013–2014 experiment and is now a
+Rust workspace containing a hand-written parser, tree-walking interpreter,
+static type checker, formatter, language server, Wasm browser runtime, bytecode
+compiler, Agent Action Gateway, and independent fuel-metered VM. Yin is experimental
 and not yet production ready. The untouched historical state is preserved by
 the `legacy-2015` Git tag.
 
 Try it in the [Yin Playground](https://smallyunet.github.io/yin/). Evaluation,
-type checking, and formatting run locally in a Web Worker; source and input are
+type checking, evaluation, and formatting run locally in a Rust/Wasm Web Worker; source and input are
 not sent to a server.
 
 ```yin
@@ -53,39 +53,38 @@ returns a new insertion-ordered dictionary; `config` remains unchanged.
 - optional typed tools, ordered policies, capability manifests, guarded hosts,
   deterministic contracts, portable bytecode, and an MCP stdio gateway
 
-The maintained test suite checks interpreter and type-checker agreement,
+The maintained Rust and conformance suites check interpreter/type-checker agreement,
 source diagnostics, modules, JSON contracts, tooling, browser behavior, and
-the independent portable VM. Yin 0.19 defines the collection and safe-access
+the independent portable VM. Yin 0.20 preserves the frozen v0.19 language and protocol
 semantics in the language specification rather than leaving them as host
 library conventions.
 
 ## Requirements
 
-- JDK 17 or newer
-- Rust 1.85 or newer only to build `yinvm`
-- Node.js 18 or newer only for the MCP demo and editor packaging
-- no system Maven installation is required
+- Rust 1.88 or newer
+- Node.js 24 or newer for browser verification and editor packaging
 
 ## Install or build
 
-Versioned executable JARs, Linux x86-64 `yinvm` binaries, Visual Studio Code
-extension packages, and SHA-256 checksums are on the
+Platform-specific `yin` and `yinvm` executables, the Visual Studio Code
+extension, and SHA-256 checksums are on the
 [GitHub Releases page](https://github.com/smallyunet/yin/releases).
 
 ```bash
-java -jar yin-0.19.0.jar --version
-code --install-extension yin-language-support-0.19.0.vsix
+yin --version
+code --install-extension yin-language-support-0.20.0.vsix
 ```
 
 Build and test from source:
 
 ```bash
-./mvnw verify
-cargo test --manifest-path vm/Cargo.toml
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace --all-targets
+cargo build --release --workspace
 ```
 
-The executable JAR is `target/yin-0.19.0.jar`. Build the Rust VM with
-`cargo build --release --manifest-path vm/Cargo.toml`.
+The executables are `target/release/yin` and `target/release/yinvm`.
 
 ## Run real programs
 
@@ -94,7 +93,7 @@ validates required keys, supplies a default, and emits a closed JSON result:
 
 ```bash
 printf '%s' '{"host":"localhost","port":"8080"}' | \
-  java -jar target/yin-0.19.0.jar --json examples/config-validator/main.yin
+  target/release/yin --json examples/config-validator/main.yin
 ```
 
 ```json
@@ -104,17 +103,10 @@ printf '%s' '{"host":"localhost","port":"8080"}' | \
 Other maintained programs:
 
 ```bash
-java -jar target/yin-0.19.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.19.0.jar examples/cli/parse-values.yin 10 bad 32
-java -jar target/yin-0.19.0.jar examples/cli/wc.yin README.md
-java -jar target/yin-0.19.0.jar examples/modules/main.yin
-```
-
-Run the type checker separately:
-
-```bash
-java -cp target/yin-0.19.0.jar \
-  org.yinwang.yin.TypeChecker examples/config-validator/main.yin
+target/release/yin examples/algorithms/quicksort.yin
+target/release/yin examples/cli/parse-values.yin 10 bad 32
+target/release/yin examples/cli/wc.yin README.md
+target/release/yin examples/modules/main.yin
 ```
 
 See [examples/README.md](examples/README.md) for the maintained program catalog.
@@ -162,14 +154,14 @@ See the [module guide](docs/modules.md).
 Launch the persistent multiline REPL:
 
 ```bash
-java -jar target/yin-0.19.0.jar
+target/release/yin
 ```
 
 Format or verify source:
 
 ```bash
-java -jar target/yin-0.19.0.jar --format program.yin
-java -jar target/yin-0.19.0.jar --format --check tests/*.yin
+target/release/yin --format program.yin
+target/release/yin --format --check tests/*.yin
 ```
 
 The bundled language server provides syntax/type diagnostics and whole-document
@@ -195,19 +187,22 @@ side effects; Yin source declarations do not grant permission by themselves.
 ## Browser runtime
 
 ```bash
-./mvnw -Pbrowser -DskipTests package
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --version 0.2.127 --locked
+cargo build --release --target wasm32-unknown-unknown --lib
+wasm-bindgen target/wasm32-unknown-unknown/release/yin.wasm \
+  --out-dir site/runtime --out-name yin --target no-modules --no-typescript
 ```
 
-TeaVM writes the JavaScript runtime to `site/runtime/`. Serve `site/` over HTTP
+`wasm-bindgen` writes the Rust/Wasm runtime to `site/runtime/`. Serve `site/` over HTTP
 for local development. Pushes to `main` deploy the same static directory to
 GitHub Pages.
 
 ## Repository layout
 
 ```text
-src/main/java/   parser, interpreter, type checker, runtime, LSP, and compiler
-src/test/java/   integration, specification, tooling, and regression tests
-vm/              independent Rust verifier and fuel-metered portable runtime
+rust/            parser, checker, interpreter, tooling, Wasm, gateway, and CLI
+vm/              independent verifier and fuel-metered portable runtime
 tests/           normative runnable language corpus
 examples/        CLI, data/config, algorithm, module, Agent, and Web3 programs
 site/            browser playground

@@ -14,7 +14,7 @@ untrusted stdin JSON
 Build Yin, then run one input:
 
 ```bash
-./mvnw package
+cargo build --release --workspace
 ./examples/agents/agent-review/run.sh examples/agents/agent-review/inputs/approve.json
 ```
 

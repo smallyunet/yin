@@ -1,4 +1,3 @@
-import * as path from "node:path";
 import * as vscode from "vscode";
 import {
   LanguageClient,
@@ -9,11 +8,10 @@ import {
 let client: LanguageClient | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  const javaPath = vscode.workspace.getConfiguration("yin").get<string>("java.path", "java");
-  const serverJar = path.join(context.extensionPath, "server", "yin.jar");
+  const yinPath = vscode.workspace.getConfiguration("yin").get<string>("path", "yin");
   const serverOptions: ServerOptions = {
-    command: javaPath,
-    args: ["-jar", serverJar, "--lsp"],
+    command: yinPath,
+    args: ["--lsp"],
   };
   const clientOptions: LanguageClientOptions = {
     documentSelector: [

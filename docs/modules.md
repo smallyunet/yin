@@ -54,8 +54,7 @@ when values cross module boundaries.
 Running the normal type checker on an entry file checks every reachable module:
 
 ```bash
-java -cp target/yin-0.19.0.jar \
-  org.yinwang.yin.TypeChecker examples/modules/main.yin
+target/release/yin examples/modules/main.yin
 ```
 
 Dependency diagnostics retain the dependency file's source span. The LSP uses

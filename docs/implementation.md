@@ -1,184 +1,45 @@
 # Implementation overview
 
-Yin is implemented as a direct pipeline:
+Yin 0.20 is a Rust workspace. The v0.19 Java implementation and its exact
+normative specification are frozen on `codex/java-v0.19.0-archive` and tag
+`v0.19.0`; no JVM code is required by the current runtime or release.
 
 ```text
-source file
-  -> Lexer
-  -> PreParser (balanced delimiter tree)
-  -> Parser (semantic AST)
-  -> Interpreter or TypeChecker
+UTF-8 source
+  -> rust/syntax.rs       lexer, balanced forms, source spans
+  -> rust/check.rs        static environments and contract checking
+  -> rust/eval.rs         lexical runtime, modules, values, JSON, tools
+  -> rust/main.rs         CLI, REPL, formatter, LSP and profile commands
 ```
 
-Portable contracts add a second execution pipeline:
+Additional boundaries:
 
-```text
-typed deterministic source -> Java YinBytecode compiler -> .ybc
-  -> Rust verifier/parser -> fuel-metered Rust evaluator -> JSON decision
-```
+- `rust/format.rs` owns deterministic formatting.
+- `rust/lsp.rs` owns framed stdio JSON-RPC, diagnostics, sync, and formatting.
+- `rust/contract.rs` emits canonical `.ybc` and runs deterministic contracts.
+- `rust/gateway.rs` owns reference file tools, request-bound approval, durable
+  nonce consumption, MCP stdio execution, trace, and replay.
+- `vm/` remains an independent parser, verifier, and fuel-metered evaluator for
+  `portable-bytecode-v1`.
+- the `wasm32-unknown-unknown` build exports evaluation and formatting to the
+  browser without filesystem or process authority.
 
-## Main components
+The runtime uses distinct `Type` and `Value` representations. Every executed
+program is parsed and checked before evaluation. Host effects enter through an
+explicit `Host`; browser hosts disable filesystem and subprocess capabilities,
+while native gateway hosts install narrowly scoped tool executors.
 
-- `parser/Lexer.java` tokenizes source text and tracks source positions.
-- `parser/PreParser.java` constructs balanced tuple and vector forms.
-- `parser/Parser.java` converts those forms into semantic AST nodes. Readable
-  `policy` rules and dotted fields lower here to the existing function,
-  conditional, and immutable-field core.
-- `ast/` contains evaluation and type-checking behavior for each construct.
-- `ast/FieldAccess.java` implements immutable record field reads and their
-  record, union, and `Any` type rules.
-- `ast/Match.java` evaluates patterns and performs branch binding, union
-  narrowing, and exhaustiveness checks.
-- `ast/VariantDef.java` installs closed tagged unions and their named case
-  constructors; `ast/JsonOperation.java` preserves type-directed boundaries.
-- `json/JsonCodec.java` owns strict parsing, deterministic value encoding, and
-  deterministic Draft 2020-12 schema generation.
-- `value/DictValue.java` and `value/SetValue.java` store immutable ordered
-  snapshots and use language-level structural equality rather than host hash
-  identity. `value/primitives/CollectionPrimitives.java` implements persistent
-  transformations and safe optional dictionary lookup.
-- `type/DictType.java`, `type/SetType.java`, and
-  `type/CollectionPrimitiveTypes.java` define collection covariance,
-  constructor inference, operand compatibility, and precise result types.
-- `Scope.java` implements generic lexical environment chains. Runtime scopes
-  contain `Value`; type-checking scopes contain `YinType`.
-- `Interpreter.java` evaluates an AST against the runtime initial scope.
-  Its `--json` host mode keeps stdout machine-readable and routes program logs
-  to stderr for structured pipelines.
-- `RuntimeContext.java` injects output, complete text input, program arguments,
-  UTF-8 resource reads, named tool handlers, authorization policy, and an audit sink
-  instead of hiding host effects in language nodes.
-- `DeterministicContractRuntime.java` validates the side-effect-free
-  `deterministic-policy-v1` subset, injects one immutable JSON input, and returns
-  a digest-bound structured decision envelope. It is a reference evaluator and
-  remains the source-level conformance evaluator.
-- `bytecode/YinBytecode.java` emits and verifies canonical `.ybc` containers;
-  `bytecode/YinBytecodeTool.java` exposes compiler-side CLI operations.
-- `vm/` is an independent Rust crate. It validates bytecode without loading the
-  JVM, enforces the portable termination subset, meters execution, and emits a
-  digest-bound result envelope.
-- `ast/ToolDef.java`, `ast/Invoke.java`, `type/ToolType.java`, and
-  `value/ToolValue.java` keep declared authority, static contracts, runtime
-  handles, and invocation separate. `CapabilityManifest.java` performs
-  type-checked preflight without execution.
-- `tool/McpToolAdapter.java` maps MCP `structuredContent` and `isError` into the
-  stable Yin host boundary. Remote annotations are never used as authorization.
-- `TypeChecker.java` evaluates an AST against a type-oriented initial scope.
-- `ReplSession.java` keeps paired runtime and type scopes across interactive
-  submissions; `Repl.java` owns terminal input, multiline recovery, and output.
-- `Formatter.java` validates with the semantic parser, then renders a small
-  concrete syntax tree so comments and original string tokens remain intact.
-- `lsp/LanguageService.java` applies the parser, type checker, and formatter to
-  unsaved source text without retaining editor state.
-- `lsp/YinLanguageServer.java` implements JSON-RPC framing, document sync,
-  diagnostics, and formatting over standard input/output.
-- `value/` contains runtime values, closures, record constructors, and runtime
-  primitives.
-- `value/ResultValue.java` and the distinct `OkType`, `ErrType`, and
-  `ResultType` static representations keep expected failures explicit without
-  mixing runtime values into the type environment.
-- `value/Vector.java` stores an immutable element snapshot; checked primitives
-  provide indexing, concatenation, mapping, filtering, folding, slicing,
-  reversal, ranges, and membership without mutable collection state.
-- `type/` contains static types, record and function types, unions, and
-  primitive signatures. No class in this package extends `Value`.
-- `type/HomogeneousVectorType.java` complements precise fixed `VectorType`
-  values, while `DeclaredFunctionType.java` makes positional callable
-  signatures source-expressible for higher-order operations.
-
-Every semantic AST node has two deliberately distinct entry points:
-
-```text
-interp(Scope<Value>)       -> Value
-typecheck(Scope<YinType>)  -> YinType
-```
-
-Java's type system therefore prevents a runtime value from being inserted into
-a static environment, or a static type from being returned by the interpreter.
-
-## Diagnostics
-
-Language failures throw `GeneralError`, which owns an immutable `Diagnostic`.
-Diagnostics contain a stable category code, message, and optional `SourceSpan`
-with file, offsets, line, and column. Library callers can inspect these fields
-without parsing CLI text.
-
-- `YIN0001`: language/runtime/type error
-- `YIN1001`: syntax error
-- `YIN1002`: source I/O error
-
-CLI entry points format the same diagnostic and return a non-zero process exit
-code.
-
-Parser syntax failures remain represented internally by `ParserException` and
-are converted to structured diagnostics at the interpreter/type-checker
-boundary.
-
-## Tests
-
-The integration tests deliberately exercise complete source files rather than
-isolated AST construction. They cover the public interpreter and type-checker
-entry points and protect the behavior of the maintained examples.
-`LanguageSpecificationTest` makes the normative evaluation and type rules
-executable, while `HistoricalCorpusTest` ensures every historical source stays
-explicitly classified and every migrated replacement remains runnable.
-`ReplTest` covers in-memory parsing, persistent state, pre-execution type
-checking, multiline input, error recovery, and incomplete input at EOF.
-`FormatterTest` covers comment safety, idempotence, semantic preservation, CLI
-modes, invalid input, and canonical formatting of every maintained program.
-`LanguageServerIntegrationTest` drives framed protocol messages to protect
-initialization, diagnostic clearing, shutdown, and formatting responses.
-`LanguageCompletenessTest` protects the Yin 0.9 programmable-core slice from type
-annotations through match, collection/string processing, host input, and
-complete runnable examples.
-`ResultIntegrationTest` protects the Yin 0.10 explicit-outcome slice across
-construction, covariance, exhaustive narrowing, structural equality, `Any`,
-and the maintained result program.
-`StructuredContractsIntegrationTest` protects the Yin 0.11 variant, Option,
-strict JSON, structured error path, schema, and complete agent-boundary slice.
-`ToolIntegrationTest` protects the Yin 0.12 declaration, manifest, host
-injection, approval, audit, structured-result validation, and MCP adapter slice.
-`PolicyIntegrationTest` protects the Yin 0.13 ordered-rule lowering, mandatory
-fallback, first-match behavior, dotted immutable field access, formatting, and
-policy diagnostics.
-`ReferencePolicyRuntimeTest` protects the Yin 0.14 preflight host agreement,
-root confinement, write approval, create-only trace, hash-chain verification,
-and side-effect-free replay boundary.
-`DeterministicContractRuntimeTest` protects the source contract profile, while
-`YinBytecodeTest` and the Rust crate tests protect the 0.16 portable format,
-reproducible envelopes, maintained capability decisions, rejected effects, and
-the JSON-result boundary.
-`ActionGatewayRuntimeTest` protects the 0.17 immutable source snapshot, closed
-intent/host agreement, actual MCP stdio lifecycle, request-bound approval,
-single-use nonce consumption, external execution, and replay boundary.
-`ModuleIntegrationTest` protects the 0.18 dependency graph across isolated
-exports, selective and transitive imports, one-time initialization, canonical
-paths, cycles, nominal type identity, security-profile rejection, and file-URI
-editor analysis.
-`ImmutableCollectionsIntegrationTest` protects Yin 0.19 dictionary and Set
-construction, persistence, safe access, bottom-type widening, ordering,
-structural equality, static operand checks, JSON interop, and schemas.
-`ConfigValidatorDemoTest` executes the maintained non-Agent multi-file CLI
-through stdin, strict JSON, modules, collections, variants, and the raw JSON
-process boundary.
-`AgentReviewDemoTest` executes every maintained policy and malformed-input
-fixture through the raw JSON CLI boundary.
-`Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy
-boundary without claiming RPC, ABI, signing, or broadcast support.
-
-Run all checks with:
+Run the complete maintained verification path:
 
 ```bash
-./mvnw verify
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace --all-targets
+cargo build --release --workspace
+.github/scripts/verify-rust-runtime.sh
+.github/scripts/verify-rust-vm.sh 0.20.0
 ```
 
-## Current architectural boundary
-
-- record mutation and generic subscript syntax are intentionally absent from the
-  supported grammar and AST
-- descriptor forms remain stored in a generic property table before evaluation
-- the type system remains experimental and is not a soundness proof
-- the JVM interpreter and TeaVM build implement the full 0.19 language; the
-  Rust VM intentionally remains limited to `portable-bytecode-v1`
-- Agent policy and gateway components are optional embedding profiles rather
-  than dependencies of the general language core
+The conformance script executes the normative corpus, multi-file configuration
+validator, deterministic compiler/VM boundary, and isolated end-to-end MCP
+gateway with approval, nonce, trace, and replay.

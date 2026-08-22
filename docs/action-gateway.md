@@ -42,7 +42,7 @@ The outer envelope has exactly these fields:
 }
 ```
 
-`arguments` is generic to the Java gateway but remains strongly typed by each
+`arguments` is generic to the Rust gateway but remains strongly typed by each
 Yin program. A GitHub policy can declare `IssueArguments`; a wallet policy can
 declare `SwapArguments`. The gateway refuses execution unless the JSON emitted
 by `invoke` is exactly the canonical `arguments` object in this envelope.
@@ -94,7 +94,7 @@ tool must actually be advertised.
 Create an approval request out of band:
 
 ```bash
-java -jar yin-0.19.0.jar --approval-request policy.yin \
+yin --approval-request policy.yin \
   --intent intent.json \
   --host host.json \
   --out approval.json \
@@ -105,7 +105,7 @@ java -jar yin-0.19.0.jar --approval-request policy.yin \
 Then execute it once:
 
 ```bash
-java -jar yin-0.19.0.jar --gateway policy.yin \
+yin --gateway policy.yin \
   --intent intent.json \
   --host host.json \
   --trace trace.jsonl \

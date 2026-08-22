@@ -5,7 +5,7 @@ machine, and authority-bearing host:
 
 ```text
 Yin source
-  -> Java parser, profile validator, and type checker
+  -> Rust parser, profile validator, and type checker
   -> canonical .ybc artifact
   -> independent Rust verifier and fuel-metered VM
   -> deterministic decision envelope
@@ -15,7 +15,7 @@ Yin source
 The language defines syntax, types, and source semantics. The compiler admits
 only `portable-bytecode-v1`, removes comments and formatting, emits versioned
 token instructions, and binds the normalized program with SHA-256. The Rust VM
-does not load the JVM or the original source. It verifies the container,
+does not load the source runtime or the original source. It verifies the container,
 reconstructs structured bytecode expressions, meters evaluation, and returns a
 digest-bound JSON decision.
 
@@ -26,10 +26,10 @@ the VM holds credentials or grants authority by itself.
 
 ## Version 0.16 boundary
 
-The Java commands are compiler-side operations:
+The Rust `yin` commands are compiler-side operations:
 
 - `--contract-check` validates the source-level `deterministic-policy-v1`;
-- `--contract-run` remains the Java reference evaluator used for conformance;
+- `--contract-run` remains the Rust reference evaluator used for conformance;
 - `--contract-compile ... --output ...` emits canonical `.ybc`;
 - `--bytecode-check` revalidates an artifact using the compiler implementation.
 
@@ -59,7 +59,7 @@ replace OS/container isolation.
 
 ## Repository boundary
 
-The Java compiler and Rust VM remain in this repository while bytecode v1 is
+The Rust compiler and Rust VM remain in this repository while bytecode v1 is
 young, so every format change can be tested atomically across both runtimes. A
 separate VM repository becomes useful when the bytecode protocol is stable and
 the VM needs an independent security review or release lifecycle.

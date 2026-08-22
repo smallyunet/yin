@@ -8,7 +8,7 @@ their semantic effect is visible and testable.
 Use JDK 17 or newer and run:
 
 ```bash
-./mvnw verify
+cargo test --workspace --all-targets
 ```
 
 ## Change guidelines
@@ -23,12 +23,12 @@ Use JDK 17 or newer and run:
 - Do not add new syntax without updating `docs/language-reference.md`.
 - Avoid unrelated formatting or file moves in semantic changes.
 
-Commit messages should state the behavior being changed. Run `./mvnw verify`
+Commit messages should state the behavior being changed. Run `cargo test --workspace --all-targets`
 before pushing directly to `main`.
 
 ## Visual Studio Code extension
 
 The extension under `editors/vscode/` bundles the executable Yin JAR. Run
 `npm ci`, then `npm run package` to rebuild the server, type-check and
-bundle the client, and produce a VSIX. Keep the extension and Maven versions in
+bundle the client, and produce a VSIX. Keep the extension and Cargo versions in
 sync. Marketplace credentials belong only in the repository-root `.env` file.

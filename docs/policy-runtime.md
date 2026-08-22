@@ -7,7 +7,7 @@ deny-by-default authorization, and a create-only decision trace.
 ## Command
 
 ```bash
-java -jar yin-0.19.0.jar --guard program.yin \
+yin --guard program.yin \
   --input request.json \
   --host host.json \
   --trace trace.jsonl \
@@ -88,7 +88,7 @@ hash. Replay verifies the chain's internal consistency and requires exactly one
 final `run-completed` event:
 
 ```bash
-java -jar yin-0.19.0.jar --replay trace.jsonl
+yin --replay trace.jsonl
 ```
 
 Replay prints the recorded final output. It does not parse the original source,
@@ -100,7 +100,7 @@ external write.
 This host is a reference implementation, not a general sandbox. It has no MCP
 client, process execution, secret broker, user identity, signed approvals,
 multi-tenant isolation, or durable suspension. A process running Yin retains
-the operating-system permissions of its Java process.
+the operating-system permissions of its native process.
 
 Traces include tool output so replay can reproduce the boundary result. They
 may therefore contain sensitive content. Store them in an access-controlled

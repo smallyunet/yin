@@ -1,6 +1,7 @@
 # Yin language specification
 
-This document defines the normative Yin 0.19 language. Behavior not described
+This document defines the normative Yin 0.20 language. Version 0.20 freezes the
+0.19 source and protocol semantics while replacing the implementation with Rust. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -15,7 +16,7 @@ otherwise.
   at runtime; unknown escapes retain their backslash.
 - Integers are decimal, binary with `0b`, or hexadecimal with `0x`, with an
   optional leading sign.
-- Floats use the syntax accepted by Java `Double.parseDouble` after tokenization.
+- Floats use the syntax accepted by Rust `f64::from_str` after tokenization.
 - `(`, `)`, `[`, and `]` are delimiters. Braces and `#` subscripts are not part
   of the language. A dot joins a name and one or more immutable field names.
 - A keyword token begins with `:`. All other accepted identifier characters
@@ -426,7 +427,7 @@ the browser supports controlled text input but rejects filesystem reads.
 
 ## Deterministic contract profile
 
-`deterministic-policy-v1` is an execution profile over the normative Yin 0.19
+`deterministic-policy-v1` is an execution profile over the normative Yin 0.20
 language. It accepts one immutable UTF-8 input through `read-all`, requires the
 program to return JSON text through `encode-json`, and rejects `Float`, `Any`,
 `set!`, `args`, `print`, `read-text`, tool declarations, and `invoke` before
@@ -455,6 +456,6 @@ conversion beyond mixed numeric primitive results.
 
 ## Errors
 
-Syntax, I/O, runtime, and type failures are language diagnostics rather than JVM
+Syntax, I/O, runtime, and type failures are language diagnostics rather than host
 termination inside the core. Diagnostics expose a stable code, message, and an
 optional source span. See `docs/implementation.md` for the diagnostic codes.
