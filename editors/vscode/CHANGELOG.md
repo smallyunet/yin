@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.18.0
+
+- highlight `module` and `import` forms
+- diagnose saved relative module dependencies from file-backed editor documents
+- bundle the Yin 0.18.0 language server
+
 ## 0.17.0
 
 - bundle the Yin 0.17.0 language server and Agent Action Gateway CLI

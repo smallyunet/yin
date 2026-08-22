@@ -48,7 +48,7 @@
       "patterns": [
         {
           "name": "keyword.control.yin",
-          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|variant|tool|invoke|policy|when|otherwise|field|decode-json|encode-json|json-schema))(?=\\s|\\))"
+          "match": "(?<=\\()(?:(?:seq|if|match|define|set!|fun|record|variant|module|import|tool|invoke|policy|when|otherwise|field|decode-json|encode-json|json-schema))(?=\\s|\\))"
         }
       ]
     },

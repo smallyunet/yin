@@ -59,6 +59,7 @@ public class Interpreter {
 
     private Value interpProgram(Node program, RuntimeContext context) {
         Scope<Value> scope = Scope.buildInitScope(context);
+        scope.moduleRuntime = new ModuleRuntime(context);
         return program.interp(scope);
     }
 

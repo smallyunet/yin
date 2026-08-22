@@ -95,7 +95,8 @@ public class Call extends Node {
             }
 
             // instantiate
-            return new RecordValue(template.name, values, template.nominalTypes(), template.variantName());
+            return new RecordValue(template.name, values, template.nominalTypes(),
+                    template.variantName(), template.identity());
         } else if (opv instanceof PrimFun) {
             PrimFun prim = (PrimFun) opv;
             if (!args.keywords.isEmpty()) {
@@ -231,7 +232,8 @@ public class Call extends Node {
             }
 
             // instantiate
-            return new RecordValueType(template.name, values, template.nominalTypes(), template.variantName());
+            return new RecordValueType(template.name, values, template.nominalTypes(),
+                    template.variantName(), template.identity());
         } else if (fun instanceof PrimitiveFunctionType primitiveType) {
             if (!args.keywords.isEmpty()) {
                 Util.abort(this, "primitive arguments must be positional: " + primitiveType.name);

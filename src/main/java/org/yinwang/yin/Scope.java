@@ -20,6 +20,7 @@ public class Scope<T> {
     public Scope<T> parent;
     public TypeChecker typeChecker;
     public RuntimeContext runtimeContext;
+    public ModuleRuntime moduleRuntime;
 
 
     public Scope() {
@@ -31,6 +32,7 @@ public class Scope<T> {
         this.parent = parent;
         this.typeChecker = parent == null ? null : parent.typeChecker;
         this.runtimeContext = parent == null ? null : parent.runtimeContext;
+        this.moduleRuntime = parent == null ? null : parent.moduleRuntime;
     }
 
 

@@ -12,6 +12,7 @@ public final class RecordValueType extends YinType {
     public final Scope<YinType> fields;
     private final Set<String> nominalTypes;
     private final String variantName;
+    private final String identity;
 
     public RecordValueType(String name, Scope<YinType> fields, Set<String> nominalTypes) {
         this(name, fields, nominalTypes, null);
@@ -19,10 +20,16 @@ public final class RecordValueType extends YinType {
 
     public RecordValueType(String name, Scope<YinType> fields, Set<String> nominalTypes,
                            String variantName) {
+        this(name, fields, nominalTypes, variantName, name);
+    }
+
+    public RecordValueType(String name, Scope<YinType> fields, Set<String> nominalTypes,
+                           String variantName, String identity) {
         this.name = name;
         this.fields = fields.copy();
         this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
         this.variantName = variantName;
+        this.identity = identity;
     }
 
     public Set<String> nominalTypes() {
@@ -30,6 +37,7 @@ public final class RecordValueType extends YinType {
     }
 
     public String variantName() { return variantName; }
+    public String identity() { return identity; }
 
     @Override
     public String toString() {

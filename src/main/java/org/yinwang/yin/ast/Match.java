@@ -150,12 +150,10 @@ public final class Match extends Node {
                     && valueMatchesType(value, builtIn)
                     && matches(recordPattern.fields().get(0), value, scope, bindings);
         }
-        if (!(value instanceof RecordValue record)
-                || !record.nominalTypes().contains(recordPattern.type().id)) {
-            return false;
-        }
         Value constructorValue = scope.lookup(recordPattern.type().id);
-        if (!(constructorValue instanceof RecordConstructor constructor)
+        if (!(value instanceof RecordValue record)
+                || !(constructorValue instanceof RecordConstructor constructor)
+                || !record.nominalTypes().contains(constructor.identity())
                 || constructor.properties.keySet().size() != recordPattern.fields().size()) {
             return false;
         }
@@ -254,7 +252,7 @@ public final class Match extends Node {
         } else {
             return null;
         }
-        if (!nominalTypes.contains(patternType.name)
+        if (!nominalTypes.contains(patternType.identity())
                 || recordPattern.fields().size() != patternType.properties.keySet().size()) {
             return null;
         }

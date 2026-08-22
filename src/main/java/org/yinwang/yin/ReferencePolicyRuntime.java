@@ -52,6 +52,8 @@ public final class ReferencePolicyRuntime {
             String input = Files.readString(options.input, StandardCharsets.UTF_8);
             String hostSource = Files.readString(options.host, StandardCharsets.UTF_8);
             HostConfig host = HostConfig.read(options.host);
+            ModuleBoundary.requireSingleFile(
+                    options.program.toString(), source, "--guard");
 
             TypeChecker checker = new TypeChecker(options.program.toString());
             checker.typecheck(options.program.toString());

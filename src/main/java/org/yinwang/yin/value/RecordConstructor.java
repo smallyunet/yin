@@ -3,6 +3,7 @@ package org.yinwang.yin.value;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.ast.Node;
+import org.yinwang.yin.NominalIdentity;
 
 import java.util.Map;
 import java.util.LinkedHashSet;
@@ -15,6 +16,7 @@ public final class RecordConstructor extends Value {
     public final Scope<Value> properties;
     private final Set<String> nominalTypes;
     private final String variantName;
+    private final String identity;
 
     public RecordConstructor(String name, Node definition, Scope<Value> properties,
                              Set<String> nominalTypes) {
@@ -28,6 +30,7 @@ public final class RecordConstructor extends Value {
         this.properties = properties.copy();
         this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
         this.variantName = variantName;
+        this.identity = NominalIdentity.of(definition, name);
     }
 
     public Set<String> nominalTypes() {
@@ -35,6 +38,7 @@ public final class RecordConstructor extends Value {
     }
 
     public String variantName() { return variantName; }
+    public String identity() { return identity; }
 
     @Override
     public String toString() {

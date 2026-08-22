@@ -69,11 +69,11 @@ public final class Types {
         }
         if (actual instanceof RecordValueType record && expected instanceof VariantType variant) {
             return variant.cases().containsKey(record.name)
-                    && variant.name().equals(record.variantName());
+                    && variant.identity().equals(record.variantName());
         }
         if (actual instanceof RecordType record && expected instanceof VariantType variant) {
             return variant.cases().containsKey(record.name)
-                    && variant.name().equals(record.variantName());
+                    && variant.identity().equals(record.variantName());
         }
         if (actual instanceof VectorType actualVector
                 && expected instanceof HomogeneousVectorType expectedVector) {
@@ -96,16 +96,19 @@ public final class Types {
             return true;
         }
         if (actual instanceof RecordValueType actualRecord && expected instanceof RecordType expectedRecord) {
-            return expectedRecord.name != null && actualRecord.nominalTypes().contains(expectedRecord.name);
+            return expectedRecord.name != null
+                    && actualRecord.nominalTypes().contains(expectedRecord.identity());
         }
         if (actual instanceof RecordValueType actualRecord && expected instanceof RecordValueType expectedRecord) {
             if (actualRecord.name != null || expectedRecord.name != null) {
-                return actualRecord.name != null && actualRecord.name.equals(expectedRecord.name);
+                return actualRecord.name != null
+                        && actualRecord.identity().equals(expectedRecord.identity());
             }
             return sameFields(actualRecord, expectedRecord);
         }
         if (actual instanceof RecordType actualRecord && expected instanceof RecordType expectedRecord) {
-            return expectedRecord.name != null && actualRecord.nominalTypes().contains(expectedRecord.name);
+            return expectedRecord.name != null
+                    && actualRecord.nominalTypes().contains(expectedRecord.identity());
         }
         if (actual instanceof FunctionType actualFunction
                 && expected instanceof DeclaredFunctionType expectedFunction) {
@@ -180,7 +183,7 @@ public final class Types {
                     && leftTool.descriptor().equals(rightTool.descriptor());
         }
         if (left instanceof VariantType leftVariant && right instanceof VariantType rightVariant) {
-            return leftVariant.name().equals(rightVariant.name());
+            return leftVariant.identity().equals(rightVariant.identity());
         }
         if (left instanceof UnionType leftUnion && right instanceof UnionType rightUnion) {
             return leftUnion.members().size() == rightUnion.members().size()
@@ -188,11 +191,12 @@ public final class Types {
                     rightUnion.members().stream().anyMatch(rightMember -> equivalent(leftMember, rightMember)));
         }
         if (left instanceof RecordType leftRecord && right instanceof RecordType rightRecord) {
-            return leftRecord.name != null && leftRecord.name.equals(rightRecord.name);
+            return leftRecord.name != null && leftRecord.identity().equals(rightRecord.identity());
         }
         if (left instanceof RecordValueType leftRecord && right instanceof RecordValueType rightRecord) {
             if (leftRecord.name != null || rightRecord.name != null) {
-                return leftRecord.name != null && leftRecord.name.equals(rightRecord.name);
+                return leftRecord.name != null
+                        && leftRecord.identity().equals(rightRecord.identity());
             }
             return sameFields(leftRecord, rightRecord);
         }

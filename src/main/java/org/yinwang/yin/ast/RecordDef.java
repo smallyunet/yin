@@ -3,6 +3,7 @@ package org.yinwang.yin.ast;
 import org.yinwang.yin.Constants;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.Util;
+import org.yinwang.yin.NominalIdentity;
 import org.yinwang.yin.value.RecordConstructor;
 import org.yinwang.yin.value.Value;
 import org.yinwang.yin.type.RecordType;
@@ -33,7 +34,7 @@ public class RecordDef extends Node {
     public Value interp(Scope<Value> s) {
         Scope<Value> properties = Declare.evalProperties(propertyForm, s);
         Set<String> nominalTypes = new LinkedHashSet<>();
-        nominalTypes.add(name.id);
+        nominalTypes.add(NominalIdentity.of(this, name.id));
 
         if (parents != null) {
             for (Node p : parents) {
@@ -57,7 +58,7 @@ public class RecordDef extends Node {
     public YinType typecheck(Scope<YinType> s) {
         Scope<YinType> properties = Declare.typecheckProperties(propertyForm, s);
         Set<String> nominalTypes = new LinkedHashSet<>();
-        nominalTypes.add(name.id);
+        nominalTypes.add(NominalIdentity.of(this, name.id));
 
         if (parents != null) {
             for (Node p : parents) {

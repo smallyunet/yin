@@ -181,7 +181,8 @@ public final class Formatter {
             return form.elements().size() > 1;
         }
         return (head.equals("seq") || head.equals("match") || head.equals("variant")
-                || head.equals("tool") || head.equals("policy") || head.equals("when"))
+                || head.equals("tool") || head.equals("policy") || head.equals("module")
+                || head.equals("when"))
                 && form.elements().size() > 2;
     }
 
@@ -199,8 +200,9 @@ public final class Formatter {
             return 2;
         }
         if (head.equals("variant") || head.equals("match") || head.equals("tool")
-                || head.equals("policy")) {
-            return head.equals("tool") ? 5 : 2;
+                || head.equals("policy") || head.equals("module")) {
+            if (head.equals("tool")) return 5;
+            return head.equals("module") ? 3 : 2;
         }
         if (head.equals("when")) {
             return 2;

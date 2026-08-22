@@ -6,6 +6,8 @@ import org.yinwang.yin.ast.Assign;
 import org.yinwang.yin.ast.BigInt;
 import org.yinwang.yin.ast.FloatNum;
 import org.yinwang.yin.ast.Invoke;
+import org.yinwang.yin.ast.Import;
+import org.yinwang.yin.ast.ModuleDef;
 import org.yinwang.yin.ast.Name;
 import org.yinwang.yin.ast.Node;
 import org.yinwang.yin.ast.ToolDef;
@@ -178,6 +180,7 @@ public final class DeterministicContractRuntime {
         if (node instanceof Assign) reject(node, "set!");
         if (node instanceof ToolDef) reject(node, "tool declarations");
         if (node instanceof Invoke) reject(node, "tool invocation");
+        if (node instanceof Import || node instanceof ModuleDef) reject(node, "modules");
         if (node instanceof Name name && FORBIDDEN_NAMES.contains(name.id)) {
             reject(node, name.id);
         }

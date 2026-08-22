@@ -175,12 +175,22 @@ The project is being stabilized before new language features are designed.
   with side-effect-free `--replay`
 - maintained external ticket action demonstrating the complete subprocess flow
 
+## 0.18 — modules and multi-file type checking
+
+- explicit `module` declarations with closed export lists
+- selective relative `import` forms with isolated lexical module scopes
+- recursive dependency-graph evaluation and type checking with one initialization
+- canonical path identity, transitive relative resolution, and circular-import diagnostics
+- private-binding, undefined-export, duplicate-module, and local-conflict enforcement
+- source-qualified nominal Record and Variant identity across module boundaries
+- file-aware LSP analysis and maintained multi-file example
+- explicit rejection from digest-bound security profiles until dependency hashes are bound
+
 ## Later
 
 - non-author usability testing and a TypeScript or Rego boundary comparison
 - authenticated approval identity and signed approval evidence
 - trace redaction, signing, retention, and production storage policy
-- modules and multi-file type checking
 - persistent dictionaries and sets
 - typed model boundaries
 - durable tasks, checkpoints, approval suspension, and recovery

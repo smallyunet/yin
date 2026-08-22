@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.18.0 — 2026-08-22
+
+- add isolated `module` declarations with explicit, closed export lists and
+  selective relative `import` forms
+- evaluate canonical module files once per program and recursively resolve
+  transitive dependencies relative to each importing file
+- type-check the complete dependency graph while preserving dependency source
+  spans in diagnostics
+- reject private imports, undefined exports, local binding conflicts, duplicate
+  module names, invalid module files, and circular imports with their chain
+- qualify Record and Variant nominal identity by defining source so same-named
+  types from separate modules cannot cross boundaries accidentally
+- add file-URI-aware LSP analysis, formatter and VS Code syntax support, a
+  maintained multi-file example, and module specification documentation
+- reject modules from digest-bound contract, guard, and gateway modes until the
+  complete dependency graph is included in their approval and trace hashes
+- update release metadata to 0.18.0, bringing the JVM suite to 218 tests while
+  retaining 3 Rust VM tests
+
 ## 0.17.0 — 2026-08-21
 
 - add `--gateway` as a generic deny-by-default bridge from source-declared

@@ -75,7 +75,9 @@ public final class JsonCodec {
     private record OptionSchema(Schema value) implements Schema { }
     private record ResultSchema(Schema ok, Schema error) implements Schema { }
     private record Field(Schema schema, Value defaultValue) { }
-    private record RecordSchema(String name, Map<String, Field> fields, String variant) implements Schema { }
+    private record RecordSchema(String name, Map<String, Field> fields,
+                                Set<String> nominalTypes, String identity,
+                                String variant) implements Schema { }
     private record VariantSchema(String name, Map<String, RecordSchema> cases) implements Schema { }
     private record UnionSchema(List<Schema> alternatives) implements Schema { }
 
@@ -132,7 +134,7 @@ public final class JsonCodec {
                 fields.put("code", new Field(new Primitive("String"), null));
                 fields.put("path", new Field(new Primitive("String"), null));
                 fields.put("message", new Field(new Primitive("String"), null));
-                return new RecordSchema(name, fields, null);
+                return new RecordSchema(name, fields, Set.of(name), name, null);
             }
         }
         throw new Failure("unknown-type", "$", "unknown JSON contract type: " + name);
@@ -162,7 +164,8 @@ public final class JsonCodec {
             Object fallback = constructor.properties.lookupPropertyLocal(field, "default");
             fields.put(field, new Field(resolve(type, scope), fallback instanceof Value v ? v : null));
         }
-        return new RecordSchema(name, fields, variant);
+        return new RecordSchema(name, fields, constructor.nominalTypes(),
+                constructor.identity(), constructor.variantName());
     }
 
     private static JValue read(JsonReader reader, String path) throws IOException {
@@ -315,7 +318,8 @@ public final class JsonCodec {
                 else throw new Failure("missing-field", child(path, name), "missing required field: " + name);
             } else values.putValue(name, decode(entry.getValue().schema, json, child(path, name), scope));
         }
-        return new RecordValue(record.name, values, Set.of(record.name), record.variant);
+        return new RecordValue(record.name, values, record.nominalTypes,
+                record.variant, record.identity);
     }
 
     private static void write(Value value, StringBuilder out, String path) {
@@ -376,7 +380,7 @@ public final class JsonCodec {
     private static RecordSchema taggedPayload(String tag, String field, Schema payload) {
         Map<String, Field> fields = new LinkedHashMap<>();
         fields.put(field, new Field(payload, null));
-        return new RecordSchema(tag, fields, "$tagged");
+        return new RecordSchema(tag, fields, Set.of(tag), tag, "$tagged");
     }
 
     private static void writeAlternatives(String keyword, List<? extends Schema> alternatives, StringBuilder out) {

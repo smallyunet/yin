@@ -1,6 +1,6 @@
 # Yin language specification
 
-This document defines the normative Yin 0.17 language. Behavior not described
+This document defines the normative Yin 0.18 language. Behavior not described
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
@@ -38,6 +38,8 @@ expression     = atom
                | assignment
                | function
                | policy-definition
+               | module-definition
+               | import
                | record-definition
                | variant-definition
                | tool-definition
@@ -79,6 +81,12 @@ policy-definition
 policy-rule    = "(" "when" expression expression ")" ;
 policy-fallback
                = "(" "otherwise" expression ")" ;
+
+module-definition
+               = "(" "module" name export-list expression { expression } ")" ;
+export-list    = "[" name { name } "]" ;
+import         = "(" "import" string import-list ")" ;
+import-list    = "[" name { name } "]" ;
 
 record-definition
                = "(" "record" name [ parent-list ] { field-descriptor } ")" ;
@@ -122,6 +130,23 @@ call           = "(" expression { expression } ")"
 Bare and descriptor parameters cannot be mixed. Positional and keyword
 arguments cannot be mixed. Keyword names and descriptor properties cannot be
 duplicated. The only supported descriptor property is `:default`.
+
+An imported file must contain exactly one module definition. Module export and
+import lists are non-empty and contain unique names. Paths are relative UTF-8
+strings ending in `.yin`; they resolve from the importing file and are
+canonicalized before graph identity and cycle detection.
+
+A module body executes and type-checks in an isolated lexical scope over the
+standard environment. Its imports and definitions are evaluated in source
+order. Every exported name must exist after the body completes. Only selected
+exported bindings are copied into the importing scope, where a local collision
+is an error. A canonical module file is initialized once per execution and
+checked once per top-level type-checking operation. Circular imports and two
+different files declaring one module name in a dependency graph are errors.
+
+The defining canonical source file participates in record and variant nominal
+identity. Display names remain source names, but equally named nominal types in
+different modules are neither equivalent nor subtypes of one another.
 
 An empty program evaluates to `void`. A source file containing multiple
 expressions is an implicit `seq`.
@@ -366,12 +391,14 @@ the browser supports controlled text input but rejects filesystem reads.
 
 ## Deterministic contract profile
 
-`deterministic-policy-v1` is an execution profile over the normative Yin 0.17
+`deterministic-policy-v1` is an execution profile over the normative Yin 0.18
 language. It accepts one immutable UTF-8 input through `read-all`, requires the
 program to return JSON text through `encode-json`, and rejects `Float`, `Any`,
 `set!`, `args`, `print`, `read-text`, tool declarations, and `invoke` before
 evaluation. No clock, randomness, environment, filesystem, network, installed
 tool, authorization decision, output channel, or audit sink is available.
+Modules and imports are also rejected until the execution envelope binds a
+canonical digest for the complete dependency graph.
 
 `--contract-check` returns the profile version and a SHA-256 digest over the
 exact source bytes. `--contract-run` additionally returns digests over the exact

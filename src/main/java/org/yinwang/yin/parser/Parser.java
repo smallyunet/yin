@@ -90,6 +90,10 @@ public class Parser {
                                 return parseInvoke(tuple);
                             case Constants.POLICY_KEYWORD:
                                 return parsePolicy(tuple);
+                            case Constants.MODULE_KEYWORD:
+                                return parseModule(tuple);
+                            case Constants.IMPORT_KEYWORD:
+                                return parseImport(tuple);
                             default:
                                 return parseCall(tuple);
                         }
@@ -285,6 +289,65 @@ public class Parser {
                     caseTuple.elements.subList(1, caseTuple.elements.size())));
         }
         return new VariantDef(name, cases, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static ModuleDef parseModule(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() < 4 || !(elements.get(1) instanceof Name name)) {
+            throw new ParserException(
+                    "module requires a name, export list, and at least one body expression", tuple);
+        }
+        List<Name> exports = parseNameList(elements.get(2), "module exports");
+        if (exports.isEmpty()) {
+            throw new ParserException("module export list cannot be empty", elements.get(2));
+        }
+        rejectDuplicateNames(exports, "duplicate module export: ");
+        List<Node> statements = parseList(elements.subList(3, elements.size()));
+        Block body = new Block(statements, tuple.file, statements.get(0).start,
+                statements.get(statements.size() - 1).end, tuple.line, tuple.col);
+        return new ModuleDef(name, exports, body,
+                tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static Import parseImport(Tuple tuple) throws ParserException {
+        List<Node> elements = tuple.elements;
+        if (elements.size() != 3 || !(elements.get(1) instanceof Str path)) {
+            throw new ParserException("import requires a relative string path and import list", tuple);
+        }
+        if (path.value.isBlank()) {
+            throw new ParserException("import path cannot be empty", path);
+        }
+        List<Name> names = parseNameList(elements.get(2), "import names");
+        if (names.isEmpty()) {
+            throw new ParserException("import list cannot be empty", elements.get(2));
+        }
+        rejectDuplicateNames(names, "duplicate imported name: ");
+        return new Import(path, names, tuple.file, tuple.start, tuple.end, tuple.line, tuple.col);
+    }
+
+    private static List<Name> parseNameList(Node node, String description) throws ParserException {
+        if (!(node instanceof Tuple list)
+                || !delimType(list.open, Constants.SQUARE_BEGIN)) {
+            throw new ParserException(description + " must be a square-bracketed name list", node);
+        }
+        List<Name> names = new ArrayList<>();
+        for (Node element : list.elements) {
+            if (!(element instanceof Name name)) {
+                throw new ParserException(description + " can contain only names", element);
+            }
+            names.add(name);
+        }
+        return names;
+    }
+
+    private static void rejectDuplicateNames(List<Name> names, String prefix)
+            throws ParserException {
+        java.util.Set<String> seen = new java.util.LinkedHashSet<>();
+        for (Name name : names) {
+            if (!seen.add(name.id)) {
+                throw new ParserException(prefix + name.id, name);
+            }
+        }
     }
 
     private static JsonOperation parseJsonOperation(Tuple tuple, JsonOperation.Kind kind)

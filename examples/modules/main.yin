@@ -1,0 +1,3 @@
+(import "./math.yin" [Point double])
+(define point (Point :x 21 :y (double 21)))
+[point.x point.y]

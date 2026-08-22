@@ -218,6 +218,7 @@ public final class ActionGatewayRuntime {
 
     private static Map<String, RuntimeContext.ToolDescriptor> declarations(
             Path program, String source) {
+        ModuleBoundary.requireSingleFile(program.toString(), source, "--gateway");
         TypeChecker checker = new TypeChecker(program.toString());
         checker.typecheckSource(program.toString(), source);
         Map<String, RuntimeContext.ToolDescriptor> declarations = new LinkedHashMap<>();

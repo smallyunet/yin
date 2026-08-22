@@ -51,7 +51,7 @@ public final class ValueEquality {
                     && (!leftOption.present() || equal(leftOption.value(), rightOption.value()));
         }
         if (left instanceof RecordValue leftRecord && right instanceof RecordValue rightRecord) {
-            if (!java.util.Objects.equals(leftRecord.name, rightRecord.name)
+            if (!java.util.Objects.equals(leftRecord.identity(), rightRecord.identity())
                     || !leftRecord.properties.keySet().equals(rightRecord.properties.keySet())) {
                 return false;
             }

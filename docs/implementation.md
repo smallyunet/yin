@@ -144,6 +144,10 @@ the JSON-result boundary.
 `ActionGatewayRuntimeTest` protects the 0.17 immutable source snapshot, closed
 intent/host agreement, actual MCP stdio lifecycle, request-bound approval,
 single-use nonce consumption, external execution, and replay boundary.
+`ModuleIntegrationTest` protects the 0.18 dependency graph across isolated
+exports, selective and transitive imports, one-time initialization, canonical
+paths, cycles, nominal type identity, security-profile rejection, and file-URI
+editor analysis.
 `AgentReviewDemoTest` executes every maintained policy and malformed-input
 fixture through the raw JSON CLI boundary.
 `Web3TransactionGuardDemoTest` protects the normalized wallet-intent policy

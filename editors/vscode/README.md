@@ -9,7 +9,7 @@ Official editor support for the [Yin programming language](https://github.com/sm
 - canonical whole-document formatting
 - exact diagnostic ranges and stable Yin diagnostic codes
 
-The extension includes the Yin 0.17.0 language server and communicates with it
+The extension includes the Yin 0.18.0 language server and communicates with it
 locally over stdio. Source code is never sent to a remote service.
 
 ## Requirement
@@ -30,5 +30,5 @@ formatter for the language, add:
 
 ## Current scope
 
-Yin 0.17.0 provides diagnostics and formatting. Hover, completion, and go to
+Yin 0.18.0 provides diagnostics and formatting. Hover, completion, and go to
 definition are planned for later editor-service releases.

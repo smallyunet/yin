@@ -54,6 +54,8 @@ explicit `otherwise` result.
 - lexical scopes and first-class closures
 - positional and keyword function arguments
 - direct and mutual recursion
+- isolated file modules with explicit exports and selective relative imports
+- dependency-graph type checking, circular-import diagnostics, and single initialization
 - records with typed fields and default values
 - immutable record field access, including inherited fields
 - an experimental type checker
@@ -63,7 +65,7 @@ The JUnit integration suite runs every maintained program under `tests/` through
 both the interpreter and type checker. The automated suite also covers parser
 boundaries, lexical scoping, assignment, Float handling, function calls, record
 inheritance, destructuring, unions, structured diagnostics, and architecture
-boundaries between runtime values and static types. Yin 0.17 defines these
+boundaries between runtime values and static types. Yin 0.18 defines these
 behaviors normatively rather than relying on historical implementation details.
 
 ## Requirements
@@ -81,13 +83,13 @@ extension packages, and SHA-256 checksum files are published on the
 downloaded JAR before running it:
 
 ```bash
-java -jar yin-0.17.0.jar --version
+java -jar yin-0.18.0.jar --version
 ```
 
 Install the matching editor extension from the downloaded VSIX:
 
 ```bash
-code --install-extension yin-language-support-0.17.0.vsix
+code --install-extension yin-language-support-0.18.0.vsix
 ```
 
 ## Build and test
@@ -97,32 +99,43 @@ code --install-extension yin-language-support-0.17.0.vsix
 cargo test --manifest-path vm/Cargo.toml
 ```
 
-This produces the executable JAR at `target/yin-0.17.0.jar`. Build the Rust VM
+This produces the executable JAR at `target/yin-0.18.0.jar`. Build the Rust VM
 with `cargo build --release --manifest-path vm/Cargo.toml`; the binary is
 `vm/target/release/yinvm`.
 
 ## Run a program
 
 ```bash
-java -jar target/yin-0.17.0.jar tests/program-usability.yin
+java -jar target/yin-0.18.0.jar tests/program-usability.yin
 ```
 
 Run the type checker separately:
 
 ```bash
-java -cp target/yin-0.17.0.jar \
+java -cp target/yin-0.18.0.jar \
   org.yinwang.yin.TypeChecker tests/program-usability.yin
 ```
 
 Run complete example programs:
 
 ```bash
-java -jar target/yin-0.17.0.jar examples/algorithms/quicksort.yin
-java -jar target/yin-0.17.0.jar examples/cli/parse-values.yin 10 bad 32
+java -jar target/yin-0.18.0.jar examples/algorithms/quicksort.yin
+java -jar target/yin-0.18.0.jar examples/cli/parse-values.yin 10 bad 32
 printf '%s' '{"task":"review","confidence":0.95}' | \
-  java -jar target/yin-0.17.0.jar --json examples/agents/structured-agent.yin
-java -jar target/yin-0.17.0.jar examples/cli/wc.yin README.md
+  java -jar target/yin-0.18.0.jar --json examples/agents/structured-agent.yin
+java -jar target/yin-0.18.0.jar examples/cli/wc.yin README.md
 ```
+
+Run a multi-file program:
+
+```bash
+java -jar target/yin-0.18.0.jar examples/modules/main.yin
+```
+
+Modules declare their complete public surface and callers import selected names.
+Every reachable module is type-checked, relative paths resolve from the importing
+file, modules initialize once per execution, and same-named nominal types in
+different files remain distinct. See the [module guide](docs/modules.md).
 
 The [typed agent review demo](examples/agents/agent-review/README.md) provides a
 complete strict-JSON request, exhaustive decision, and raw-JSON response flow
@@ -138,7 +151,7 @@ host boundary errors without granting ambient authority.
 Inspect every tool capability without executing the program:
 
 ```bash
-java -jar target/yin-0.17.0.jar --capabilities examples/agents/typed-tool.yin
+java -jar target/yin-0.18.0.jar --capabilities examples/agents/typed-tool.yin
 ```
 
 The manifest is deterministic and includes effect, approval, idempotency, and
@@ -151,14 +164,14 @@ Yin 0.15 introduced `deterministic-policy-v1`, an executable pure-policy profile
 for portable Agent capability decisions. Validate a contract without running it:
 
 ```bash
-java -jar target/yin-0.17.0.jar --contract-check \
+java -jar target/yin-0.18.0.jar --contract-check \
   examples/agents/capability-decision/main.yin
 ```
 
 Evaluate it against one exact JSON input:
 
 ```bash
-java -jar target/yin-0.17.0.jar --contract-run \
+java -jar target/yin-0.18.0.jar --contract-run \
   examples/agents/capability-decision/main.yin \
   --input examples/agents/capability-decision/inputs/approve.json
 ```
@@ -169,7 +182,7 @@ access, output, and tool authority. It remains the source-level reference
 evaluator. Yin 0.16 adds a separate portable execution path:
 
 ```bash
-java -jar target/yin-0.17.0.jar --contract-compile \
+java -jar target/yin-0.18.0.jar --contract-compile \
   examples/agents/capability-decision/main.yin \
   --output capability.ybc
 cargo run --quiet --manifest-path vm/Cargo.toml -- check capability.ybc
@@ -219,12 +232,12 @@ creates a new hash-chained trace for every run:
 mkdir -p examples/agents/tool-boundary/runtime/notes
 cp examples/agents/tool-boundary/fixtures/welcome.txt \
   examples/agents/tool-boundary/runtime/notes/welcome.txt
-java -jar target/yin-0.17.0.jar --guard \
+java -jar target/yin-0.18.0.jar --guard \
   examples/agents/tool-boundary/main.yin \
   --input examples/agents/tool-boundary/inputs/read.json \
   --host examples/agents/tool-boundary/host.json \
   --trace examples/agents/tool-boundary/runtime/read.jsonl
-java -jar target/yin-0.17.0.jar --replay \
+java -jar target/yin-0.18.0.jar --replay \
   examples/agents/tool-boundary/runtime/read.jsonl
 ```
 
@@ -240,7 +253,7 @@ sandbox or production authorization service. See the
 Launch the REPL by running the JAR without a program path:
 
 ```bash
-java -jar target/yin-0.17.0.jar
+java -jar target/yin-0.18.0.jar
 ```
 
 Definitions persist across inputs, balanced multiline forms are supported, and
@@ -252,7 +265,7 @@ the [REPL guide](docs/repl.md) for its precise behavior and embedding API.
 Print canonical formatting without changing the file:
 
 ```bash
-java -jar target/yin-0.17.0.jar --format tests/function1.yin
+java -jar target/yin-0.18.0.jar --format tests/function1.yin
 ```
 
 Use `--format --check` in CI or `--format --write` to update one or more files.
@@ -290,7 +303,8 @@ See the normative [Language specification](docs/language-specification.md), the
 short [Language reference](docs/language-reference.md), the
 [ordered-policy guide](docs/policies.md), the
 [historical-program classification](docs/historical-programs.md),
-[REPL guide](docs/repl.md), [Formatter guide](docs/formatter.md),
+[module guide](docs/modules.md), [REPL guide](docs/repl.md),
+[Formatter guide](docs/formatter.md),
 [Editor integration](docs/lsp.md),
 [Implementation](docs/implementation.md), and [Roadmap](docs/roadmap.md) for the
 maintained project boundaries.

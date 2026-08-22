@@ -14,6 +14,7 @@ public class RecordValue extends Value {
     public Scope<Value> properties;
     private final Set<String> nominalTypes;
     private final String variantName;
+    private final String identity;
 
 
     public RecordValue(String name, Scope<Value> properties) {
@@ -26,10 +27,16 @@ public class RecordValue extends Value {
 
     public RecordValue(String name, Scope<Value> properties, Set<String> nominalTypes,
                        String variantName) {
+        this(name, properties, nominalTypes, variantName, name);
+    }
+
+    public RecordValue(String name, Scope<Value> properties, Set<String> nominalTypes,
+                       String variantName, String identity) {
         this.name = name;
         this.properties = properties;
         this.nominalTypes = Set.copyOf(new LinkedHashSet<>(nominalTypes));
         this.variantName = variantName;
+        this.identity = identity;
     }
 
     public Set<String> nominalTypes() {
@@ -37,6 +44,7 @@ public class RecordValue extends Value {
     }
 
     public String variantName() { return variantName; }
+    public String identity() { return identity; }
 
 
     public String toString() {

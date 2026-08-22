@@ -6,6 +6,7 @@ All maintained examples live under this directory and are grouped by purpose:
 | --- | --- | --- |
 | `algorithms/` | `quicksort.yin` | Pure language and collection algorithms |
 | `cli/` | `parse-values.yin`, `wc.yin` | Arguments, standard input, and file-oriented CLI programs |
+| `modules/` | `main.yin`, `math.yin` | Explicit exports, selective imports, and multi-file type checking |
 | `agents/` | `structured-agent.yin`, `typed-tool.yin`, `agent-review/`, `capability-decision/`, `tool-boundary/`, `action-gateway/` | Ordered typed policy, deterministic decisions, guarded tools, real MCP stdio actions, and JSON workflows |
 | `web3/` | `transaction-guard/` | Ordered safety policy between an AI agent and a wallet host |
 

@@ -1,0 +1,5 @@
+(module math [Point double]
+  (record Point [x Int] [y Int])
+  (define double
+    (fun ([value Int] [-> Int])
+      (* value 2))))

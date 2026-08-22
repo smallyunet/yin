@@ -1,6 +1,7 @@
 package org.yinwang.yin.ast;
 
 import org.yinwang.yin.Constants;
+import org.yinwang.yin.NominalIdentity;
 import org.yinwang.yin.Scope;
 import org.yinwang.yin.type.RecordType;
 import org.yinwang.yin.type.VariantType;
@@ -26,10 +27,12 @@ public final class VariantDef extends Node {
     }
 
     @Override public Value interp(Scope<Value> scope) {
+        String variantIdentity = NominalIdentity.of(this, name.id);
         for (Map.Entry<String, Scope<Object>> entry : cases.entrySet()) {
             Scope<Value> fields = Declare.evalProperties(entry.getValue(), scope);
             scope.putValue(entry.getKey(), new RecordConstructor(
-                    entry.getKey(), this, fields, Set.of(entry.getKey()), name.id));
+                    entry.getKey(), this, fields,
+                    Set.of(NominalIdentity.of(this, entry.getKey())), variantIdentity));
         }
         VariantDescriptor descriptor = new VariantDescriptor(this);
         scope.putValue(name.id, descriptor);
@@ -37,15 +40,16 @@ public final class VariantDef extends Node {
     }
 
     @Override public YinType typecheck(Scope<YinType> scope) {
+        String variantIdentity = NominalIdentity.of(this, name.id);
         Map<String, RecordType> alternatives = new LinkedHashMap<>();
         for (Map.Entry<String, Scope<Object>> entry : cases.entrySet()) {
             Scope<YinType> fields = Declare.typecheckProperties(entry.getValue(), scope);
             RecordType type = new RecordType(entry.getKey(), this, fields,
-                    Set.of(entry.getKey()), name.id);
+                    Set.of(NominalIdentity.of(this, entry.getKey())), variantIdentity);
             alternatives.put(entry.getKey(), type);
             scope.putValue(entry.getKey(), type);
         }
-        VariantType type = new VariantType(name.id, alternatives);
+        VariantType type = new VariantType(name.id, variantIdentity, alternatives);
         scope.putValue(name.id, type);
         return type;
     }
