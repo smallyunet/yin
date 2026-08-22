@@ -708,10 +708,10 @@ fn validate_program_termination(expressions: &[Expr]) -> Result<()> {
             }
             Some("variant") => {
                 for branch in &items[2..] {
-                    if let Expr::Vector(parts) = branch {
-                        if let Some(tag) = name(parts.first()) {
-                            callable.push(tag);
-                        }
+                    if let Expr::Vector(parts) = branch
+                        && let Some(tag) = name(parts.first())
+                    {
+                        callable.push(tag);
                     }
                 }
             }
@@ -726,10 +726,10 @@ fn validate_program_termination(expressions: &[Expr]) -> Result<()> {
         let Expr::List(items) = expression else {
             continue;
         };
-        if matches!(name(items.first()), Some("record" | "variant")) {
-            if let Some(declared) = name(items.get(1)) {
-                types.insert(declared.to_string());
-            }
+        if matches!(name(items.first()), Some("record" | "variant"))
+            && let Some(declared) = name(items.get(1))
+        {
+            types.insert(declared.to_string());
         }
     }
     for expression in expressions {
@@ -741,12 +741,12 @@ fn validate_program_termination(expressions: &[Expr]) -> Result<()> {
 fn validate_operations(expression: &Expr, callable: &[&str]) -> Result<()> {
     match expression {
         Expr::List(items) => {
-            if let Some(operation) = name(items.first()) {
-                if !callable.contains(&operation) {
-                    return Err(format!(
-                        "unsupported portable bytecode operation: {operation}"
-                    ));
-                }
+            if let Some(operation) = name(items.first())
+                && !callable.contains(&operation)
+            {
+                return Err(format!(
+                    "unsupported portable bytecode operation: {operation}"
+                ));
             }
             for item in items {
                 validate_operations(item, callable)?;
@@ -767,10 +767,9 @@ fn validate_types(expression: &Expr, types: &HashSet<String>) -> Result<()> {
         Expr::Vector(items) => {
             if let (Some(Expr::Name(_)), Some(Expr::Name(type_name))) =
                 (items.first(), items.get(1))
+                && !types.contains(type_name)
             {
-                if !types.contains(type_name) {
-                    return Err(format!("unsupported portable bytecode type: {type_name}"));
-                }
+                return Err(format!("unsupported portable bytecode type: {type_name}"));
             }
             for item in items {
                 validate_types(item, types)?;
