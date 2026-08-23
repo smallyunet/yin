@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.21.1
+
+- add the Yin logo and matching Visual Studio Marketplace presentation
+- align the extension with the Yin 0.21.1 native language server release
+
 ## 0.21.0
 
 - align the extension with the Yin 0.21 semantic-regression migration,

@@ -7,10 +7,12 @@ formatter.
 
 ## Visual Studio Code
 
-Install both the platform-specific `yin` executable and the versioned VSIX from the
-[GitHub Releases page](https://github.com/smallyunet/yin/releases) and install it
-with **Extensions: Install from VSIX...** in Visual Studio Code. Put `yin` on
-`PATH`, or set `yin.path` in Visual Studio Code settings to the executable.
+Install the extension from the
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=smallyu.yin-language-support)
+or install the versioned VSIX from the
+[GitHub Releases page](https://github.com/smallyunet/yin/releases) with
+**Extensions: Install from VSIX...**. Install the matching platform-specific
+`yin` executable, put it on `PATH`, or set `yin.path` to its full path.
 
 The first release intentionally supports only full-document synchronization,
 diagnostics, and formatting. Hover, completion, definitions, and references are

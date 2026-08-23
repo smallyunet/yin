@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.21.1 — 2026-08-23
+
+- introduce a unified Yin logo and reusable vector brand assets
+- use the new mark across the Playground, browser metadata, README, and VS Code extension
+- publish the current native extension release to the Visual Studio Marketplace
+
 ## 0.21.0 — 2026-08-23
 
 - migrate the v0.19 semantic regression surface into native Rust integration

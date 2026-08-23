@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title description">
+  <title id="title">Yin</title>
+  <desc id="description">A jade green branching Y symbol on a deep navy rounded square.</desc>
   <rect width="64" height="64" rx="16" fill="#0f172a"/>
   <path
     d="M16 15h10c0 8.2 2.5 14.2 6 17.2 3.5-3 6-9 6-17.2h10c0 12-4.4 21.1-11 27.2V50H27v-7.8C20.4 36.1 16 27 16 15Z"

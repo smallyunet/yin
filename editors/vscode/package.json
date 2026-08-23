@@ -2,8 +2,13 @@
   "name": "yin-language-support",
   "displayName": "Yin Programming Language",
   "description": "Diagnostics, formatting, and syntax highlighting for the Yin programming language.",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "publisher": "smallyu",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#0f172a",
+    "theme": "dark"
+  },
   "license": "AGPL-3.0-only",
   "homepage": "https://github.com/smallyunet/yin",
   "repository": {

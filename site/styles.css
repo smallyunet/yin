@@ -83,18 +83,11 @@ button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 2px sol
 .brand, .site-footer > div { display: inline-flex; align-items: center; gap: 0.7rem; font-weight: 500; letter-spacing: -0.01em; }
 .brand strong { color: var(--muted); font-weight: 400; }
 .brand-mark {
-  display: grid;
+  display: block;
   width: 34px;
   height: 34px;
-  place-items: center;
-  border: 1px solid rgb(74 222 128 / 45%);
-  border-radius: 10px;
-  background: rgb(74 222 128 / 10%);
-  color: var(--accent);
-  font-family: var(--mono);
-  font-weight: 600;
 }
-.brand-mark.small { width: 28px; height: 28px; border-radius: 8px; font-size: 0.8rem; }
+.brand-mark.small { width: 28px; height: 28px; }
 .header-nav { display: flex; align-items: center; gap: 1.5rem; color: var(--text-soft); font-size: 0.9rem; }
 .header-nav a { transition: color 180ms ease; }
 .header-nav a:hover { color: var(--text); }

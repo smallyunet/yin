@@ -35,7 +35,7 @@ jobs:
           cargo test --workspace --all-targets
           cargo build --release --workspace
           .github/scripts/verify-rust-runtime.sh
-          .github/scripts/verify-rust-vm.sh 0.21.0
+          .github/scripts/verify-rust-vm.sh 0.21.1
           .github/scripts/verify-v019-test-migration.sh
           .github/scripts/verify-v019-differential.sh
       - name: Verify Rust/Wasm runtime
@@ -61,4 +61,4 @@ jobs:
         working-directory: editors/vscode
       - run: npm run package
         working-directory: editors/vscode
-      - run: .github/scripts/verify-vsix.sh 0.21.0 editors/vscode/yin-language-support-0.21.0.vsix
+      - run: .github/scripts/verify-vsix.sh 0.21.1 editors/vscode/yin-language-support-0.21.1.vsix

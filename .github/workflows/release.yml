@@ -61,6 +61,7 @@ jobs:
           cache-dependency-path: editors/vscode/package-lock.json
       - run: npm ci && npm run package
         working-directory: editors/vscode
+      - run: .github/scripts/verify-vsix.sh "${GITHUB_REF_NAME#v}" "editors/vscode/yin-language-support-${GITHUB_REF_NAME#v}.vsix"
       - uses: actions/upload-artifact@v4
         with:
           name: editor

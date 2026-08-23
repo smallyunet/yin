@@ -1,6 +1,6 @@
 [package]
 name = "yin-vm"
-version = "0.21.0"
+version = "0.21.1"
 edition = "2024"
 description = "Deterministic Rust runtime for portable Yin bytecode"
 license = "AGPL-3.0-only"
