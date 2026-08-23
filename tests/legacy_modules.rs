@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use yin::{Engine, Host};
 
 struct Project {
@@ -149,7 +149,7 @@ fn dependency_type_errors_are_checked_before_evaluation() {
 #[test]
 fn invalid_module_contracts_are_rejected() {
     let project = Project::new();
-    let absolute_target = Path::new("/tmp/value.yin");
+    let absolute_target = project.root.path().join("value.yin");
     project.write(
         "absolute.yin",
         &format!("(import \"{}\" [value])", absolute_target.display()),
