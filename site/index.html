@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hero-stats" aria-label="Project status">
-          <div><strong>0.20</strong><span>Current version</span></div>
-          <div><strong>230+</strong><span>Automated tests</span></div>
+          <div><strong>0.21</strong><span>Current version</span></div>
+          <div><strong>149</strong><span>Rust tests</span></div>
           <div><strong>0</strong><span>Server dependencies</span></div>
         </div>
       </section>
@@ -82,10 +82,19 @@
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="structuredAgent">Structured agent</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="agentReview">Ordered policy</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="typedTool">Typed tool</button>
+              <button class="example-tab example-tab-featured" type="button" role="tab" aria-selected="false" data-example="ethWallet">ETH wallet</button>
               <button class="example-tab" type="button" role="tab" aria-selected="false" data-example="web3Guard">Web3 guard</button>
             </div>
           </div>
         </div>
+
+        <aside class="wallet-demo-notice is-hidden" id="wallet-demo-notice" role="note">
+          <div>
+            <strong>Browser-only educational wallet</strong>
+            <p>Web Crypto generates the key inside the local Worker. Yin receives the public address, while the private key stays outside program values and is hidden by default.</p>
+          </div>
+          <span>Never send funds to this demo wallet.</span>
+        </aside>
 
         <div class="workbench">
           <section class="panel editor-panel" aria-labelledby="editor-title">
@@ -101,7 +110,7 @@
                 <button class="text-button" id="format-button" type="button">Format</button>
                 <button class="run-button" id="run-button" type="button">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>
-                  Run
+                  <span id="run-button-label">Run</span>
                 </button>
               </div>
             </div>
@@ -133,7 +142,7 @@
             <div class="output-content" id="output-content">
               <div class="runtime-loading" id="runtime-loading">
                 <span class="spinner" aria-hidden="true"></span>
-                <div><strong>Loading the Yin runtime</strong><span>About 150 KB on first load</span></div>
+                <div><strong>Loading the Yin runtime</strong><span>Runs locally from WebAssembly</span></div>
               </div>
               <div class="result-view is-hidden" id="result-view">
                 <div class="result-meta">
@@ -147,6 +156,18 @@
                 <div class="type-row">
                   <span>Inferred type</span>
                   <code id="result-type">void</code>
+                </div>
+                <div class="wallet-secret is-hidden" id="wallet-secret">
+                  <div class="wallet-secret-heading">
+                    <span class="result-label">Demo private key</span>
+                    <span class="wallet-local-badge">Worker memory only</span>
+                  </div>
+                  <p><strong>Educational demo only.</strong> Anyone with this key controls the wallet. Never fund this address.</p>
+                  <code id="wallet-secret-value">Hidden until you reveal it</code>
+                  <div class="wallet-secret-actions">
+                    <button class="text-button" id="wallet-reveal-button" type="button" aria-pressed="false">Reveal private key</button>
+                    <button class="text-button" id="wallet-copy-button" type="button" disabled>Copy private key</button>
+                  </div>
                 </div>
                 <div class="stdout-block is-hidden" id="stdout-block">
                   <span class="result-label">Standard output</span>

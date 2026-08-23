@@ -1,0 +1,18 @@
+(record WalletRequest [acknowledged Bool])
+(record WalletReceipt [address String] [publicKey String])
+(variant WalletFailure
+  [GenerationFailed [message String]])
+
+(tool generate-eth-wallet WalletRequest WalletReceipt WalletFailure
+  :capability "wallet.create"
+  :effect :write
+  :approval true
+  :idempotent false
+  :open-world false)
+
+(match (invoke generate-eth-wallet (WalletRequest :acknowledged true))
+  [(Ok wallet) wallet.address]
+  [(Err error)
+    (match error
+      [(GenerationFailed message) message]
+      [(ToolError _ _ message) message])])

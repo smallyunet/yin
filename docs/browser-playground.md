@@ -10,6 +10,15 @@ approval stores, and native gateway operations are deliberately unavailable in
 Wasm. Their source forms still parse and type-check, and an attempted tool call
 returns a structured `ToolError` through the normal Yin boundary.
 
+The Playground has one intentionally narrow browser host capability:
+`generate-eth-wallet`. It obtains entropy from Web Crypto inside the Worker,
+derives an Ethereum address locally, and returns only the address and public key
+through the typed Yin tool boundary. The private key stays outside Yin values,
+standard output, and diagnostics; the UI retrieves it through a separate
+one-shot Wasm export and keeps it hidden until the user explicitly reveals or
+copies it. This is an educational demo and generated addresses must not receive
+funds.
+
 Build the runtime:
 
 ```bash

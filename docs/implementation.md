@@ -26,8 +26,9 @@ Additional boundaries:
 
 The runtime uses distinct `Type` and `Value` representations. Every executed
 program is parsed and checked before evaluation. Host effects enter through an
-explicit `Host`; browser hosts disable filesystem and subprocess capabilities,
-while native gateway hosts install narrowly scoped tool executors.
+explicit `Host`; browser hosts disable filesystem and subprocess capabilities
+and expose only the educational wallet demo tool, while native gateway hosts
+install their own narrowly scoped tool executors.
 
 Run the complete maintained verification path:
 

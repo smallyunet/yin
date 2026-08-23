@@ -8,6 +8,8 @@ mod gateway;
 mod lsp;
 mod syntax;
 mod value;
+#[cfg(any(target_arch = "wasm32", test))]
+mod wallet;
 
 pub use check::{CheckSession, check_program};
 pub use contract::{compile_bytecode, contract_run};
@@ -24,12 +26,57 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[cfg(target_arch = "wasm32")]
 mod wasm {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
     use wasm_bindgen::prelude::*;
+
+    thread_local! {
+        static BROWSER_SECRET: RefCell<Option<String>> = const { RefCell::new(None) };
+    }
+
+    fn browser_host(input: &str, arguments: Vec<String>) -> crate::Host {
+        let mut host = crate::Host::browser(input, arguments);
+        host.tool_executor = Some(Rc::new(|name, input| {
+            if name != "generate-eth-wallet" {
+                return Err(crate::YinError::language(format!(
+                    "browser host does not provide tool: {name}"
+                )));
+            }
+            if input
+                .get("acknowledged")
+                .and_then(serde_json::Value::as_bool)
+                != Some(true)
+            {
+                return Err(crate::YinError::language(
+                    "wallet demo risk acknowledgement is required",
+                ));
+            }
+            let wallet = loop {
+                let mut bytes = [0_u8; 32];
+                getrandom::fill(&mut bytes).map_err(|error| {
+                    crate::YinError::language(format!("secure randomness unavailable: {error}"))
+                })?;
+                if let Ok(wallet) = crate::wallet::eth_wallet_from_private_key(&bytes) {
+                    break wallet;
+                }
+            };
+            BROWSER_SECRET.with(|secret| {
+                *secret.borrow_mut() = Some(wallet.private_key);
+            });
+            Ok(serde_json::json!({
+                "address": wallet.address,
+                "publicKey": wallet.public_key,
+            }))
+        }));
+        host
+    }
 
     #[wasm_bindgen]
     pub fn evaluate(source: &str, input: &str, arguments_json: &str) -> String {
+        BROWSER_SECRET.with(|secret| secret.borrow_mut().take());
         let arguments = serde_json::from_str::<Vec<String>>(arguments_json).unwrap_or_default();
-        match crate::Engine::new(crate::Host::browser(input, arguments))
+        match crate::Engine::new(browser_host(input, arguments))
             .run_source("playground.yin", source)
         {
             Ok(result) => serde_json::json!({
@@ -44,6 +91,11 @@ mod wasm {
             })
             .to_string(),
         }
+    }
+
+    #[wasm_bindgen]
+    pub fn take_browser_secret() -> String {
+        BROWSER_SECRET.with(|secret| secret.borrow_mut().take().unwrap_or_default())
     }
 
     #[wasm_bindgen]

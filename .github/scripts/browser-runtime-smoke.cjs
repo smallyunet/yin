@@ -59,6 +59,14 @@ vm.runInThisContext(fs.readFileSync("site/runtime/yin.js", "utf8"));
   assert.equal(structuredContract.ok, true);
   assert.match(structuredContract.value, /Approve/);
 
+  const wallet = evaluate(fs.readFileSync("examples/web3/eth-wallet/main.yin", "utf8"));
+  assert.equal(wallet.ok, true);
+  assert.match(wallet.value, /^"0x[0-9A-Fa-f]{40}"$/);
+  const privateKey = wasm_bindgen.take_browser_secret();
+  assert.match(privateKey, /^0x[0-9a-f]{64}$/);
+  assert.equal(wasm_bindgen.take_browser_secret(), "");
+  assert.doesNotMatch(JSON.stringify(wallet), new RegExp(privateKey.slice(2)));
+
   console.log("Rust/Wasm browser runtime smoke test passed");
 })().catch((error) => {
   console.error(error);

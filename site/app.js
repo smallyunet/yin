@@ -158,6 +158,24 @@ origin.x`,
       [(Offline message) message]
       [(Rejected message) message]
       [(ToolError _ _ message) message])])`,
+  ethWallet: `(record WalletRequest [acknowledged Bool])
+(record WalletReceipt [address String] [publicKey String])
+(variant WalletFailure
+  [GenerationFailed [message String]])
+
+(tool generate-eth-wallet WalletRequest WalletReceipt WalletFailure
+  :capability "wallet.create"
+  :effect :write
+  :approval true
+  :idempotent false
+  :open-world false)
+
+(match (invoke generate-eth-wallet (WalletRequest :acknowledged true))
+  [(Ok wallet) wallet.address]
+  [(Err error)
+    (match error
+      [(GenerationFailed message) message]
+      [(ToolError _ _ message) message])])`,
   web3Guard: `(record TransactionIntent
   [requestId String]
   [chainId Int]
@@ -228,6 +246,7 @@ const exampleFiles = {
   structuredAgent: "examples/agents/structured-agent.yin",
   agentReview: "examples/agents/agent-review/main.yin",
   typedTool: "examples/agents/typed-tool.yin",
+  ethWallet: "examples/web3/eth-wallet/main.yin",
   web3Guard: "examples/web3/transaction-guard/main.yin"
 };
 
@@ -238,6 +257,7 @@ const inputPanel = document.querySelector("#input-panel");
 const inputEditor = document.querySelector("#input-editor");
 const lineNumbers = document.querySelector("#line-numbers");
 const runButton = document.querySelector("#run-button");
+const runButtonLabel = document.querySelector("#run-button-label");
 const formatButton = document.querySelector("#format-button");
 const resetButton = document.querySelector("#reset-button");
 const copyButton = document.querySelector("#copy-button");
@@ -256,6 +276,11 @@ const diagnosticLocation = document.querySelector("#diagnostic-location");
 const runtimeDot = document.querySelector("#runtime-dot");
 const runtimeStatus = document.querySelector("#runtime-status");
 const cursorPosition = document.querySelector("#cursor-position");
+const walletDemoNotice = document.querySelector("#wallet-demo-notice");
+const walletSecret = document.querySelector("#wallet-secret");
+const walletSecretValue = document.querySelector("#wallet-secret-value");
+const walletRevealButton = document.querySelector("#wallet-reveal-button");
+const walletCopyButton = document.querySelector("#wallet-copy-button");
 
 let worker;
 let workerReady = false;
@@ -263,6 +288,25 @@ let requestId = 0;
 let pendingRequest = null;
 let lastDiagnostic = null;
 let activeExample = "dictionaries";
+let privateKey = "";
+let privateKeyRevealed = false;
+
+function clearWalletSecret() {
+  privateKey = "";
+  privateKeyRevealed = false;
+  walletSecret.classList.add("is-hidden");
+  walletSecretValue.textContent = "Hidden until you reveal it";
+  walletRevealButton.textContent = "Reveal private key";
+  walletRevealButton.setAttribute("aria-pressed", "false");
+  walletCopyButton.disabled = true;
+  walletCopyButton.textContent = "Copy private key";
+}
+
+function updateExampleChrome() {
+  const walletActive = activeExample === "ethWallet";
+  walletDemoNotice.classList.toggle("is-hidden", !walletActive);
+  runButtonLabel.textContent = walletActive ? "Generate" : "Run";
+}
 
 function createWorker() {
   workerReady = false;
@@ -323,10 +367,13 @@ function request(action, source = "", input) {
 function setBusy(busy) {
   runButton.disabled = busy || !workerReady;
   formatButton.disabled = busy || !workerReady;
-  runButton.lastChild.textContent = busy ? " Running" : " Run";
+  runButtonLabel.textContent = busy
+    ? (activeExample === "ethWallet" ? "Generating" : "Running")
+    : (activeExample === "ethWallet" ? "Generate" : "Run");
 }
 
 function showIdle() {
+  clearWalletSecret();
   statusChip.className = "status-chip status-success";
   statusChip.innerHTML = "<i></i>Ready";
   duration.textContent = "⌘ + Enter";
@@ -337,6 +384,7 @@ function showIdle() {
 }
 
 function showResult(payload, elapsed) {
+  clearWalletSecret();
   duration.textContent = `${elapsed} ms`;
   lastDiagnostic = payload.diagnostic || null;
   const output = payload.output || [];
@@ -344,10 +392,15 @@ function showResult(payload, elapsed) {
   stdoutValue.textContent = output.join("\n");
   if (payload.ok) {
     statusChip.className = "status-chip status-success";
-    statusChip.innerHTML = "<i></i>Executed";
+    statusChip.innerHTML = `<i></i>${payload.secret ? "Generated" : "Executed"}`;
     resultValue.textContent = payload.value;
-    resultType.textContent = payload.type;
+    resultType.textContent = payload.secret ? "Ethereum address" : payload.type;
     diagnostic.classList.add("is-hidden");
+    if (payload.secret) {
+      privateKey = payload.secret;
+      walletSecret.classList.remove("is-hidden");
+      walletCopyButton.disabled = false;
+    }
   } else {
     statusChip.className = "status-chip status-error";
     statusChip.innerHTML = "<i></i>Failed";
@@ -397,12 +450,14 @@ function handleFormatResult(payload) {
 function loadExample(name, persist = true) {
   if (!Object.hasOwn(examples, name)) return;
   activeExample = name;
+  clearWalletSecret();
   editor.value = examples[name];
   inputEditor.value = exampleInputs[name] || "";
   const acceptsInput = Object.hasOwn(exampleInputs, name);
   inputPanel.classList.toggle("is-hidden", !acceptsInput);
   editorPanel.classList.toggle("has-input", acceptsInput);
   editorTitle.textContent = exampleFiles[name] || "main.yin";
+  updateExampleChrome();
   document.querySelectorAll(".example-tab").forEach((tab) => {
     const active = tab.dataset.example === name;
     tab.classList.toggle("is-active", active);
@@ -440,6 +495,7 @@ function restoreExampleChrome(name) {
   inputPanel.classList.toggle("is-hidden", !acceptsInput);
   editorPanel.classList.toggle("has-input", acceptsInput);
   editorTitle.textContent = exampleFiles[activeExample] || "main.yin";
+  updateExampleChrome();
   document.querySelectorAll(".example-tab").forEach((tab) => {
     const active = tab.dataset.example === activeExample;
     tab.classList.toggle("is-active", active);
@@ -468,6 +524,21 @@ runButton.addEventListener("click", () => request(
 formatButton.addEventListener("click", () => request("format", editor.value));
 resetButton.addEventListener("click", () => {
   if (!pendingRequest) request("reset");
+});
+walletRevealButton.addEventListener("click", () => {
+  if (!privateKey) return;
+  privateKeyRevealed = !privateKeyRevealed;
+  walletSecretValue.textContent = privateKeyRevealed ? privateKey : "Hidden until you reveal it";
+  walletRevealButton.textContent = privateKeyRevealed ? "Hide private key" : "Reveal private key";
+  walletRevealButton.setAttribute("aria-pressed", String(privateKeyRevealed));
+});
+walletCopyButton.addEventListener("click", async () => {
+  if (!privateKey) return;
+  await navigator.clipboard.writeText(privateKey);
+  walletCopyButton.textContent = "Copied";
+  setTimeout(() => {
+    if (privateKey) walletCopyButton.textContent = "Copy private key";
+  }, 1200);
 });
 copyButton.addEventListener("click", async () => {
   await navigator.clipboard.writeText(editor.value);

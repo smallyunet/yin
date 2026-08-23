@@ -176,6 +176,21 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 .example-tab.is-active { border-color: var(--border); background: var(--surface); color: var(--text); }
 .example-tab-featured { color: #93c5fd; }
 
+.wallet-demo-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 0 0 0.8rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgb(96 165 250 / 28%);
+  border-radius: 0.75rem;
+  background: rgb(30 64 175 / 9%);
+}
+.wallet-demo-notice strong { color: #bfdbfe; font-size: 0.82rem; font-weight: 600; }
+.wallet-demo-notice p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.78rem; }
+.wallet-demo-notice > span { flex: 0 0 auto; color: var(--warning); font-family: var(--mono); font-size: 0.7rem; }
+
 .workbench {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.75fr);
@@ -254,7 +269,7 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 }
 .editor-footer span:first-child { margin-right: auto; }
 
-.output-content { position: relative; flex: 1; padding: 1.4rem; }
+.output-content { position: relative; flex: 1; overflow-y: auto; padding: 1.4rem; }
 .runtime-loading { display: flex; height: 100%; align-items: center; justify-content: center; gap: 0.9rem; color: var(--text-soft); }
 .runtime-loading div { display: flex; flex-direction: column; }
 .runtime-loading strong { font-size: 0.88rem; font-weight: 500; }
@@ -273,6 +288,13 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
 .result-block code { overflow-wrap: anywhere; color: var(--text); font-family: var(--mono); font-size: clamp(1.35rem, 3vw, 2rem); }
 .type-row, .stdout-block { padding: 0.8rem 1rem; border: 1px solid var(--border-subtle); border-radius: 0.65rem; background: rgb(12 20 35 / 58%); color: var(--muted); font-size: 0.78rem; }
 .type-row code { color: #93c5fd; font-family: var(--mono); }
+.wallet-secret { padding: 0.9rem 1rem; border: 1px solid rgb(251 191 36 / 28%); border-radius: 0.65rem; background: rgb(251 191 36 / 6%); }
+.wallet-secret-heading, .wallet-secret-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.wallet-local-badge { padding: 0.2rem 0.4rem; border: 1px solid rgb(96 165 250 / 30%); border-radius: 999px; color: #93c5fd; font-family: var(--mono); font-size: 0.6rem; }
+.wallet-secret p { margin: 0.7rem 0; color: var(--muted); font-size: 0.75rem; }
+.wallet-secret p strong { color: var(--warning); }
+.wallet-secret > code { display: block; min-height: 44px; overflow-wrap: anywhere; padding: 0.7rem; border-radius: 0.45rem; background: #0a1220; color: var(--text-soft); font-family: var(--mono); font-size: 0.72rem; }
+.wallet-secret-actions { justify-content: flex-start; margin-top: 0.55rem; }
 .stdout-block pre { margin: 0.65rem 0 0; color: var(--text-soft); font-family: var(--mono); font-size: 0.78rem; white-space: pre-wrap; }
 .diagnostic { display: flex; width: 100%; min-height: 88px; flex-direction: column; align-items: flex-start; gap: 0.35rem; padding: 0.9rem 1rem; border: 1px solid rgb(251 113 133 / 30%); border-radius: 0.65rem; background: rgb(251 113 133 / 7%); color: var(--text-soft); text-align: left; }
 .diagnostic:hover { border-color: rgb(251 113 133 / 55%); }
@@ -330,6 +352,7 @@ kbd { padding: 0.13rem 0.35rem; border: 1px solid var(--border); border-bottom-w
   .section-heading > p { text-align: left; }
   .playground-section, .features-section { padding: 3.5rem 0; }
   .example-group { grid-template-columns: 1fr; gap: 0.15rem; }
+  .wallet-demo-notice { align-items: flex-start; flex-direction: column; gap: 0.6rem; }
   .workbench { border-radius: 0.75rem; }
   .panel-bar { padding-left: 0.8rem; }
   .traffic-lights, .panel-actions .icon-button { display: none; }

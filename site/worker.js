@@ -10,11 +10,12 @@ self.addEventListener("message", async (event) => {
     await runtimeReady;
     if (action === "run") {
       const result = JSON.parse(wasm_bindgen.evaluate(source, input || "", "[]"));
+      const secret = wasm_bindgen.take_browser_secret();
       self.postMessage({
         id,
         kind: "result",
         payload: result.ok
-          ? { ok: true, value: result.value, type: "Runtime value", output: result.output || [] }
+          ? { ok: true, value: result.value, type: "Runtime value", output: result.output || [], secret }
           : { ok: false, output: [], diagnostic: result.error }
       });
     } else if (action === "format") {
@@ -27,6 +28,7 @@ self.addEventListener("message", async (event) => {
           : { ok: false, diagnostic: result.error }
       });
     } else if (action === "reset") {
+      wasm_bindgen.take_browser_secret();
       self.postMessage({ id, kind: "result", payload: { ok: true } });
     }
   } catch (error) {
