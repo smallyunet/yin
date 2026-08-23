@@ -1,0 +1,4 @@
+(record Request [name String] [limit Int :default 10])
+(match (decode-json Request "{\"name\":\"yin\"}")
+  [(Ok request) (encode-json request)]
+  [(Err error) (err error)])

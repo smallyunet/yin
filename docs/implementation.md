@@ -37,7 +37,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace --all-targets
 cargo build --release --workspace
 .github/scripts/verify-rust-runtime.sh
-.github/scripts/verify-rust-vm.sh 0.20.0
+.github/scripts/verify-rust-vm.sh 0.21.0
 ```
 
 The conformance script executes the normative corpus, multi-file configuration

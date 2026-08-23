@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.21.0
+
+- align the extension with the Yin 0.21 semantic-regression migration,
+  persistent REPL/LSP runtime, and v0.19 differential conformance gates
+
 ## 0.20.0
 
 - replace the JVM language server with the native Rust `yin --lsp` server

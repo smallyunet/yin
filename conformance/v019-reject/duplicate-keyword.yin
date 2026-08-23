@@ -1,0 +1,2 @@
+(define identity (fun (value) value))
+(identity :value 1 :value 2)

@@ -14,12 +14,19 @@ pub enum Type {
     Float,
     Bool,
     String,
+    ExactVector(Vec<Type>),
     Vector(Box<Type>),
     Dict(Box<Type>, Box<Type>),
     Set(Box<Type>),
     Result(Box<Type>, Box<Type>),
+    Ok(Box<Type>),
+    Err(Box<Type>),
     Option(Box<Type>),
-    Function(Vec<Type>, Box<Type>),
+    Some(Box<Type>),
+    None,
+    Function(Vec<Type>, usize, Box<Type>),
+    Tool(Box<Type>, Box<Type>, Box<Type>),
+    Record { name: String, parents: Vec<String> },
     Named(String),
     Union(Vec<Type>),
 }
@@ -52,6 +59,10 @@ pub enum Value {
     Function(Rc<Function>),
     Primitive(&'static str),
     RecordDefinition(Rc<RecordDefinition>),
+    VariantDefinition {
+        name: String,
+        cases: Vec<String>,
+    },
     Record {
         name: String,
         fields: IndexMap<String, Value>,
@@ -128,7 +139,10 @@ impl fmt::Display for Value {
             Self::Int(value) => write!(f, "{value}"),
             Self::Float(value) => write!(f, "{value}"),
             Self::Bool(value) => write!(f, "{value}"),
-            Self::String(value) => write!(f, "{value}"),
+            Self::String(value) => {
+                let encoded = serde_json::to_string(value).map_err(|_| fmt::Error)?;
+                f.write_str(&encoded)
+            }
             Self::Vector(values) => write_joined(f, "[", "]", values),
             Self::Dict(entries) => {
                 f.write_str("(dict")?;
@@ -147,10 +161,11 @@ impl fmt::Display for Value {
             Self::Function(_) => f.write_str("<function>"),
             Self::Primitive(name) => write!(f, "<primitive:{name}>"),
             Self::RecordDefinition(definition) => write!(f, "<record:{}>", definition.name),
+            Self::VariantDefinition { name, .. } => write!(f, "<variant:{name}>"),
             Self::Record { name, fields, .. } => {
-                write!(f, "({name}")?;
-                for value in fields.values() {
-                    write!(f, " {value}")?;
+                write!(f, "(record {name}")?;
+                for (field, value) in fields {
+                    write!(f, " [{field} {value}]")?;
                 }
                 f.write_str(")")
             }

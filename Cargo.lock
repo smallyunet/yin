@@ -448,7 +448,7 @@ dependencies = [
 
 [[package]]
 name = "yin-language"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "fs2",
  "indexmap",
@@ -464,7 +464,7 @@ dependencies = [
 
 [[package]]
 name = "yin-vm"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "serde_json",
  "sha2",

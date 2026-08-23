@@ -1,0 +1,5 @@
+(define original (dict "a" 1 "b" 2))
+(define values (set 1 2 2 3))
+[(dict/get (dict/put original "a" 10) "a")
+ (set/union values (set 3 4))
+ (map [1 2 3] (fun ([value Int] [-> Int]) (* value 2)))]

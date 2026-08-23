@@ -304,6 +304,7 @@ fn format_command(arguments: &[String]) -> Result<(), (i32, String)> {
 }
 
 fn repl() -> Result<(), (i32, String)> {
+    let mut session = yin::ReplSession::new(Host::default());
     let mut source = String::new();
     let mut line = String::new();
     loop {
@@ -313,14 +314,26 @@ fn repl() -> Result<(), (i32, String)> {
             .map_err(|e| (1, e.to_string()))?
             == 0
         {
+            if !source.trim().is_empty() {
+                if let Err(error) = yin::parse("<repl>", &source) {
+                    eprintln!("{error}");
+                }
+            }
+            break;
+        }
+        if source.is_empty() && line.trim() == ":quit" {
             break;
         }
         source.push_str(&line);
         match yin::parse("<repl>", &source) {
             Ok(_) => {
-                let mut engine = Engine::new(Host::default());
-                match engine.run_source("<repl>", &source) {
-                    Ok(result) => println!("{}", result.value),
+                match session.evaluate("<repl>", &source) {
+                    Ok((result, _)) => {
+                        for line in result.output {
+                            println!("{line}");
+                        }
+                        println!("{}", result.value)
+                    }
                     Err(error) => eprintln!("{error}"),
                 }
                 source.clear()

@@ -238,6 +238,13 @@ fn lex(file: &str, source: &str) -> Result<Vec<Token>, YinError> {
                         Some(span(index + 1)),
                     ));
                 }
+                if looks_numeric(&atom) && !valid_number(&atom) {
+                    return Err(YinError::new(
+                        ErrorCode::Syntax,
+                        format!("incorrect number format: {atom}"),
+                        Some(span(index)),
+                    ));
+                }
                 out.push(Token {
                     kind: TokenKind::Atom(atom),
                     span: span(index),
@@ -246,6 +253,27 @@ fn lex(file: &str, source: &str) -> Result<Vec<Token>, YinError> {
         }
     }
     Ok(out)
+}
+
+fn looks_numeric(atom: &str) -> bool {
+    let first = atom.as_bytes().first().copied();
+    first.is_some_and(|byte| byte.is_ascii_digit())
+        || matches!(first, Some(b'+' | b'-'))
+            && atom.as_bytes().get(1).is_some_and(u8::is_ascii_digit)
+}
+
+fn valid_number(atom: &str) -> bool {
+    let unsigned = atom
+        .strip_prefix('+')
+        .or_else(|| atom.strip_prefix('-'))
+        .unwrap_or(atom);
+    if let Some(hex) = unsigned.strip_prefix("0x") {
+        return !hex.is_empty() && hex.bytes().all(|byte| byte.is_ascii_hexdigit());
+    }
+    if let Some(binary) = unsigned.strip_prefix("0b") {
+        return !binary.is_empty() && binary.bytes().all(|byte| matches!(byte, b'0' | b'1'));
+    }
+    atom.parse::<f64>().is_ok()
 }
 
 fn advance(byte: u8, line: &mut usize, column: &mut usize) {

@@ -1,6 +1,6 @@
 use crate::syntax::{Expr, Form, parse};
 use crate::value::{Function, RecordDefinition};
-use crate::{Type, Value, YinError, check_program};
+use crate::{CheckSession, Type, Value, YinError, check_program};
 use indexmap::IndexMap;
 use num_bigint::BigInt;
 use num_traits::{ToPrimitive, Zero};
@@ -116,6 +116,45 @@ pub struct Engine {
     modules: IndexMap<PathBuf, IndexMap<String, Value>>,
     loading: HashSet<PathBuf>,
     current_file: Option<PathBuf>,
+}
+
+pub struct ReplSession {
+    engine: Engine,
+    environment: Environment,
+    checker: CheckSession,
+}
+
+impl ReplSession {
+    pub fn new(host: Host) -> Self {
+        let engine = Engine::new(host);
+        let environment = engine.initial_environment();
+        Self {
+            engine,
+            environment,
+            checker: CheckSession::new(),
+        }
+    }
+
+    pub fn evaluate(
+        &mut self,
+        file: &str,
+        source: &str,
+    ) -> Result<(ProgramResult, Type), YinError> {
+        let kind = self.checker.check_source(file, source)?;
+        let program = parse(file, source)?;
+        let environment = self.environment.child();
+        let value = self
+            .engine
+            .eval_sequence(&program.expressions, &environment)?;
+        self.environment = environment;
+        Ok((
+            ProgramResult {
+                value,
+                output: std::mem::take(&mut self.engine.output),
+            },
+            kind,
+        ))
+    }
 }
 
 impl Engine {
@@ -333,7 +372,7 @@ impl Engine {
             }
             Some("decode-json") => self.eval_decode_json(values, env),
             Some("encode-json") => self.eval_encode_json(values, env),
-            Some("json-schema") => self.eval_json_schema(values),
+            Some("json-schema") => self.eval_json_schema(values, env),
             _ => self.eval_call(values, env),
         }
     }
@@ -356,11 +395,8 @@ impl Engine {
 
     fn eval_assign(&mut self, values: &[Expr], env: &Environment) -> Result<Value, YinError> {
         expect_len(values, 3, "set!")?;
-        let name = values[1]
-            .atom()
-            .ok_or_else(|| YinError::language("set! expects a name"))?;
         let value = self.eval(&values[2], env)?;
-        env.assign(name, value.clone())?;
+        bind_pattern(&values[1], value.clone(), env, false)?;
         Ok(value)
     }
 
@@ -381,6 +417,7 @@ impl Engine {
                 Expr::Form(Form::Vector, fields, _)
                     if fields.first().and_then(Expr::atom) == Some("->") => {}
                 Expr::Form(Form::Vector, fields, _) => {
+                    validate_descriptor(fields)?;
                     let name = fields
                         .first()
                         .and_then(Expr::atom)
@@ -450,14 +487,26 @@ impl Engine {
                 }
                 let call_env = function.environment.child();
                 if keywords.is_empty() {
-                    if positional.len() != function.parameters.len() {
+                    let required = function
+                        .parameters
+                        .iter()
+                        .filter(|parameter| parameter.default.is_none())
+                        .count();
+                    if positional.len() < required || positional.len() > function.parameters.len() {
                         return Err(YinError::language(format!(
-                            "expected {} arguments, got {}",
+                            "expected {required}..={} arguments, got {}",
                             function.parameters.len(),
                             positional.len()
                         )));
                     }
-                    for (parameter, value) in function.parameters.iter().zip(positional) {
+                    for (index, parameter) in function.parameters.iter().enumerate() {
+                        let value = positional
+                            .get(index)
+                            .cloned()
+                            .or_else(|| parameter.default.clone())
+                            .ok_or_else(|| {
+                                YinError::language(format!("missing argument: {}", parameter.name))
+                            })?;
                         call_env.define(&parameter.name, value)?;
                     }
                 } else {
@@ -580,6 +629,11 @@ impl Engine {
                 }
                 let mut out = Vec::new();
                 for pair in args.chunks(2) {
+                    if !structurally_comparable(&pair[0]) {
+                        return Err(YinError::language(
+                            "dict key requires structurally comparable values",
+                        ));
+                    }
                     put_pair(&mut out, pair[0].clone(), pair[1].clone());
                 }
                 Ok(Value::Dict(out))
@@ -631,7 +685,14 @@ impl Engine {
                 arity(&args, 1, name)?;
                 Ok(Value::Int(BigInt::from(dict(&args[0])?.len())))
             }
-            "set" => Ok(Value::Set(unique(args))),
+            "set" => {
+                if args.iter().any(|value| !structurally_comparable(value)) {
+                    return Err(YinError::language(
+                        "set requires structurally comparable values",
+                    ));
+                }
+                Ok(Value::Set(unique(args)))
+            }
             "set/add" => {
                 arity(&args, 2, name)?;
                 let mut s = set(&args[0])?.to_vec();
@@ -895,14 +956,6 @@ impl Engine {
             index += 1
         }
         let mut fields = Vec::new();
-        for parent in &parents {
-            let Some(Value::RecordDefinition(parent_definition)) = env.get(parent) else {
-                return Err(YinError::language(format!(
-                    "unknown parent record: {parent}"
-                )));
-            };
-            fields.extend(parent_definition.fields.iter().cloned());
-        }
         for field in &values[index..] {
             let Expr::Form(Form::Vector, parts, _) = field else {
                 return Err(YinError::language("record field must be a vector"));
@@ -912,6 +965,12 @@ impl Engine {
                 .and_then(Expr::atom)
                 .ok_or_else(|| YinError::language("invalid record field"))?
                 .to_owned();
+            validate_descriptor(parts)?;
+            if fields.iter().any(|(name, _, _)| name == &field_name) {
+                return Err(YinError::language(format!(
+                    "duplicate record field: {field_name}"
+                )));
+            }
             let field_type = parts
                 .get(1)
                 .cloned()
@@ -926,6 +985,22 @@ impl Engine {
                 .map(|expression| self.eval(expression, env))
                 .transpose()?;
             fields.push((field_name, field_type, default));
+        }
+        for parent in &parents {
+            let Some(Value::RecordDefinition(parent_definition)) = env.get(parent) else {
+                return Err(YinError::language(format!(
+                    "unknown parent record: {parent}"
+                )));
+            };
+            for inherited in &parent_definition.fields {
+                if fields.iter().any(|(name, _, _)| name == &inherited.0) {
+                    return Err(YinError::language(format!(
+                        "conflicting field {} inherited from parent {parent}",
+                        inherited.0
+                    )));
+                }
+                fields.push(inherited.clone());
+            }
         }
         let definition = Value::RecordDefinition(Rc::new(RecordDefinition {
             name: name.clone(),
@@ -945,7 +1020,7 @@ impl Engine {
             .atom()
             .ok_or_else(|| YinError::language("variant expects a name"))?
             .to_owned();
-        env.define(&variant, Value::Type(Type::Named(variant.clone())))?;
+        let mut cases = Vec::new();
         for case in &values[2..] {
             let Expr::Form(Form::Vector, parts, span) = case else {
                 return Err(YinError::language("variant case must be a vector"));
@@ -954,6 +1029,12 @@ impl Engine {
                 .first()
                 .and_then(Expr::atom)
                 .ok_or_else(|| YinError::language("invalid variant case"))?;
+            if cases.iter().any(|case| case == name) {
+                return Err(YinError::language(format!(
+                    "duplicated variant case: {name}"
+                )));
+            }
+            cases.push(name.to_owned());
             let mut record = vec![
                 Expr::Atom("record".into(), span.clone()),
                 Expr::Atom(name.into(), span.clone()),
@@ -961,7 +1042,12 @@ impl Engine {
             record.extend_from_slice(&parts[1..]);
             self.eval_record(&record, env, Some(variant.clone()))?;
         }
-        Ok(Value::Type(Type::Named(variant)))
+        let definition = Value::VariantDefinition {
+            name: variant.clone(),
+            cases,
+        };
+        env.define(&variant, definition.clone())?;
+        Ok(definition)
     }
 
     fn construct_record(
@@ -1010,10 +1096,10 @@ impl Engine {
     }
 
     fn eval_module(&mut self, values: &[Expr], env: &Environment) -> Result<Value, YinError> {
-        if values.len() < 4 {
-            return Err(YinError::language("module expects name, exports, and body"));
-        }
-        self.eval_sequence(&values[3..], env)
+        let _ = (values, env);
+        Err(YinError::language(
+            "module declarations can only be loaded through import",
+        ))
     }
 
     fn eval_import(&mut self, values: &[Expr], env: &Environment) -> Result<Value, YinError> {
@@ -1021,6 +1107,9 @@ impl Engine {
         let Expr::String(relative, _) = &values[1] else {
             return Err(YinError::language("import expects a string path"));
         };
+        if Path::new(relative).is_absolute() {
+            return Err(YinError::language("import path must be relative"));
+        }
         let Expr::Form(Form::Vector, names, _) = &values[2] else {
             return Err(YinError::language("import expects an import list"));
         };
@@ -1141,7 +1230,7 @@ impl Engine {
                 },
                 Err(error) => Value::Result {
                     ok: false,
-                    value: Box::new(decode_error(error.to_string())),
+                    value: Box::new(decode_contract_error(&error.to_string())),
                 },
             },
             Err(e) => Value::Result {
@@ -1160,15 +1249,23 @@ impl Engine {
             }),
             Err(e) => Ok(Value::Result {
                 ok: false,
-                value: Box::new(decode_error(e.to_string())),
+                value: Box::new(encode_error(&e.to_string())),
             }),
         }
     }
-    fn eval_json_schema(&self, values: &[Expr]) -> Result<Value, YinError> {
+    fn eval_json_schema(&self, values: &[Expr], env: &Environment) -> Result<Value, YinError> {
         expect_len(values, 2, "json-schema")?;
-        Ok(Value::String(
-            "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\"}".into(),
-        ))
+        let mut schema = schema_for(&values[1], env)?;
+        let JsonValue::Object(ref mut object) = schema else {
+            unreachable!("schemas are JSON objects")
+        };
+        let mut with_draft = JsonMap::new();
+        with_draft.insert(
+            "$schema".into(),
+            JsonValue::String("https://json-schema.org/draft/2020-12/schema".into()),
+        );
+        with_draft.append(object);
+        Ok(Value::String(serde_json::to_string(&with_draft).unwrap()))
     }
 
     fn resolve_resource(&self, resource: &str) -> Result<PathBuf, YinError> {
@@ -1189,6 +1286,14 @@ fn eval_module_file(
     expressions: &[Expr],
     env: &Environment,
 ) -> Result<IndexMap<String, Value>, YinError> {
+    check_program(&crate::ParsedProgram {
+        file: engine
+            .current_file
+            .as_ref()
+            .map(|path| path.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "<module>".into()),
+        expressions: expressions.to_vec(),
+    })?;
     if expressions.len() != 1 {
         return Err(YinError::language(
             "module file must contain exactly one module",
@@ -1209,6 +1314,11 @@ fn eval_module_file(
         let name = name
             .atom()
             .ok_or_else(|| YinError::language("invalid export"))?;
+        if exports.contains_key(name) {
+            return Err(YinError::language(format!(
+                "duplicate module export: {name}"
+            )));
+        }
         exports.insert(
             name.into(),
             env.get(name)
@@ -1330,6 +1440,29 @@ fn parse_integer(atom: &str) -> Option<BigInt> {
         (atom.into(), 10)
     };
     BigInt::parse_bytes(s.as_bytes(), radix)
+}
+
+fn validate_descriptor(parts: &[Expr]) -> Result<(), YinError> {
+    let mut properties = HashSet::new();
+    let mut index = 2;
+    while index < parts.len() {
+        let property = parts[index]
+            .atom()
+            .and_then(|value| value.strip_prefix(':'))
+            .ok_or_else(|| YinError::language("descriptor property must be a keyword"))?;
+        if !properties.insert(property) {
+            return Err(YinError::language(format!(
+                "duplicate descriptor property: {property}"
+            )));
+        }
+        if parts.get(index + 1).is_none() {
+            return Err(YinError::language(format!(
+                "descriptor property has no value: {property}"
+            )));
+        }
+        index += 2;
+    }
+    Ok(())
 }
 fn expect_len(values: &[Expr], n: usize, name: &str) -> Result<(), YinError> {
     if values.len() == n {
@@ -1484,6 +1617,23 @@ fn unique(values: Vec<Value>) -> Vec<Value> {
     }
     out
 }
+fn structurally_comparable(value: &Value) -> bool {
+    match value {
+        Value::Function(_)
+        | Value::Primitive(_)
+        | Value::RecordDefinition(_)
+        | Value::VariantDefinition { .. }
+        | Value::Tool { .. }
+        | Value::Type(_) => false,
+        Value::Vector(values) | Value::Set(values) => values.iter().all(structurally_comparable),
+        Value::Dict(entries) => entries
+            .iter()
+            .all(|(key, value)| structurally_comparable(key) && structurally_comparable(value)),
+        Value::Record { fields, .. } => fields.values().all(structurally_comparable),
+        Value::Result { value, .. } | Value::Option(Some(value)) => structurally_comparable(value),
+        _ => true,
+    }
+}
 fn put_pair(entries: &mut Vec<(Value, Value)>, key: Value, value: Value) {
     if let Some(pair) = entries.iter_mut().find(|(k, _)| k == &key) {
         pair.1 = value
@@ -1529,6 +1679,54 @@ fn decode_error(message: String) -> Value {
     fields.insert("message".into(), Value::String(message));
     Value::Record {
         name: "DecodeError".into(),
+        fields,
+        parents: vec![],
+        variant: None,
+    }
+}
+fn json_contract_error(code: &str, path: &str, message: impl AsRef<str>) -> YinError {
+    YinError::language(format!(
+        "JSON_CONTRACT::{code}::{path}::{}",
+        message.as_ref()
+    ))
+}
+
+fn decode_contract_error(message: &str) -> Value {
+    let payload = message
+        .split_once("JSON_CONTRACT::")
+        .map(|(_, payload)| payload)
+        .unwrap_or(message);
+    let mut parts = payload.splitn(3, "::");
+    let code = parts.next().unwrap_or("invalid-json");
+    let path = parts.next().unwrap_or("$");
+    let detail = parts.next().unwrap_or(message);
+    let mut fields = IndexMap::new();
+    fields.insert("code".into(), Value::String(code.into()));
+    fields.insert("path".into(), Value::String(path.into()));
+    fields.insert("message".into(), Value::String(detail.into()));
+    Value::Record {
+        name: "DecodeError".into(),
+        fields,
+        parents: vec![],
+        variant: None,
+    }
+}
+fn encode_error(message: &str) -> Value {
+    let code = if message.contains("expected String") {
+        "non-string-key"
+    } else if message.contains("not JSON encodable") {
+        "unsupported-value"
+    } else if message.contains("non-finite") {
+        "non-finite-number"
+    } else {
+        "encoding-error"
+    };
+    let mut fields = IndexMap::new();
+    fields.insert("code".into(), Value::String(code.into()));
+    fields.insert("path".into(), Value::String("$".into()));
+    fields.insert("message".into(), Value::String(message.into()));
+    Value::Record {
+        name: "EncodeError".into(),
         fields,
         parents: vec![],
         variant: None,
@@ -1588,6 +1786,26 @@ fn from_json_typed(kind: &Expr, value: JsonValue, env: &Environment) -> Result<V
                 .ok_or_else(|| YinError::language("expected JSON string")),
             _ => {
                 if let Some(Value::RecordDefinition(definition)) = env.get(name) {
+                    return decode_record(&definition, value, env);
+                }
+                if let Some(Value::VariantDefinition { cases, .. }) = env.get(name) {
+                    let tag = value
+                        .as_object()
+                        .and_then(|object| object.get("tag"))
+                        .and_then(JsonValue::as_str)
+                        .ok_or_else(|| YinError::language("variant JSON requires tag"))?;
+                    if !cases.iter().any(|case| case == tag) {
+                        return Err(json_contract_error(
+                            "unknown-tag",
+                            "$.tag",
+                            format!("unknown variant tag: {tag}"),
+                        ));
+                    }
+                    let Some(Value::RecordDefinition(definition)) = env.get(tag) else {
+                        return Err(YinError::language(format!(
+                            "unknown variant constructor: {tag}"
+                        )));
+                    };
                     return decode_record(&definition, value, env);
                 }
                 if let JsonValue::Object(object) = &value {
@@ -1670,6 +1888,32 @@ fn from_json_typed(kind: &Expr, value: JsonValue, env: &Environment) -> Result<V
                         )?))))
                     }
                 }
+                "Result" => {
+                    let JsonValue::Object(mut object) = value else {
+                        return Err(YinError::language("expected JSON Result object"));
+                    };
+                    let tag = object
+                        .remove("tag")
+                        .and_then(|value| value.as_str().map(str::to_owned))
+                        .ok_or_else(|| YinError::language("Result JSON requires tag"))?;
+                    let (ok, field, kind) = match tag.as_str() {
+                        "Ok" => (true, "value", parts.get(1)),
+                        "Err" => (false, "error", parts.get(2)),
+                        _ => return Err(YinError::language(format!("unknown Result tag: {tag}"))),
+                    };
+                    let kind =
+                        kind.ok_or_else(|| YinError::language("Result requires two types"))?;
+                    let payload = object.remove(field).ok_or_else(|| {
+                        YinError::language(format!("Result JSON requires {field}"))
+                    })?;
+                    if !object.is_empty() {
+                        return Err(YinError::language("unknown Result JSON field"));
+                    }
+                    Ok(Value::Result {
+                        ok,
+                        value: Box::new(from_json_typed(kind, payload, env)?),
+                    })
+                }
                 _ => Err(YinError::language(format!(
                     "unsupported JSON contract: {operation}"
                 ))),
@@ -1677,6 +1921,130 @@ fn from_json_typed(kind: &Expr, value: JsonValue, env: &Environment) -> Result<V
         }
         _ => Err(YinError::language("invalid JSON contract type")),
     }
+}
+
+fn schema_for(kind: &Expr, env: &Environment) -> Result<JsonValue, YinError> {
+    let object = |pairs: Vec<(&str, JsonValue)>| {
+        JsonValue::Object(
+            pairs
+                .into_iter()
+                .map(|(key, value)| (key.into(), value))
+                .collect(),
+        )
+    };
+    match kind {
+        Expr::Atom(name, _) => Ok(match name.as_str() {
+            "Int" => object(vec![
+                ("type", JsonValue::String("integer".into())),
+                ("minimum", JsonValue::from(i32::MIN)),
+                ("maximum", JsonValue::from(i32::MAX)),
+            ]),
+            "Float" => object(vec![("type", JsonValue::String("number".into()))]),
+            "Bool" => object(vec![("type", JsonValue::String("boolean".into()))]),
+            "String" => object(vec![("type", JsonValue::String("string".into()))]),
+            "Any" => object(vec![("x-yin-type", JsonValue::String("Any".into()))]),
+            other => {
+                if let Some(Value::RecordDefinition(definition)) = env.get(other) {
+                    schema_record(&definition, env)?
+                } else if let Some(Value::VariantDefinition { cases, .. }) = env.get(other) {
+                    object(vec![(
+                        "oneOf",
+                        JsonValue::Array(
+                            cases
+                                .iter()
+                                .map(|case| {
+                                    let Some(Value::RecordDefinition(definition)) = env.get(case)
+                                    else {
+                                        return Err(YinError::language("missing variant case"));
+                                    };
+                                    schema_record(&definition, env)
+                                })
+                                .collect::<Result<Vec<_>, _>>()?,
+                        ),
+                    )])
+                } else {
+                    return Err(YinError::language(format!("unknown schema type: {other}")));
+                }
+            }
+        }),
+        Expr::Form(Form::Tuple, parts, _) => match parts.first().and_then(Expr::atom) {
+            Some("Vector") => Ok(object(vec![
+                ("type", JsonValue::String("array".into())),
+                ("items", schema_for(&parts[1], env)?),
+            ])),
+            Some("Set") => Ok(object(vec![
+                ("type", JsonValue::String("array".into())),
+                ("items", schema_for(&parts[1], env)?),
+                ("uniqueItems", JsonValue::Bool(true)),
+            ])),
+            Some("Dict") => {
+                if parts.get(1).and_then(Expr::atom) != Some("String") {
+                    return Err(YinError::language(
+                        "json-schema non-string-key: JSON object schemas require Dict String keys",
+                    ));
+                }
+                Ok(object(vec![
+                    ("type", JsonValue::String("object".into())),
+                    ("additionalProperties", schema_for(&parts[2], env)?),
+                ]))
+            }
+            Some("Option") => Ok(object(vec![(
+                "anyOf",
+                JsonValue::Array(vec![
+                    schema_for(&parts[1], env)?,
+                    object(vec![("type", JsonValue::String("null".into()))]),
+                ]),
+            )])),
+            Some("Result") => Ok(object(vec![(
+                "oneOf",
+                JsonValue::Array(vec![
+                    tagged_schema("Ok", "value", schema_for(&parts[1], env)?),
+                    tagged_schema("Err", "error", schema_for(&parts[2], env)?),
+                ]),
+            )])),
+            Some("U") => Ok(object(vec![(
+                "anyOf",
+                JsonValue::Array(
+                    parts[1..]
+                        .iter()
+                        .map(|part| schema_for(part, env))
+                        .collect::<Result<Vec<_>, _>>()?,
+                ),
+            )])),
+            _ => Err(YinError::language("unsupported schema type")),
+        },
+        _ => Err(YinError::language("invalid schema type")),
+    }
+}
+
+fn tagged_schema(tag: &str, payload: &str, schema: JsonValue) -> JsonValue {
+    serde_json::json!({
+        "type":"object",
+        "properties": {"tag":{"const":tag}, payload:schema},
+        "required":["tag",payload],
+        "additionalProperties":false
+    })
+}
+
+fn schema_record(definition: &RecordDefinition, env: &Environment) -> Result<JsonValue, YinError> {
+    let mut properties = JsonMap::new();
+    let mut required = Vec::new();
+    if definition.variant.is_some() {
+        properties.insert("tag".into(), serde_json::json!({"const":definition.name}));
+        required.push(JsonValue::String("tag".into()));
+    }
+    for (name, kind, default) in &definition.fields {
+        properties.insert(name.clone(), schema_for(kind, env)?);
+        if default.is_none() {
+            required.push(JsonValue::String(name.clone()));
+        }
+    }
+    Ok(serde_json::json!({
+        "type":"object",
+        "properties":properties,
+        "required":required,
+        "additionalProperties":false
+    }))
 }
 
 fn decode_record(
@@ -1703,14 +2071,28 @@ fn decode_record(
         }
     }
     let mut fields = IndexMap::new();
-    for (name, kind, _default) in &definition.fields {
-        let field = object
-            .remove(name)
-            .ok_or_else(|| YinError::language(format!("missing JSON field: {name}")))?;
-        fields.insert(name.clone(), from_json_typed(kind, field, env)?);
+    for (name, kind, default) in &definition.fields {
+        if let Some(field) = object.remove(name) {
+            let decoded = from_json_typed(kind, field, env).map_err(|error| {
+                json_contract_error("type-mismatch", &format!("$.{name}"), error.to_string())
+            })?;
+            fields.insert(name.clone(), decoded);
+        } else if let Some(default) = default {
+            fields.insert(name.clone(), default.clone());
+        } else {
+            return Err(json_contract_error(
+                "missing-field",
+                &format!("$.{name}"),
+                format!("missing JSON field: {name}"),
+            ));
+        }
     }
     if let Some(name) = object.keys().next() {
-        return Err(YinError::language(format!("unknown JSON field: {name}")));
+        return Err(json_contract_error(
+            "unknown-field",
+            &format!("$.{name}"),
+            format!("unknown JSON field: {name}"),
+        ));
     }
     Ok(Value::Record {
         name: definition.name.clone(),

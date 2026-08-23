@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.21.0 — 2026-08-23
+
+- migrate the v0.19 semantic regression surface into native Rust integration
+  suites covering language semantics, collections, Results and Options,
+  structured contracts, modules, formatter, REPL, LSP, policy, and typed tools
+- add a class-by-class ledger for all 27 historical JUnit classes and all 234
+  tests, verified directly against the frozen `v0.19.0` tag
+- add a differential semantic suite that runs the full frozen JUnit suite and
+  compares shared positive outputs and negative type-check classifications with
+  the Rust runtime in CI
+- restore precise record, function, collection, Result, Option, tool, JSON,
+  module, and persistent REPL semantics found by the migrated suites
+
 ## 0.20.0 — 2026-08-22
 
 - freeze the complete Java 0.19 implementation and normative protocol on

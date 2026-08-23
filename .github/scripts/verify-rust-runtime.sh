@@ -2,7 +2,7 @@
 set -euo pipefail
 
 yin="${1:-target/release/yin}"
-test "$("$yin" --version)" = "Yin 0.20.0"
+test "$("$yin" --version)" = "Yin 0.21.0"
 
 for program in tests/*.yin examples/algorithms/*.yin examples/modules/main.yin; do
   "$yin" "$program" >/dev/null

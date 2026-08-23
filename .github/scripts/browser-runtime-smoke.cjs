@@ -26,7 +26,7 @@ vm.runInThisContext(fs.readFileSync("site/runtime/yin.js", "utf8"));
     (decide (Request :risk "low" :amount 2500))
   `);
   assert.equal(orderedPolicy.ok, true);
-  assert.equal(orderedPolicy.value, "approval");
+  assert.equal(orderedPolicy.value, '"approval"');
 
   const diagnostic = evaluate("(field 42 :value)");
   assert.equal(diagnostic.ok, false);

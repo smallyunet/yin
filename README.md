@@ -72,7 +72,7 @@ extension, and SHA-256 checksums are on the
 
 ```bash
 yin --version
-code --install-extension yin-language-support-0.20.0.vsix
+code --install-extension yin-language-support-0.21.0.vsix
 ```
 
 Build and test from source:

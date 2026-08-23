@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@1.88.0
         with:
           components: clippy, rustfmt
@@ -22,6 +24,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Verify native runtime
         run: |
           cargo fmt --all -- --check
@@ -29,7 +35,9 @@ jobs:
           cargo test --workspace --all-targets
           cargo build --release --workspace
           .github/scripts/verify-rust-runtime.sh
-          .github/scripts/verify-rust-vm.sh 0.20.0
+          .github/scripts/verify-rust-vm.sh 0.21.0
+          .github/scripts/verify-v019-test-migration.sh
+          .github/scripts/verify-v019-differential.sh
       - name: Verify Rust/Wasm runtime
         run: |
           cargo install wasm-bindgen-cli --version 0.2.127 --locked
@@ -53,4 +61,4 @@ jobs:
         working-directory: editors/vscode
       - run: npm run package
         working-directory: editors/vscode
-      - run: .github/scripts/verify-vsix.sh 0.20.0 editors/vscode/yin-language-support-0.20.0.vsix
+      - run: .github/scripts/verify-vsix.sh 0.21.0 editors/vscode/yin-language-support-0.21.0.vsix

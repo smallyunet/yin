@@ -9,10 +9,10 @@ mod lsp;
 mod syntax;
 mod value;
 
-pub use check::check_program;
+pub use check::{CheckSession, check_program};
 pub use contract::{compile_bytecode, contract_run};
 pub use diagnostic::{Diagnostic, ErrorCode, SourceSpan, YinError};
-pub use eval::{Engine, Host, ProgramResult};
+pub use eval::{Engine, Host, ProgramResult, ReplSession};
 pub use format::format_source;
 #[cfg(not(target_arch = "wasm32"))]
 pub use gateway::{approval_request, gateway_run, guard_run, replay_trace};

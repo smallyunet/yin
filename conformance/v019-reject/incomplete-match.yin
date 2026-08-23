@@ -1,0 +1,4 @@
+(define unwrap
+  (fun ([outcome (Result Int String)])
+    (match outcome [(Ok value) value])))
+unwrap

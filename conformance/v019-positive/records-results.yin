@@ -1,0 +1,9 @@
+(record Parent [value Int])
+(record Child (Parent) [name String])
+(define describe
+  (fun ([outcome (Result Child String)] [-> String])
+    (match outcome
+      [(Ok child) child.name]
+      [(Err message) message])))
+[(describe (ok (Child :name "yin" :value 42)))
+ (describe (err "offline"))]
