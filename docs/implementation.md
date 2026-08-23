@@ -37,7 +37,7 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace --all-targets
 cargo build --release --workspace
-.github/scripts/verify-rust-runtime.sh
+.github/scripts/verify-rust-runtime.sh 0.21.1
 .github/scripts/verify-rust-vm.sh 0.21.1
 ```
 

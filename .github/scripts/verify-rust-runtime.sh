@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-yin="${1:-target/release/yin}"
-test "$("$yin" --version)" = "Yin 0.21.0"
+version="${1:?usage: verify-rust-runtime.sh VERSION [YIN]}"
+yin="${2:-target/release/yin}"
+test "$("$yin" --version)" = "Yin $version"
 
 for program in tests/*.yin examples/algorithms/*.yin examples/modules/main.yin; do
   "$yin" "$program" >/dev/null
