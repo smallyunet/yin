@@ -44,7 +44,9 @@ jobs:
           $version = $env:GITHUB_REF_NAME.Substring(1)
           Copy-Item target/release/yin.exe "release/yin-$version-${{ matrix.platform }}.exe"
           Copy-Item target/release/yinvm.exe "release/yinvm-$version-${{ matrix.platform }}.exe"
-          Get-ChildItem release/*.exe | Get-FileHash -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" } | Set-Content "release/SHA256SUMS-${{ matrix.platform }}.txt"
+          $checksums = Get-ChildItem release/*.exe | Get-FileHash -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" }
+          $checksumPath = Join-Path $PWD "release/SHA256SUMS-${{ matrix.platform }}.txt"
+          [IO.File]::WriteAllText($checksumPath, ($checksums -join "`n") + "`n", [Text.UTF8Encoding]::new($false))
       - uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.platform }}
