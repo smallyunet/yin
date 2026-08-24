@@ -67,8 +67,44 @@ jobs:
           name: editor
           path: editors/vscode/yin-language-support-*.vsix
 
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - run: cargo install wasm-bindgen-cli --version 0.2.127 --locked
+      - name: Build and verify browser runtime
+        run: |
+          cargo build --release --target wasm32-unknown-unknown --lib
+          wasm-bindgen target/wasm32-unknown-unknown/release/yin.wasm \
+            --out-dir site/runtime --out-name yin --target no-modules --no-typescript
+          node --check site/app.js
+          node --check site/worker.js
+          node .github/scripts/browser-runtime-smoke.cjs
+      - name: Package Wasm runtime
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          package="yin-wasm-$version"
+          mkdir -p "wasm-package/$package" release
+          cp site/runtime/yin.js site/runtime/yin_bg.wasm "wasm-package/$package/"
+          cp LICENSE "wasm-package/$package/"
+          cp docs/releases/wasm-runtime.md "wasm-package/$package/README.md"
+          tar -czf "release/$package.tar.gz" -C wasm-package "$package"
+          cd release
+          shasum -a 256 "$package.tar.gz" > SHA256SUMS-wasm.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm
+          path: release/*
+
   publish:
-    needs: [native, editor]
+    needs: [native, editor, wasm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -85,4 +121,13 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" release/* --title "Yin ${GITHUB_REF_NAME#v}" --generate-notes --verify-tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          notes_file="docs/releases/v$version.md"
+          if test -f "$notes_file"; then
+            gh release create "$GITHUB_REF_NAME" release/* \
+              --title "Yin $version" --notes-file "$notes_file" --verify-tag
+          else
+            gh release create "$GITHUB_REF_NAME" release/* \
+              --title "Yin $version" --generate-notes --verify-tag
+          fi

@@ -35,7 +35,7 @@ install their own narrowly scoped tool executors.
 The current parser exposes a deliberately small surface `Expr` tree, and the
 hosted checker and evaluator still interpret those expressions directly. An
 experimental compiler path now also lowers admitted programs through HIR and
-MIR. The hosted path remains the reference architecture in 0.21.1 and is not
+MIR. The hosted path remains the reference architecture in 0.22.0 and is not
 silently replaced by the experimental evaluator.
 
 The planned compiler separates:
@@ -54,7 +54,7 @@ artifact of `portable-bytecode-v1`; it will not be retroactively described as
 HIR or MIR. See [language and compiler architecture](architecture.md) and
 [target profiles](targets.md).
 
-No EVM, SVM, RISC-V, or Bitcoin code generator is implemented in 0.21.1.
+No EVM, SVM, RISC-V, or Bitcoin code generator is implemented in 0.22.0.
 
 The first compiler-core slice exposes an experimental inspection path for the
 admitted pure subset:
@@ -119,8 +119,8 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace --all-targets
 cargo build --release --workspace
-.github/scripts/verify-rust-runtime.sh 0.21.1
-.github/scripts/verify-rust-vm.sh 0.21.1
+.github/scripts/verify-rust-runtime.sh 0.22.0
+.github/scripts/verify-rust-vm.sh 0.22.0
 ```
 
 The conformance script executes the normative corpus, multi-file configuration

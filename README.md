@@ -107,15 +107,15 @@ effects rather than approximate them.
 
 ## Install or build
 
-Platform-specific `yin` and `yinvm` executables, the Visual Studio Code
-extension, and SHA-256 checksums are on the
+Platform-specific `yin` and `yinvm` executables, a browser-ready Wasm runtime
+bundle, the Visual Studio Code extension, and SHA-256 checksums are on the
 [GitHub Releases page](https://github.com/smallyunet/yin/releases).
 The editor extension is also available directly from the
 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=smallyu.yin-language-support).
 
 ```bash
 yin --version
-code --install-extension yin-language-support-0.21.1.vsix
+code --install-extension yin-language-support-0.22.0.vsix
 ```
 
 Build and test from source:

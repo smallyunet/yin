@@ -140,7 +140,7 @@ and generated artifacts have received appropriate independent review.
 
 ## Implemented today
 
-Yin 0.21.1 has the Rust parser, checker, tree-walking evaluator, formatter, LSP,
+Yin 0.22.0 has the Rust parser, checker, tree-walking evaluator, formatter, LSP,
 Wasm browser runtime, hosted tool boundary, Agent Action Gateway, canonical
 `.ybc` artifacts, and an independent fuel-metered decision VM. The current
 `.ybc` format is a normalized token stream for a narrow decision profile; it is

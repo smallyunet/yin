@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.22.0 — 2026-08-24
+
 - define the long-term Yin architecture as one typed deterministic language
   core with versioned target and application profiles
 - document the planned typed HIR, effect validation, target-independent MIR,

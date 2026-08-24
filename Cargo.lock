@@ -620,7 +620,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "yin-language"
-version = "0.21.1"
+version = "0.22.0"
 dependencies = [
  "fs2",
  "getrandom 0.3.4",
@@ -639,7 +639,7 @@ dependencies = [
 
 [[package]]
 name = "yin-vm"
-version = "0.21.1"
+version = "0.22.0"
 dependencies = [
  "serde_json",
  "sha2",

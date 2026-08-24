@@ -1,6 +1,6 @@
 [package]
 name = "yin-vm"
-version = "0.21.1"
+version = "0.22.0"
 edition = "2024"
 description = "Independent fuel-metered runtime for Yin portable decision bytecode"
 license = "AGPL-3.0-only"

@@ -226,6 +226,19 @@ architecture and acceptance order rather than promised release numbers or dates.
 - publish aligned native binaries, Wasm, and editor artifacts
 - make release verification parameterized and reproducible
 
+## 0.22 — compiler core preview
+
+- add resolved typed HIR for the maintained pure and structured-decision slices
+- lower admitted HIR into target-independent control-flow MIR
+- execute the initial MIR subset and compare it with the hosted semantic oracle
+- infer source-spanned effects through named calls, policies, and callbacks
+- register versioned target profiles and fail closed when a validator or backend
+  is unavailable
+- publish a verified browser Wasm bundle alongside native and editor artifacts
+
+This preview establishes executable compiler boundaries, not complete target
+backends. The forward milestone exit criteria remain unchanged.
+
 ## Forward milestone A — compiler-ready core
 
 Initial source status: the experimental `--emit-hir` path now reuses normative

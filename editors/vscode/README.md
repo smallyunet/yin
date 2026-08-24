@@ -20,7 +20,7 @@ are not yet available.
 - canonical whole-document formatting
 - exact diagnostic ranges and stable Yin diagnostic codes
 
-The extension starts the Yin 0.21.1 Rust language server locally over stdio.
+The extension starts the Yin 0.22.0 Rust language server locally over stdio.
 Source code is never sent to a remote service.
 
 ## Requirement
@@ -41,5 +41,5 @@ formatter for the language, add:
 
 ## Current scope
 
-Yin 0.21.1 provides diagnostics and formatting. Hover, completion, and go to
+Yin 0.22.0 provides diagnostics and formatting. Hover, completion, and go to
 definition are planned for later editor-service releases.

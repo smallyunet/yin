@@ -368,7 +368,7 @@ in the [reference policy runtime guide](policy-runtime.md).
 - `portable-bytecode-v1` compiles a deliberately restricted decision subset to
   `.ybc` for the fuel-metered Rust VM; it is not a hostile-process sandbox
 - EVM, SVM, RISC-V, and Bitcoin are documented target designs, not implemented
-  backends in Yin 0.21.1
+  backends in Yin 0.22.0
 - `yin check --target` validates one source file today; imported module graphs,
   target ABI/resource validation, and designed-only backend validators remain
   incomplete

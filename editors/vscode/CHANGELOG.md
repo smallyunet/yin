@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.22.0
+
+- align the extension package with the Yin 0.22.0 Compiler Core Preview
+- retain local LSP diagnostics and formatting while compiler target support
+  remains explicitly gated by the native CLI
+
 ## 0.21.1
 
 - add the Yin logo and matching Visual Studio Marketplace presentation

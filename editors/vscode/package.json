@@ -2,7 +2,7 @@
   "name": "yin-language-support",
   "displayName": "Yin Programming Language",
   "description": "Editor support for the typed deterministic Yin programming language.",
-  "version": "0.21.1",
+  "version": "0.22.0",
   "publisher": "smallyu",
   "icon": "images/icon.png",
   "galleryBanner": {
