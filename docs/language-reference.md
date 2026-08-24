@@ -369,6 +369,9 @@ in the [reference policy runtime guide](policy-runtime.md).
   `.ybc` for the fuel-metered Rust VM; it is not a hostile-process sandbox
 - EVM, SVM, RISC-V, and Bitcoin are documented target designs, not implemented
   backends in Yin 0.21.1
+- `yin check --target` validates one source file today; imported module graphs,
+  target ABI/resource validation, and designed-only backend validators remain
+  incomplete
 - the LSP currently provides diagnostics and formatting, but not semantic
   navigation or completion
 - several files under `experiments/` represent abandoned syntax designs

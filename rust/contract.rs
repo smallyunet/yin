@@ -1,4 +1,4 @@
-use crate::{Engine, Expr, Form, Host, Value, YinError, parse};
+use crate::{Engine, ErrorCode, Expr, Form, Host, Value, YinError, parse};
 use serde_json::{Value as Json, json};
 use sha2::{Digest, Sha256};
 use std::fs;
@@ -9,6 +9,14 @@ const MAGIC: &[u8; 4] = b"YBC\x01";
 struct Token(u8, String);
 
 pub fn compile_bytecode(source_name: &str, source: &str) -> Result<Vec<u8>, YinError> {
+    ensure_portable_profile(source_name, source)?;
+    compile_bytecode_unchecked(source_name, source)
+}
+
+pub(crate) fn compile_bytecode_unchecked(
+    source_name: &str,
+    source: &str,
+) -> Result<Vec<u8>, YinError> {
     let program = parse(source_name, source)?;
     if program.expressions.is_empty() {
         return Err(YinError::language("cannot compile an empty program"));
@@ -44,6 +52,7 @@ pub fn compile_bytecode(source_name: &str, source: &str) -> Result<Vec<u8>, YinE
 pub fn contract_run(program: &Path, input: &Path) -> Result<Json, YinError> {
     let source = fs::read_to_string(program)
         .map_err(|e| YinError::io(format!("failed to read {}: {e}", program.display())))?;
+    ensure_portable_profile(&program.to_string_lossy(), &source)?;
     let input_text = fs::read_to_string(input)
         .map_err(|e| YinError::io(format!("failed to read {}: {e}", input.display())))?;
     let mut engine = Engine::new(Host::browser(&input_text, Vec::new()));
@@ -77,6 +86,23 @@ pub fn contract_run(program: &Path, input: &Path) -> Result<Json, YinError> {
         "result": result_json,
         "resultHash": hash(canonical_result.as_bytes())
     }))
+}
+
+fn ensure_portable_profile(source_name: &str, source: &str) -> Result<(), YinError> {
+    let check = crate::check_target_source(source_name, source, "portable-bytecode-v1")?;
+    if check.valid {
+        return Ok(());
+    }
+    let first = &check.violations[0];
+    Err(YinError::new(
+        ErrorCode::Language,
+        format!(
+            "portable-bytecode-v1 validation failed with {} violation(s): {}",
+            check.violations.len(),
+            first.message
+        ),
+        first.span.clone(),
+    ))
 }
 
 fn emit(expression: &Expr, tokens: &mut Vec<Token>) -> Result<(), YinError> {

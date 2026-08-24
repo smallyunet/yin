@@ -2,8 +2,8 @@
 
 Target profiles make portability explicit and fail closed. A profile is a
 versioned contract among the Yin frontend, backend, generated artifact, runtime,
-and conformance suite. This document records the intended profile boundaries;
-only `hosted` and the existing narrow portable VM are implemented today.
+and conformance suite. The registry and first validators are now implemented;
+validation does not imply that an artifact backend exists.
 
 ## Profile contract
 
@@ -20,26 +20,53 @@ Every target profile must define:
 9. deterministic-build and differential-test requirements;
 10. profile and target runtime versions.
 
-`yin check --target <profile>` should eventually report all unsupported
-constructs before code generation. `yin build --target <profile>` must produce
-only artifacts that passed the same validation.
+Inspect the registry or validate one source file:
+
+```bash
+yin --target-profiles
+yin check --target mir-pure-v1 program.yin
+```
+
+The JSON report includes the profile status, backend availability, whole-program
+and entry effects, named-function call edges, source-spanned effect origins, and
+all detected violations. Designed-only profiles fail closed. The current
+validator does not resolve an imported module graph; `import` is reported as a
+`module-load` effect until graph binding is added.
+
+`--contract-check`, `--contract-compile`, and `contract_run` use the same
+`portable-bytecode-v1` validation path, so the portable artifact path cannot
+bypass its profile check.
 
 ## Current profiles
 
-### `hosted`
+### `hosted-v1` — supported
 
 The Rust interpreter, CLI, REPL, modules, browser embedding, controlled host I/O,
 and installed tools form the current general-language environment. Availability
 of filesystem, subprocess, wallet, or tool capabilities depends on the host.
+This source check does not grant or verify runtime authority; host configuration
+continues to decide which capabilities are actually available.
 
-### `portable-bytecode-v1`
+### `portable-bytecode-v1` — experimental
 
 The existing `.ybc` and `yinvm` path admits a deliberately narrow deterministic
 decision subset with immutable input and fuel metering. It excludes ambient
 authority and is not a general compiler IR, consensus runtime, memory sandbox,
 or promise that arbitrary Yin programs are portable.
 
-## Planned profiles
+It permits allocation and the exact `read-all` input boundary while rejecting
+other host I/O, mutation, dynamic calls, tools, unsupported collections,
+`Float`, `Any`, and integers outside the current signed 64-bit VM range.
+
+### `mir-pure-v1` — prototype
+
+This profile admits data-returning programs accepted by the experimental MIR
+lowerer and evaluator. Allocation is admitted; host I/O, mutation, external
+calls, persistent state, module loading, authorization, and unresolved dynamic
+calls are rejected with their source origins. It produces no distributable
+artifact and is not a consensus profile.
+
+## Designed profiles without validators or backends
 
 ### `evm-contract-v1`
 
@@ -101,5 +128,7 @@ Documentation and releases must distinguish:
 - **experimental**: versioned artifacts and conformance tests exist;
 - **supported**: compatibility and security maintenance commitments are stated.
 
-The presence of a target in this document means **designed**, not implemented or
-production ready.
+The profile registry exposes status, validator availability, and artifact
+backend availability separately. A successful check currently exists only for
+`hosted-v1`, `portable-bytecode-v1`, and `mir-pure-v1`; the other registered
+profiles return a designed-only violation rather than pretending to validate.

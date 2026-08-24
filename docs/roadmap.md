@@ -259,6 +259,17 @@ in the shared MIR.
 
 ## Forward milestone B — effects and target validation
 
+Initial source status: the compiler now infers allocation, host I/O, mutation,
+persistent-state, external-call, authorization, module-load, and dynamic-call
+effects with source provenance. Named function, policy, and named callback
+effects propagate through call edges. A versioned registry and
+`yin check --target` validate `hosted-v1`, `portable-bytecode-v1`, and prototype
+`mir-pure-v1`; designed EVM, SVM, RISC-V, and Bitcoin profiles fail closed.
+Portable check, compile, and contract execution share the same validator.
+Complete module-graph binding, target resource limits, ABI contracts, and
+implemented account/hash/signature intrinsics remain unfinished, so this
+milestone is not complete.
+
 - define a versioned target-profile contract covering types, control flow,
   effects, resource limits, ABI, failures, artifacts, and runtime versions
 - infer pure, allocation, host I/O, persistent state, external call, account,

@@ -90,7 +90,7 @@ authority checks remain explicit.
 ## Product and roadmap boundary
 
 Compiler-core correctness takes priority over adding protocol integrations.
-Near-term architectural work is typed HIR, effects, target validation, MIR,
+Near-term architectural work broadens typed HIR, effects, target validation, MIR,
 fixed-width numeric semantics, and semantic tooling. New Agent, approval, or
 protocol-specific work should enter the core only when a real cross-host or
 cross-target program demonstrates a semantic gap that cannot be handled more

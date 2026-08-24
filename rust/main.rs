@@ -22,6 +22,15 @@ fn run() -> Result<(), (i32, String)> {
         }
         Some("--lsp") if arguments.len() == 1 => run_language_server(io::stdin(), io::stdout())
             .map_err(|e| (1, format!("language server failed: {e}"))),
+        Some("check") => check_target_command(&arguments[1..]),
+        Some("--target-profiles") if arguments.len() == 1 => {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(yin::target_profiles())
+                    .map_err(|error| (1, error.to_string()))?
+            );
+            Ok(())
+        }
         Some("--format") => format_command(&arguments[1..]),
         Some("--emit-hir") => emit_hir_command(&arguments[1..]),
         Some("--emit-mir") => emit_mir_command(&arguments[1..]),
@@ -41,6 +50,27 @@ fn run() -> Result<(), (i32, String)> {
             format!("unsupported command in Rust v{VERSION}: {option}"),
         )),
         Some(file) => execute(file, &arguments[1..], false),
+    }
+}
+
+fn check_target_command(arguments: &[String]) -> Result<(), (i32, String)> {
+    if arguments.len() != 3 || arguments[0] != "--target" {
+        return Err((2, "usage: check --target <profile> <program.yin>".into()));
+    }
+    let profile = &arguments[1];
+    let file = &arguments[2];
+    let source =
+        fs::read_to_string(file).map_err(|error| (1, format!("failed to read {file}: {error}")))?;
+    let report =
+        yin::check_target_source(file, &source, profile).map_err(|error| (1, error.to_string()))?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&report).map_err(|error| (1, error.to_string()))?
+    );
+    if report.valid {
+        Ok(())
+    } else {
+        Err((1, format!("target validation failed for {profile}")))
     }
 }
 

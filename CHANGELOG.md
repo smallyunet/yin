@@ -22,6 +22,11 @@
   reads, and exhaustive match terminators; add deterministic `--emit-mir`,
   experimental `--run-mir`, and differential execution tests without switching
   the hosted evaluator
+- add source-spanned effect inference with named call-graph and callback
+  propagation, a versioned target-profile registry, fail-closed
+  `yin check --target`, and shared `portable-bytecode-v1` validation across
+  check, compile, and contract execution; keep unimplemented target validators
+  visibly designed-only
 
 ## 0.21.1 — 2026-08-23
 

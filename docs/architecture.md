@@ -163,6 +163,14 @@ This experimental evaluator does not replace hosted execution, and JSON, host
 I/O, modules, tools, mutation, defaults, and higher-order collection primitives
 remain outside its fail-closed admission boundary.
 
-Complete HIR and MIR coverage, effect inference, fixed-width portable integers,
+Complete HIR, MIR, and effect-inference coverage, fixed-width portable integers,
 and EVM, SVM, RISC-V, and Bitcoin backends remain planned work. The
 [roadmap](roadmap.md) defines the order and acceptance boundaries.
+
+The initial effect pass classifies allocation, host I/O, mutation, persistent
+state, external calls, account access, hashing, signatures, authorization,
+module loading, and unresolved dynamic calls. It propagates effects through
+named functions, policies, and named callbacks while retaining source-spanned
+origins. `yin check --target` applies versioned, fail-closed profile rules.
+`hosted-v1`, `portable-bytecode-v1`, and `mir-pure-v1` have validators; designed
+consensus/native profiles remain registered but cannot pass validation.

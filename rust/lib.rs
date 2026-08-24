@@ -1,6 +1,7 @@
 mod check;
 mod contract;
 mod diagnostic;
+mod effects;
 mod eval;
 mod format;
 #[cfg(not(target_arch = "wasm32"))]
@@ -9,6 +10,7 @@ mod hir;
 mod lsp;
 mod mir;
 mod syntax;
+mod target;
 mod value;
 #[cfg(any(target_arch = "wasm32", test))]
 mod wallet;
@@ -16,6 +18,7 @@ mod wallet;
 pub use check::{CheckSession, check_program};
 pub use contract::{compile_bytecode, contract_run};
 pub use diagnostic::{Diagnostic, ErrorCode, SourceSpan, YinError};
+pub use effects::{Effect, EffectOrigin, EffectReport, FunctionEffects, infer_effects};
 pub use eval::{Engine, Host, ProgramResult, ReplSession};
 pub use format::format_source;
 #[cfg(not(target_arch = "wasm32"))]
@@ -33,6 +36,10 @@ pub use mir::{
     render_mir,
 };
 pub use syntax::{Expr, Form, ParsedProgram, parse};
+pub use target::{
+    ProfileStatus, TargetCheck, TargetProfile, TargetViolation, check_target_source,
+    target_profile, target_profiles,
+};
 pub use value::{Type, Value};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

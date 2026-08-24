@@ -90,6 +90,28 @@ with the tree-walking evaluator. JSON boundaries, host I/O, modules, tools,
 mutation, defaults, and higher-order collection primitives currently fail
 closed at HIR or MIR admission rather than being approximated.
 
+The first effect and target-validation slice is available through:
+
+```bash
+yin --target-profiles
+yin check --target hosted-v1 program.yin
+yin check --target portable-bytecode-v1 program.yin
+yin check --target mir-pure-v1 program.yin
+```
+
+Effect inference distinguishes allocation, host I/O, local mutation,
+persistent state, external calls, account access, hashing, signatures,
+authorization, module loading, and unresolved dynamic calls. Effects propagate
+through named functions, policies, and named higher-order callbacks. Reports
+retain the direct source origin and the propagated call edges. Dynamic calls
+remain explicit rather than being assumed pure.
+
+`hosted-v1` is supported, `portable-bytecode-v1` is experimental, and
+`mir-pure-v1` is a prototype without an artifact backend. EVM, SVM, RISC-V, and
+Bitcoin profiles are registered as designed-only and always fail validation
+until their validators exist. Current checks operate on one source file;
+complete imported-module graph binding remains future work.
+
 Run the complete maintained verification path:
 
 ```bash
