@@ -1,5 +1,8 @@
 # Browser playground
 
+The Playground runs the implemented hosted Yin language through Rust/Wasm. It
+does not emulate or compile to the planned EVM, SVM, RISC-V, or Bitcoin targets.
+
 The [Yin Playground](https://smallyunet.github.io/yin/) runs the same Rust
 parser, checker, interpreter, and formatter as the native CLI. `wasm-bindgen`
 packages the library for `wasm32-unknown-unknown`; a dedicated Web Worker keeps

@@ -4,27 +4,32 @@
 
 # The Yin Programming Language
 
-Yin is a small, typed, deterministic programming language for reliable CLI
-tools, data and configuration transformation, and embeddable automation. It
-combines immutable data, explicit failures, exhaustive pattern matching,
-isolated modules, strict JSON boundaries, and predictable evaluation in a
-compact implementation.
+Yin is a typed deterministic language for portable programs and policies across
+constrained execution environments. It combines immutable data, explicit
+failures, exhaustive pattern matching, isolated modules, strict boundaries, and
+predictable evaluation in a compact implementation.
 
-Yin is a general programming language, not an approval system or an Agent-only
-DSL. Agent policies, capability-safe tools, and deterministic decision
-contracts remain supported as optional libraries and runtime profiles built on
-the same language core.
+The long-term architecture is one language core with checked target profiles.
+Hosted CLI and browser execution work today. EVM, SVM, RISC-V, and Bitcoin
+Script are planned compiler targets, not current capabilities. Agent policies
+and the Action Gateway are application profiles built on the same core, not the
+language's identity.
 
 The implementation descends from Yin Wang's 2013–2014 experiment and is now a
 Rust workspace containing a hand-written parser, tree-walking interpreter,
 static type checker, formatter, language server, Wasm browser runtime, bytecode
-compiler, Agent Action Gateway, and independent fuel-metered VM. Yin is experimental
-and not yet production ready. The untouched historical state is preserved by
-the `legacy-2015` Git tag.
+compiler, Agent Action Gateway, and independent fuel-metered VM. Yin is
+experimental and not yet production ready. The untouched historical state is
+preserved by the `legacy-2015` Git tag.
 
-Try it in the [Yin Playground](https://smallyunet.github.io/yin/). Evaluation,
-type checking, evaluation, and formatting run locally in a Rust/Wasm Web Worker; source and input are
-not sent to a server.
+Read the [language and compiler architecture](docs/architecture.md) for the
+separation among Yin Core, target profiles, and application profiles. The
+[target profile guide](docs/targets.md) records the proposed backend boundaries
+and their honest implementation status.
+
+Try it in the [Yin Playground](https://smallyunet.github.io/yin/). Parsing, type
+checking, evaluation, and formatting run locally in a Rust/Wasm Web Worker;
+source and input are not sent to a server.
 
 ```yin
 (define config
@@ -62,6 +67,29 @@ source diagnostics, modules, JSON contracts, tooling, browser behavior, and
 the independent portable VM. Yin 0.20 preserves the frozen v0.19 language and protocol
 semantics in the language specification rather than leaving them as host
 library conventions.
+
+## Direction, not current support
+
+Yin is evolving from an interpreter-centered implementation toward a reusable
+compiler architecture:
+
+```text
+Yin source
+  -> parser and module resolver
+  -> typed HIR
+  -> effect and target validation
+  -> target-independent MIR
+  -> hosted / portable VM / EVM / SVM / RISC-V / Bitcoin backends
+```
+
+Typed HIR, effect inference, MIR, fixed-width portable integers, and the EVM,
+SVM, RISC-V, and Bitcoin backends are not implemented yet. The current `.ybc`
+format remains a narrow normalized decision artifact, not a general compiler IR.
+
+Portability is checked per program. Pure typed logic may be accepted by several
+targets, while storage, accounts, syscalls, host tools, and spending conditions
+remain explicit target capabilities. The compiler must reject unsupported
+effects rather than approximate them.
 
 ## Requirements
 
@@ -174,17 +202,17 @@ The bundled language server provides syntax/type diagnostics and whole-document
 formatting. See the [REPL](docs/repl.md), [formatter](docs/formatter.md), and
 [editor integration](docs/lsp.md) guides.
 
-## Optional automation profiles
+## AI and automation applications
 
-Yin's Agent and policy features are retained, but they are not the language's
-identity. They demonstrate how a typed deterministic core can be embedded into
-hosts with explicit authority:
+AI is an application domain, not a compiler target. Yin's Agent and policy
+features demonstrate how the typed deterministic core can validate an intent,
+make a bounded decision, and pass explicitly authorized effects to a host:
 
 - [ordered policy syntax](docs/policies.md)
 - [typed capabilities and guarded reference host](docs/policy-runtime.md)
 - [deterministic contract profile and portable VM](docs/vm/architecture.md)
 - [MCP action gateway](docs/action-gateway.md)
-- [automation-profile design boundary](docs/ai-first.md)
+- [AI and automation application boundary](docs/ai-first.md)
 
 These profiles do not replace UI approval, authentication, process isolation,
 or an organizational policy engine. Host implementations own authority and
@@ -220,7 +248,8 @@ docs/            specification, guides, implementation notes, and roadmap
 
 Start with the normative [language specification](docs/language-specification.md),
 the concise [language reference](docs/language-reference.md), the
-[implementation overview](docs/implementation.md), and the
+[architecture](docs/architecture.md), the [target profiles](docs/targets.md),
+the [implementation overview](docs/implementation.md), and the
 [roadmap](docs/roadmap.md).
 
 ## License

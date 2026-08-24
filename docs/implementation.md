@@ -30,6 +30,31 @@ explicit `Host`; browser hosts disable filesystem and subprocess capabilities
 and expose only the educational wallet demo tool, while native gateway hosts
 install their own narrowly scoped tool executors.
 
+## Compiler evolution boundary
+
+The current parser exposes a deliberately small surface `Expr` tree, and the
+checker and evaluator interpret those expressions directly. That remains the
+implemented 0.21.1 architecture. It is not sufficient as the interface for
+multiple consensus and native backends.
+
+The planned compiler separates:
+
+```text
+surface AST
+  -> resolved and typed HIR
+  -> inferred effects and target-profile validation
+  -> target-independent control-flow MIR
+  -> target-specific lowering and artifacts
+```
+
+The current evaluator will remain a semantic reference while a MIR evaluator
+and backends are introduced. The existing `.ybc` token format remains the
+artifact of `portable-bytecode-v1`; it will not be retroactively described as
+HIR or MIR. See [language and compiler architecture](architecture.md) and
+[target profiles](targets.md).
+
+No EVM, SVM, RISC-V, or Bitcoin code generator is implemented in 0.21.1.
+
 Run the complete maintained verification path:
 
 ```bash

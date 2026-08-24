@@ -1,5 +1,10 @@
 # Yin contract architecture
 
+This is the implemented architecture of the narrow `portable-bytecode-v1`
+decision profile. It is one current target profile within Yin's broader
+[language and compiler architecture](../architecture.md), not the shared IR for
+planned EVM, SVM, RISC-V, or Bitcoin backends.
+
 Yin 0.16 separates the human-facing language, portable artifact, execution
 machine, and authority-bearing host:
 
@@ -63,3 +68,7 @@ The Rust compiler and Rust VM remain in this repository while bytecode v1 is
 young, so every format change can be tested atomically across both runtimes. A
 separate VM repository becomes useful when the bytecode protocol is stable and
 the VM needs an independent security review or release lifecycle.
+
+Future typed HIR and MIR work will be versioned separately. Existing `.ybc`
+artifacts will not silently acquire new execution semantics or be relabeled as
+a universal target-independent representation.

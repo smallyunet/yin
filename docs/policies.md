@@ -1,5 +1,9 @@
 # Ordered policies
 
+`policy` is application-facing syntax over the shared language core, not an
+Agent-only or blockchain-only sublanguage. A policy may be portable when its
+types, control flow, and effects satisfy a requested target profile.
+
 Yin 0.13 added a human-facing form for typed decision policy. It keeps the
 existing S-expression core and changes how decision trees are written, not how
 their conditions or outcomes are evaluated.

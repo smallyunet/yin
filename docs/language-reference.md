@@ -361,9 +361,11 @@ in the [reference policy runtime guide](policy-runtime.md).
 
 - record mutation and generic subscript syntax are unsupported
 - the type system is experimental and is not a formal soundness guarantee
-- there is no package manager or general-purpose native compiler
+- there is no package manager, typed compiler IR, or general-purpose native compiler
 - `portable-bytecode-v1` compiles a deliberately restricted decision subset to
   `.ybc` for the fuel-metered Rust VM; it is not a hostile-process sandbox
+- EVM, SVM, RISC-V, and Bitcoin are documented target designs, not implemented
+  backends in Yin 0.21.1
 - the LSP currently provides diagnostics and formatting, but not semantic
   navigation or completion
 - several files under `experiments/` represent abandoned syntax designs

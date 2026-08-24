@@ -6,6 +6,11 @@
 
 Official editor support for the [Yin programming language](https://github.com/smallyunet/yin).
 
+Yin is a typed deterministic language for portable programs and policies across
+constrained execution environments. The extension supports the implemented
+hosted language today; planned EVM, SVM, RISC-V, and Bitcoin target diagnostics
+are not yet available.
+
 [Install from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=smallyu.yin-language-support).
 
 ## Features

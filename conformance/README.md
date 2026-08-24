@@ -10,6 +10,12 @@ only target use case. Native Rust, `yinvm`, and Wasm implementations consume
 shared fixtures where their profiles overlap and must agree on validation,
 decisions, errors, hashes, and fuel within those stated boundaries.
 
+The planned multi-target architecture will extend this model rather than treat
+current `.ybc` as a universal compiler IR. Each EVM, SVM, RISC-V, or Bitcoin
+profile requires its own positive and rejection corpus, differential execution
+against the shared semantic oracle, and target-native artifact verification.
+Their design status alone does not add them to this maintained corpus.
+
 ## v0.19 semantic migration
 
 The Rust rewrite is checked against the last complete Java implementation in

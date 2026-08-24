@@ -1,5 +1,11 @@
 # Reference policy runtime
 
+The reference runtime is a hosted application adapter, not Yin's universal
+authority or state model. Its filesystem tools, approval files, and traces do
+not model EVM storage, Solana accounts, RISC-V syscalls, or Bitcoin spending
+conditions. Portable policy logic may be shared only where a target profile
+admits the same typed semantics.
+
 Yin 0.14 closes the first executable Agent-to-tool loop. `--guard` runs one
 typed Yin program with untrusted JSON input, an explicit host configuration,
 deny-by-default authorization, and a create-only decision trace.

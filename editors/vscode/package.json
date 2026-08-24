@@ -1,7 +1,7 @@
 {
   "name": "yin-language-support",
   "displayName": "Yin Programming Language",
-  "description": "Diagnostics, formatting, and syntax highlighting for the Yin programming language.",
+  "description": "Editor support for the typed deterministic Yin programming language.",
   "version": "0.21.1",
   "publisher": "smallyu",
   "icon": "images/icon.png",
@@ -29,6 +29,8 @@
   ],
   "keywords": [
     "yin",
+    "deterministic",
+    "portable",
     "language server",
     "lsp",
     "formatter"

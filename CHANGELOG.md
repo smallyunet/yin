@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- define the long-term Yin architecture as one typed deterministic language
+  core with versioned target and application profiles
+- document the planned typed HIR, effect validation, target-independent MIR,
+  and staged EVM, RISC-V, SVM, and Bitcoin backend boundaries
+- retain Agent policy and the Action Gateway as AI application profiles while
+  separating hosted MCP concerns from compiler targets
+- update repository, Playground, package, editor, example, conformance, and
+  contributor descriptions without claiming that planned backends exist
+
 ## 0.21.1 — 2026-08-23
 
 - introduce a unified Yin logo and reusable vector brand assets

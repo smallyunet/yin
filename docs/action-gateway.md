@@ -1,5 +1,11 @@
 # Agent Action Gateway
 
+The gateway is a hosted AI application profile. MCP transport, subprocess
+lifecycle, approval evidence, nonce storage, and JSONL traces are adapter
+responsibilities; they are not requirements of Yin Core or planned consensus
+targets. See [AI and automation applications](ai-first.md) and the
+[language architecture](architecture.md).
+
 Yin 0.17 adds a generic host boundary for executing source-declared typed tools
 through MCP stdio servers. The gateway is a reference security architecture,
 not a process sandbox or a hosted authorization service.

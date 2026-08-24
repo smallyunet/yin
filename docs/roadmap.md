@@ -1,11 +1,15 @@
 # Roadmap
 
-Yin is developed as a small, typed, deterministic general programming language
-for CLI tools, data/configuration work, and embeddable automation. Agent policy
-and capability runtimes are optional profiles, not the roadmap's organizing
-identity. Each language release must be demonstrated by a non-Agent program and
-must keep interpreter, type checker, browser runtime, documentation, and editor
-artifacts aligned.
+Yin is developed as a typed deterministic language for portable programs and
+policies across constrained execution environments. The roadmap now separates
+the shared language and compiler core, target profiles, and application
+profiles. Agent policy is the first substantial application profile; it is not
+the organizing identity of the language. EVM, SVM, RISC-V, and Bitcoin are
+planned targets and must not be presented as implemented before their profile
+contracts, artifacts, and conformance suites exist.
+
+Released milestones below are historical. The forward milestones describe
+architecture and acceptance order rather than promised release numbers or dates.
 
 ## 0.1 — reproducible baseline
 
@@ -214,22 +218,115 @@ artifacts aligned.
 - preserve canonical `.ybc` compatibility and the independent fuel-metered VM
 - ship native Linux, macOS, and Windows executables and a universal VSIX client
 
-## Later
+## 0.21 — native semantic parity and release hardening
 
-- 0.20: module namespaces and aliases, a project manifest, source roots, graph
-  diagnostics, and cross-file editor navigation
-- 0.21: one coherent failure model for parsing, indexing, and host I/O using
-  `Option`, `Result`, and diagnostics for distinct responsibilities
-- 0.22: user-defined generic types, recursive aliases, and inference hardening
-- 0.23: semantic bytecode parity for closures, modules, variants, results, and
-  collections, followed by precise fuel/memory accounting and Wasm
-- 0.24: completion, hover, definition, references, project formatting,
-  built-in test declarations, and generated API documentation
+- migrate the frozen Java semantic corpus into native Rust integration suites
+- verify shared positive and rejection behavior differentially against v0.19
+- restore precise language behavior discovered by the migrated suites
+- publish aligned native binaries, Wasm, and editor artifacts
+- make release verification parameterized and reproducible
 
-Held unless a concrete general-language program requires them: authenticated
-approval services, durable Agent tasks, additional MCP-specific syntax, web
-frameworks, async/concurrency, an online package registry, and a native compiler.
+## Forward milestone A — compiler-ready core
 
-New syntax should not be added until it has a written rule, interpreter tests,
-type-checker tests, diagnostic tests, and a demonstrated improvement in a
-maintained non-Agent CLI, data, configuration, or automation program.
+- introduce resolved, typed HIR instead of making backends inspect surface
+  `Expr` strings directly
+- separate module/name resolution from type checking and evaluation
+- attach source spans, resolved identities, types, and inferred effects to HIR
+- define explicit fixed-width signed and unsigned integer types and overflow
+  behavior while retaining hosted arbitrary-precision `Int`
+- lower functions, records, variants, matches, and explicit failures into a
+  target-independent control-flow MIR
+- implement a MIR evaluator and differential tests against the current
+  tree-walking reference evaluator
+- preserve formatter, LSP, browser, hosted runtime, and current source behavior
+  during the compiler refactor
+
+Exit criterion: maintained hosted programs execute identically through the
+reference evaluator and MIR evaluator, and no target-specific concept appears
+in the shared MIR.
+
+## Forward milestone B — effects and target validation
+
+- define a versioned target-profile contract covering types, control flow,
+  effects, resource limits, ABI, failures, artifacts, and runtime versions
+- infer pure, allocation, host I/O, persistent state, external call, account,
+  hashing, signature, and authorization effects through the call graph
+- add `yin check --target <profile>` with fail-closed diagnostics and effect
+  provenance
+- bind complete module graphs and profile versions into generated artifacts
+- distinguish designed, prototype, experimental, and supported target status
+  in all documentation and release metadata
+
+Exit criterion: hosted and current portable-VM behavior are expressed as
+profiles, and unsupported programs fail before code generation.
+
+## Forward milestone C — EVM profile
+
+- specify `evm-contract-v1` integer, ABI, storage, memory, context, revert,
+  event, external-call, gas, and rollback semantics
+- lower an intentionally small Yin subset through Yul to creation/runtime EVM
+  bytecode, ABI JSON, metadata, and source mappings
+- validate generated contracts in REVM and compare pure functions with the MIR
+  semantic oracle
+- add storage-layout, ABI, revert, gas, and adversarial boundary suites
+- consider native EVM assembly only after the profile and Yul path stabilize
+
+Exit criterion: versioned example contracts can be built, deployed, called,
+and differentially verified without claiming Solidity-wide compatibility.
+
+## Forward milestone D — RISC-V profile
+
+- select and document an explicit `riscv64-v1` ABI and hosted or bare-metal
+  runtime boundary
+- lower MIR through LLVM IR or another independently justified backend path
+- define memory allocation, traps, linking, and runtime imports
+- run generated ELF artifacts in a named emulator and hardware-independent
+  conformance environment
+
+Exit criterion: shared pure programs execute consistently on RISC-V, proving
+that MIR and the compiler core do not encode EVM-specific assumptions.
+
+## Forward milestone E — SVM profile
+
+- specify `svm-program-v1` instruction data, accounts, signer/writable/owner
+  constraints, PDA, CPI, compute-unit, allocation, and failure semantics
+- provide target libraries and effects rather than aliasing SVM concepts to EVM
+  storage or hosted tools
+- lower admitted programs to sBPF artifacts with Solana-compatible entry points
+- verify account changes, CPI propagation, failures, and compute limits in a
+  maintained SVM harness
+
+Exit criterion: a bounded program processes real account fixtures with results
+that agree with the documented profile and semantic oracle where applicable.
+
+## Forward milestone F — Bitcoin profile
+
+- specify a particular Script/Tapscript version rather than a generic "Bitcoin"
+  target
+- statically prove termination, maximum stack depth, code size, opcode
+  availability, and numeric encoding for every admitted program
+- reject loops, recursion, dynamic allocation, persistent mutable state, and
+  unavailable introspection before emission
+- emit spending scripts plus human-readable policy and resource reports
+- validate against Bitcoin Core-compatible vectors and consensus fixtures
+
+Exit criterion: generated scripts are consensus-valid for the named profile and
+their accepted and rejected spending cases match the source policy.
+
+## Continuing language and tooling work
+
+- module namespaces, aliases, project manifests, source roots, and graph diagnostics
+- coherent failure semantics across parsing, indexing, arithmetic, and host I/O
+- user-defined generics, recursive aliases, and inference hardening
+- completion, hover, definition, references, project formatting, tests, and
+  generated API documentation
+- precise fuel, stack, code-size, and memory accounting per target
+
+Authenticated approval services, durable Agent workflows, additional
+MCP-specific syntax, web frameworks, async/concurrency, and a package registry
+remain application-driven work. They must not block compiler-core correctness or
+be promoted into the language solely for one integration.
+
+New syntax or target intrinsics require written semantics, positive and
+rejection tests, diagnostics, formatter/editor coverage, and a maintained
+program demonstrating why a library or adapter is insufficient.

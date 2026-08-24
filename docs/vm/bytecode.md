@@ -2,7 +2,8 @@
 
 `.ybc` is Yin 0.16's canonical transport between the Rust language front end
 and the Rust VM. It is a compact token instruction stream, not UTF-8 Yin source
-and not JVM bytecode.
+and not JVM bytecode. It is also not the target-independent MIR proposed for
+future EVM, SVM, RISC-V, or Bitcoin compilation.
 
 ## Container
 

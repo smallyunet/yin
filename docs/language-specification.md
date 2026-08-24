@@ -5,6 +5,12 @@ This document defines the normative Yin 0.20 language. Version 0.20 freezes the
 here is unsupported even if a historical file or implementation class suggests
 otherwise.
 
+This specification describes the currently implemented hosted language. The
+planned multi-target compiler does not retroactively make every construct
+portable. Future target profiles will be separate versioned contracts that
+admit a checked subset, define target effects and ABIs, and preserve these core
+semantics where accepted. See `docs/architecture.md` and `docs/targets.md`.
+
 ## Lexical grammar
 
 - Source text is UTF-8.
