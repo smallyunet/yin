@@ -7,6 +7,7 @@ mod format;
 mod gateway;
 mod hir;
 mod lsp;
+mod mir;
 mod syntax;
 mod value;
 #[cfg(any(target_arch = "wasm32", test))]
@@ -25,6 +26,12 @@ pub use hir::{
     HirSymbol, HirSymbolKind, HirVariantCase, SymbolId, check_hir_program, render_hir,
 };
 pub use lsp::run_language_server;
+pub use mir::{
+    BlockId, FunctionId, LocalId, MirArgument, MirBasicBlock, MirBlockParameter, MirFunction,
+    MirInstruction, MirInstructionKind, MirMatchTarget, MirParameter, MirProgram,
+    MirRecordDefinition, MirTerminator, check_mir_program, evaluate_mir, lower_mir_program,
+    render_mir,
+};
 pub use syntax::{Expr, Form, ParsedProgram, parse};
 pub use value::{Type, Value};
 

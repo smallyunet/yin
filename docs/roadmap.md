@@ -233,8 +233,12 @@ checker types, assigns stable binding, parameter, type, constructor, and pattern
 symbols, and preserves source spans. Phase 1 lowers the pure core through
 records and field access. Phase 2 lowers variants, `Option`, `Result`, exhaustive
 matches, policy syntax, and typed JSON boundaries, including the maintained
-capability-decision program. HIR is not yet consumed by the hosted evaluator and
-does not complete this milestone.
+capability-decision program. The initial MIR slice adds explicit functions,
+basic blocks, typed block parameters, branches, jumps, calls, constructors,
+field reads, and match terminators. Its evaluator supports closures, recursion,
+core data, and a fail-closed primitive subset, with differential tests against
+the tree-walking evaluator. HIR and MIR are not consumed by the hosted evaluator,
+coverage is incomplete, and this does not complete the milestone.
 
 - introduce resolved, typed HIR instead of making backends inspect surface
   `Expr` strings directly

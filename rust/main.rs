@@ -24,6 +24,8 @@ fn run() -> Result<(), (i32, String)> {
             .map_err(|e| (1, format!("language server failed: {e}"))),
         Some("--format") => format_command(&arguments[1..]),
         Some("--emit-hir") => emit_hir_command(&arguments[1..]),
+        Some("--emit-mir") => emit_mir_command(&arguments[1..]),
+        Some("--run-mir") => run_mir_command(&arguments[1..]),
         Some("--json") => json_command(&arguments[1..]),
         Some("--capabilities") => capabilities_command(&arguments[1..]),
         Some("--contract-check") => contract_check_command(&arguments[1..]),
@@ -40,6 +42,33 @@ fn run() -> Result<(), (i32, String)> {
         )),
         Some(file) => execute(file, &arguments[1..], false),
     }
+}
+
+fn emit_mir_command(arguments: &[String]) -> Result<(), (i32, String)> {
+    let program = mir_command_program(arguments, "--emit-mir")?;
+    print!("{}", yin::render_mir(&program));
+    Ok(())
+}
+
+fn run_mir_command(arguments: &[String]) -> Result<(), (i32, String)> {
+    let program = mir_command_program(arguments, "--run-mir")?;
+    let value = yin::evaluate_mir(&program).map_err(|error| (1, error.to_string()))?;
+    println!("{value}");
+    Ok(())
+}
+
+fn mir_command_program(
+    arguments: &[String],
+    command: &str,
+) -> Result<yin::MirProgram, (i32, String)> {
+    if arguments.len() != 1 {
+        return Err((2, format!("usage: {command} <program.yin>")));
+    }
+    let file = &arguments[0];
+    let source =
+        fs::read_to_string(file).map_err(|error| (1, format!("failed to read {file}: {error}")))?;
+    let program = yin::parse(file, &source).map_err(|error| (1, error.to_string()))?;
+    yin::check_mir_program(&program).map_err(|error| (1, error.to_string()))
 }
 
 fn emit_hir_command(arguments: &[String]) -> Result<(), (i32, String)> {

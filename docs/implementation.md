@@ -33,9 +33,10 @@ install their own narrowly scoped tool executors.
 ## Compiler evolution boundary
 
 The current parser exposes a deliberately small surface `Expr` tree, and the
-checker and evaluator interpret those expressions directly. That remains the
-implemented 0.21.1 architecture. It is not sufficient as the interface for
-multiple consensus and native backends.
+hosted checker and evaluator still interpret those expressions directly. An
+experimental compiler path now also lowers admitted programs through HIR and
+MIR. The hosted path remains the reference architecture in 0.21.1 and is not
+silently replaced by the experimental evaluator.
 
 The planned compiler separates:
 
@@ -47,8 +48,8 @@ surface AST
   -> target-specific lowering and artifacts
 ```
 
-The current evaluator will remain a semantic reference while a MIR evaluator
-and backends are introduced. The existing `.ybc` token format remains the
+The current evaluator remains the semantic reference while MIR coverage and
+backends are introduced. The existing `.ybc` token format remains the
 artifact of `portable-bytecode-v1`; it will not be retroactively described as
 HIR or MIR. See [language and compiler architecture](architecture.md) and
 [target profiles](targets.md).
@@ -72,6 +73,22 @@ program is part of its regression surface.
 The existing interpreter does not consume HIR yet. Unsupported forms such as
 mutation, defaults, modules, and tools fail with a source-spanned HIR admission
 diagnostic; this is not a restriction on normal hosted execution.
+
+The first target-independent control-flow MIR slice is available through:
+
+```bash
+yin --emit-mir program.yin
+yin --run-mir program.yin
+```
+
+It lowers typed HIR into functions, explicit basic blocks, block parameters,
+branches, jumps, calls, constructors, field reads, and exhaustive match
+terminators. Its evaluator supports lexical closures, recursion, vectors,
+records, variants, `Option`, `Result`, and the initial arithmetic, comparison,
+boolean, and vector primitives. Differential tests compare successful MIR runs
+with the tree-walking evaluator. JSON boundaries, host I/O, modules, tools,
+mutation, defaults, and higher-order collection primitives currently fail
+closed at HIR or MIR admission rather than being approximated.
 
 Run the complete maintained verification path:
 

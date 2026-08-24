@@ -125,8 +125,8 @@ rejection.
 
 ## Correctness model
 
-The reference evaluator and future MIR evaluator are semantic oracles, not
-proof that a backend is correct. Each backend requires:
+The reference evaluator and experimental MIR evaluator are semantic oracles,
+not proof that a backend is correct. Each backend requires:
 
 - positive and rejection conformance suites;
 - differential execution against the reference semantics;
@@ -154,6 +154,15 @@ and typed JSON boundaries. They reuse normative checker types, resolve stable
 symbol identities, preserve spans, and have deterministic snapshots through
 `yin --emit-hir`. The hosted evaluator does not consume HIR yet.
 
-Complete HIR coverage, effect inference, target-independent MIR, fixed-width
-portable integers, and EVM, SVM, RISC-V, and Bitcoin backends remain planned
-work. The [roadmap](roadmap.md) defines the order and acceptance boundaries.
+An initial target-independent MIR slice lowers admitted pure HIR into functions,
+explicit basic blocks, typed block parameters, calls, branches, jumps,
+constructors, field reads, and exhaustive match terminators. `yin --emit-mir`
+renders it deterministically, while `yin --run-mir` executes data-returning
+programs through a differential-tested evaluator with closures and recursion.
+This experimental evaluator does not replace hosted execution, and JSON, host
+I/O, modules, tools, mutation, defaults, and higher-order collection primitives
+remain outside its fail-closed admission boundary.
+
+Complete HIR and MIR coverage, effect inference, fixed-width portable integers,
+and EVM, SVM, RISC-V, and Bitcoin backends remain planned work. The
+[roadmap](roadmap.md) defines the order and acceptance boundaries.

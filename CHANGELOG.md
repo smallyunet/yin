@@ -17,6 +17,11 @@
   scoped pattern symbols, primitive/vector/record patterns, `Option`, `Result`,
   policy lowering, and typed JSON boundaries; cover the maintained
   capability-decision program without switching the hosted evaluator
+- add the first target-independent MIR slice with explicit functions, basic
+  blocks, typed block parameters, branches, jumps, calls, constructors, field
+  reads, and exhaustive match terminators; add deterministic `--emit-mir`,
+  experimental `--run-mir`, and differential execution tests without switching
+  the hosted evaluator
 
 ## 0.21.1 — 2026-08-23
 
