@@ -146,11 +146,13 @@ Wasm browser runtime, hosted tool boundary, Agent Action Gateway, canonical
 `.ybc` format is a normalized token stream for a narrow decision profile; it is
 not the future target-independent MIR.
 
-Current source also contains the first experimental typed HIR slice for pure
-literals, vectors, definitions, functions, calls, conditionals, sequences,
-records, and field access. It reuses normative checker types, resolves stable
-symbol identities, preserves spans, and has deterministic snapshots through
-`yin --emit-hir`. The hosted evaluator does not consume it yet.
+Current source also contains the first two experimental typed HIR slices. Phase
+1 covers literals, vectors, definitions, functions, calls, conditionals,
+sequences, records, and field access. Phase 2 adds variants, typed constructors,
+exhaustive matches, scoped pattern bindings, `Option`, `Result`, policy lowering,
+and typed JSON boundaries. They reuse normative checker types, resolve stable
+symbol identities, preserve spans, and have deterministic snapshots through
+`yin --emit-hir`. The hosted evaluator does not consume HIR yet.
 
 Complete HIR coverage, effect inference, target-independent MIR, fixed-width
 portable integers, and EVM, SVM, RISC-V, and Bitcoin backends remain planned

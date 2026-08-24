@@ -62,10 +62,15 @@ admitted pure subset:
 yin --emit-hir program.yin
 ```
 
-It runs the normative checker first, resolves bindings and parameters to stable
-`SymbolId` values, attaches the checker's expression types and source spans,
-and prints a deterministic HIR snapshot. The existing interpreter does not
-consume HIR yet. Unsupported forms fail with a source-spanned Phase 1
+It runs the normative checker first, resolves bindings, parameters, types,
+constructors, and pattern bindings to stable `SymbolId` values, attaches the
+checker's expression types and source spans, and prints a deterministic HIR
+snapshot. Phase 2 includes variants, `Option`, `Result`, exhaustive `match`,
+policy lowering, and typed JSON boundaries. The maintained capability-decision
+program is part of its regression surface.
+
+The existing interpreter does not consume HIR yet. Unsupported forms such as
+mutation, defaults, modules, and tools fail with a source-spanned HIR admission
 diagnostic; this is not a restriction on normal hosted execution.
 
 Run the complete maintained verification path:

@@ -13,6 +13,10 @@
 - add the first compiler-core slice: checker-derived expression types, stable
   binding and parameter `SymbolId` values, resolved typed HIR, deterministic HIR
   rendering, and experimental `--emit-hir` inspection for admitted pure programs
+- extend HIR with variant and record constructors, typed exhaustive match arms,
+  scoped pattern symbols, primitive/vector/record patterns, `Option`, `Result`,
+  policy lowering, and typed JSON boundaries; cover the maintained
+  capability-decision program without switching the hosted evaluator
 
 ## 0.21.1 — 2026-08-23
 

@@ -82,11 +82,14 @@ Yin source
   -> hosted / portable VM / EVM / SVM / RISC-V / Bitcoin backends
 ```
 
-Typed HIR, effect inference, MIR, fixed-width portable integers, and the EVM,
-SVM, RISC-V, and Bitcoin backends are not implemented yet. An experimental
+Complete typed HIR coverage, effect inference, MIR, fixed-width portable
+integers, and the EVM, SVM, RISC-V, and Bitcoin backends are not implemented
+yet. An experimental
 `yin --emit-hir <program.yin>` command exposes the first resolved, typed HIR
-slice for pure core programs. The current `.ybc` format remains a narrow
-normalized decision artifact, not a general compiler IR.
+slice for core and structured decision programs, including variants,
+constructors, exhaustive matches, `Option`, `Result`, policies, and typed JSON
+boundaries. The current `.ybc` format remains a narrow normalized decision
+artifact, not a general compiler IR.
 
 Portability is checked per program. Pure typed logic may be accepted by several
 targets, while storage, accounts, syscalls, host tools, and spending conditions

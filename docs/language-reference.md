@@ -362,8 +362,8 @@ in the [reference policy runtime guide](policy-runtime.md).
 - record mutation and generic subscript syntax are unsupported
 - the type system is experimental and is not a formal soundness guarantee
 - there is no package manager, target-independent MIR, or general-purpose native
-  compiler; the experimental typed HIR currently covers only the documented
-  Phase 1 pure subset
+  compiler; the experimental typed HIR currently covers the documented Phase 1
+  core and Phase 2 structured-decision subsets
 - `portable-bytecode-v1` compiles a deliberately restricted decision subset to
   `.ybc` for the fuel-metered Rust VM; it is not a hostile-process sandbox
 - EVM, SVM, RISC-V, and Bitcoin are documented target designs, not implemented

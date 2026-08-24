@@ -121,7 +121,123 @@ fn records_keep_nominal_and_field_types() {
 }
 
 #[test]
-fn normative_type_errors_precede_phase_one_admission() {
+fn variants_and_exhaustive_match_lower_to_typed_patterns() {
+    let checked = lower(
+        "(variant Decision [Approve [value Int]] [Reject [reason String]])\n(define decide (fun ([allow Bool] [-> Decision]) (if allow (Approve :value 42) (Reject :reason \"blocked\"))))\n(match (decide true) [(Approve value) value] [(Reject reason) 0])",
+    );
+    let HirKind::Variant { cases, .. } = &checked.hir.expressions[0].kind else {
+        panic!("expected variant HIR");
+    };
+    assert_eq!(cases.len(), 2);
+    assert_eq!(cases[0].name, "Approve");
+    assert_eq!(cases[0].fields[0].ty, Type::Int);
+
+    let HirKind::Match { arms, .. } = &checked.hir.expressions[2].kind else {
+        panic!("expected match HIR");
+    };
+    assert_eq!(arms.len(), 2);
+    let yin::HirPatternKind::Constructor {
+        constructor: yin::HirPatternConstructor::VariantCase(approve),
+        payloads,
+    } = &arms[0].pattern.kind
+    else {
+        panic!("expected variant-case pattern");
+    };
+    assert_eq!(*approve, cases[0].symbol);
+    assert_eq!(payloads[0].ty, Type::Int);
+    assert!(matches!(payloads[0].kind, yin::HirPatternKind::Binding(_)));
+    assert_eq!(checked.result_type(), &Type::Int);
+}
+
+#[test]
+fn option_and_result_patterns_preserve_payload_types_and_scopes() {
+    let checked = lower(
+        "(define result-value (fun ([ok-value Bool] [-> (Result Int String)]) (if ok-value (ok 42) (err \"failed\"))))\n(define option-value (fun ([present Bool] [-> (Option Int)]) (if present (some 7) none)))\n(define from-result (match (result-value true) [(Ok value) value] [(Err value) 0]))\n(match (option-value true) [(Some value) (+ from-result value)] [(None) from-result])",
+    );
+    let matches = checked
+        .hir
+        .expressions
+        .iter()
+        .filter_map(|expression| match &expression.kind {
+            HirKind::Define { value, .. } => match &value.kind {
+                HirKind::Match { arms, .. } => Some(arms),
+                _ => None,
+            },
+            HirKind::Match { arms, .. } => Some(arms),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(matches.len(), 2);
+    assert_eq!(matches[0][0].pattern.ty, Type::Ok(Box::new(Type::Int)));
+    assert_eq!(matches[0][1].pattern.ty, Type::Err(Box::new(Type::String)));
+    assert_eq!(matches[1][0].pattern.ty, Type::Some(Box::new(Type::Int)));
+    assert_eq!(matches[1][1].pattern.ty, Type::None);
+
+    let binding_symbols = checked
+        .hir
+        .symbols
+        .iter()
+        .filter(|symbol| symbol.kind == HirSymbolKind::PatternBinding)
+        .collect::<Vec<_>>();
+    assert_eq!(binding_symbols.len(), 3);
+    assert!(
+        binding_symbols
+            .windows(2)
+            .all(|pair| pair[0].id != pair[1].id)
+    );
+    assert_eq!(checked.result_type(), &Type::Int);
+}
+
+#[test]
+fn vector_and_primitive_patterns_are_fully_typed() {
+    let vector = lower("(match [42 \"yin\"] [[number name] name])");
+    let HirKind::Match { arms, .. } = &vector.hir.expressions[0].kind else {
+        panic!("expected vector match");
+    };
+    let yin::HirPatternKind::Vector(patterns) = &arms[0].pattern.kind else {
+        panic!("expected vector pattern");
+    };
+    assert_eq!(patterns[0].ty, Type::Int);
+    assert_eq!(patterns[1].ty, Type::String);
+
+    let primitive = lower(
+        "(define describe (fun ([value (U Int String)] [-> String]) (match value [(Int number) \"integer\"] [(String text) text])))\n(describe \"yin\")",
+    );
+    let HirKind::Define { value, .. } = &primitive.hir.expressions[0].kind else {
+        panic!("expected function definition");
+    };
+    let HirKind::Function { body, .. } = &value.kind else {
+        panic!("expected function");
+    };
+    let HirKind::Match { arms, .. } = &body[0].kind else {
+        panic!("expected primitive match");
+    };
+    assert_eq!(arms[0].pattern.ty, Type::Int);
+    assert_eq!(arms[1].pattern.ty, Type::String);
+}
+
+#[test]
+fn maintained_capability_decision_program_emits_structured_hir() {
+    let path = "examples/agents/capability-decision/main.yin";
+    let source = std::fs::read_to_string(path).unwrap();
+    let program = parse(path, &source).unwrap();
+    let checked = check_hir_program(&program).unwrap();
+    let rendered = render_hir(&checked.hir);
+
+    assert!(rendered.contains("variant"));
+    assert!(rendered.contains("constructor VariantCase"));
+    assert!(rendered.contains("decode-json"));
+    assert!(rendered.contains("encode-json"));
+    assert!(rendered.contains("pattern constructor Ok"));
+    assert!(rendered.contains("pattern constructor Err"));
+    assert!(rendered.contains("authorize-swap Binding"));
+    assert!(rendered.contains(".amount -> Int"));
+    assert!(rendered.contains(".simulationSucceeded -> Bool"));
+    assert!(rendered.contains(".code -> String"));
+}
+
+#[test]
+fn normative_type_errors_precede_hir_admission() {
     let program = parse("hir-invalid.yin", "(match (+ 1 true) [_ false])").unwrap();
     let error = check_hir_program(&program).unwrap_err();
     assert!(error.to_string().contains("numeric argument"), "{error}");
@@ -129,23 +245,38 @@ fn normative_type_errors_precede_phase_one_admission() {
 }
 
 #[test]
-fn phase_one_rejects_unlowered_forms_after_normal_type_checking() {
+fn normative_match_rejections_precede_hir_lowering() {
     for (source, expected) in [
         (
-            "(match 1 [1 true] [_ false])",
-            "match is outside HIR phase 1",
+            "(variant Decision [Allow] [Deny])\n(define choose (fun ([-> Decision]) (Allow)))\n(match (choose) [(Allow) true])",
+            "non-exhaustive match",
         ),
+        ("(match [1 2] [[value value] value])", "duplicate binding"),
+        (
+            "(match (some 1) [(Some left right) left] [(None) 0])",
+            "Some pattern expects exactly 1 payloads",
+        ),
+    ] {
+        let program = parse("hir-match-reject.yin", source).unwrap();
+        let error = check_hir_program(&program).unwrap_err();
+        assert!(error.to_string().contains(expected), "{error}");
+    }
+}
+
+#[test]
+fn phase_two_rejects_unlowered_forms_after_normal_type_checking() {
+    for (source, expected) in [
         (
             "(define value (fun ([input Int :default 1]) input))\n(value)",
-            "default parameters are outside HIR phase 1",
+            "default parameters are outside HIR phase 2",
         ),
         (
             "(define [left right] [1 2])\nleft",
-            "destructuring define is outside HIR phase 1",
+            "destructuring define is outside HIR phase 2",
         ),
         (
             "(record Box [value Int :default 1])\n(Box)",
-            "record defaults are outside HIR phase 1",
+            "record defaults are outside HIR phase 2",
         ),
     ] {
         let program = parse("hir-reject.yin", source).unwrap();
@@ -177,7 +308,22 @@ fn assert_all_typed(expressions: &[yin::HirExpr]) {
             HirKind::Vector(values) | HirKind::Sequence(values) => assert_all_typed(values),
             HirKind::Define { value, .. } => assert_all_typed(std::slice::from_ref(value)),
             HirKind::Function { body, .. } => assert_all_typed(body),
-            HirKind::Record { .. } => {}
+            HirKind::Record { .. } | HirKind::Variant { .. } => {}
+            HirKind::Constructor { arguments, .. } => {
+                for argument in arguments {
+                    assert_all_typed(std::slice::from_ref(&argument.value));
+                }
+            }
+            HirKind::Match { target, arms } => {
+                assert_all_typed(std::slice::from_ref(target));
+                for arm in arms {
+                    assert_all_typed(std::slice::from_ref(&arm.body));
+                }
+            }
+            HirKind::DecodeJson { input, .. } => {
+                assert_all_typed(std::slice::from_ref(input));
+            }
+            HirKind::EncodeJson(value) => assert_all_typed(std::slice::from_ref(value)),
             HirKind::Call { callee, arguments } => {
                 assert_all_typed(std::slice::from_ref(callee));
                 for argument in arguments {

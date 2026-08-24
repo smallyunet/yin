@@ -229,9 +229,12 @@ architecture and acceptance order rather than promised release numbers or dates.
 ## Forward milestone A — compiler-ready core
 
 Initial source status: the experimental `--emit-hir` path now reuses normative
-checker types, assigns stable binding and parameter symbols, preserves source
-spans, and lowers a pure Phase 1 slice including records and field access. It is
-not yet consumed by the hosted evaluator and does not complete this milestone.
+checker types, assigns stable binding, parameter, type, constructor, and pattern
+symbols, and preserves source spans. Phase 1 lowers the pure core through
+records and field access. Phase 2 lowers variants, `Option`, `Result`, exhaustive
+matches, policy syntax, and typed JSON boundaries, including the maintained
+capability-decision program. HIR is not yet consumed by the hosted evaluator and
+does not complete this milestone.
 
 - introduce resolved, typed HIR instead of making backends inspect surface
   `Expr` strings directly

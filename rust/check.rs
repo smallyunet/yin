@@ -28,15 +28,30 @@ pub(crate) struct CheckReport {
     pub(crate) result_type: Type,
     pub(crate) expression_types: std::collections::HashMap<SpanKey, Type>,
     pub(crate) record_fields: IndexMap<String, Vec<(String, Type)>>,
+    pub(crate) record_types: IndexMap<String, Type>,
+    pub(crate) variants: IndexMap<String, Vec<String>>,
+    pub(crate) record_variants: IndexMap<String, String>,
 }
 
 pub(crate) fn check_program_report(program: &ParsedProgram) -> Result<CheckReport, YinError> {
     let mut checker = Checker::new(true);
     let result_type = checker.sequence(&program.expressions)?;
+    let record_types = checker
+        .scopes
+        .iter()
+        .flat_map(|scope| scope.iter())
+        .filter_map(|(name, ty)| match ty {
+            Type::Record { .. } => Some((name.clone(), ty.clone())),
+            _ => None,
+        })
+        .collect();
     Ok(CheckReport {
         result_type,
         expression_types: checker.expression_types,
         record_fields: checker.records,
+        record_types,
+        variants: checker.variants,
+        record_variants: checker.record_variants,
     })
 }
 
