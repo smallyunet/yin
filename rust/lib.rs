@@ -5,6 +5,7 @@ mod eval;
 mod format;
 #[cfg(not(target_arch = "wasm32"))]
 mod gateway;
+mod hir;
 mod lsp;
 mod syntax;
 mod value;
@@ -18,6 +19,10 @@ pub use eval::{Engine, Host, ProgramResult, ReplSession};
 pub use format::format_source;
 #[cfg(not(target_arch = "wasm32"))]
 pub use gateway::{approval_request, gateway_run, guard_run, replay_trace};
+pub use hir::{
+    CheckedProgram, HirArgument, HirExpr, HirKind, HirLiteral, HirParameter, HirProgram,
+    HirRecordField, HirSymbol, HirSymbolKind, SymbolId, check_hir_program, render_hir,
+};
 pub use lsp::run_language_server;
 pub use syntax::{Expr, Form, ParsedProgram, parse};
 pub use value::{Type, Value};

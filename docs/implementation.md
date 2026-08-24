@@ -55,6 +55,19 @@ HIR or MIR. See [language and compiler architecture](architecture.md) and
 
 No EVM, SVM, RISC-V, or Bitcoin code generator is implemented in 0.21.1.
 
+The first compiler-core slice exposes an experimental inspection path for the
+admitted pure subset:
+
+```bash
+yin --emit-hir program.yin
+```
+
+It runs the normative checker first, resolves bindings and parameters to stable
+`SymbolId` values, attaches the checker's expression types and source spans,
+and prints a deterministic HIR snapshot. The existing interpreter does not
+consume HIR yet. Unsupported forms fail with a source-spanned Phase 1
+diagnostic; this is not a restriction on normal hosted execution.
+
 Run the complete maintained verification path:
 
 ```bash

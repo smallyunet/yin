@@ -10,6 +10,9 @@
   separating hosted MCP concerns from compiler targets
 - update repository, Playground, package, editor, example, conformance, and
   contributor descriptions without claiming that planned backends exist
+- add the first compiler-core slice: checker-derived expression types, stable
+  binding and parameter `SymbolId` values, resolved typed HIR, deterministic HIR
+  rendering, and experimental `--emit-hir` inspection for admitted pure programs
 
 ## 0.21.1 — 2026-08-23
 

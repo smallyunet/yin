@@ -2,8 +2,42 @@ use crate::{Expr, Form, ParsedProgram, Type, YinError};
 use indexmap::IndexMap;
 
 pub fn check_program(program: &ParsedProgram) -> Result<Type, YinError> {
-    let mut checker = Checker::new();
+    let mut checker = Checker::new(false);
     checker.sequence(&program.expressions)
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct SpanKey {
+    file: String,
+    start: usize,
+    end: usize,
+}
+
+impl SpanKey {
+    pub(crate) fn of(expression: &Expr) -> Self {
+        let span = expression.span();
+        Self {
+            file: span.file.clone(),
+            start: span.start,
+            end: span.end,
+        }
+    }
+}
+
+pub(crate) struct CheckReport {
+    pub(crate) result_type: Type,
+    pub(crate) expression_types: std::collections::HashMap<SpanKey, Type>,
+    pub(crate) record_fields: IndexMap<String, Vec<(String, Type)>>,
+}
+
+pub(crate) fn check_program_report(program: &ParsedProgram) -> Result<CheckReport, YinError> {
+    let mut checker = Checker::new(true);
+    let result_type = checker.sequence(&program.expressions)?;
+    Ok(CheckReport {
+        result_type,
+        expression_types: checker.expression_types,
+        record_fields: checker.records,
+    })
 }
 
 #[derive(Clone)]
@@ -14,7 +48,7 @@ pub struct CheckSession {
 impl CheckSession {
     pub fn new() -> Self {
         Self {
-            checker: Checker::new(),
+            checker: Checker::new(false),
         }
     }
 
@@ -41,10 +75,12 @@ struct Checker {
     record_defaults: IndexMap<String, std::collections::HashSet<String>>,
     variants: IndexMap<String, Vec<String>>,
     record_variants: IndexMap<String, String>,
+    expression_types: std::collections::HashMap<SpanKey, Type>,
+    record_expression_types: bool,
 }
 
 impl Checker {
-    fn new() -> Self {
+    fn new(record_expression_types: bool) -> Self {
         let mut root = IndexMap::new();
         let mut records = IndexMap::new();
         let mut record_defaults = IndexMap::new();
@@ -163,6 +199,8 @@ impl Checker {
             record_defaults,
             variants: IndexMap::new(),
             record_variants: IndexMap::new(),
+            expression_types: std::collections::HashMap::new(),
+            record_expression_types,
         }
     }
 
@@ -193,6 +231,15 @@ impl Checker {
     }
 
     fn expression(&mut self, expression: &Expr) -> Result<Type, YinError> {
+        let result = self.expression_inner(expression)?;
+        if self.record_expression_types {
+            self.expression_types
+                .insert(SpanKey::of(expression), result.clone());
+        }
+        Ok(result)
+    }
+
+    fn expression_inner(&mut self, expression: &Expr) -> Result<Type, YinError> {
         match expression {
             Expr::String(_, _) => Ok(Type::String),
             Expr::Atom(value, _) if integer(value) => Ok(Type::Int),
@@ -1134,7 +1181,7 @@ impl Checker {
     }
 }
 
-fn builtin(name: &str) -> Type {
+pub(crate) fn builtin(name: &str) -> Type {
     use Type::*;
     let f = |args: Vec<Type>, result| {
         let required = args.len();
